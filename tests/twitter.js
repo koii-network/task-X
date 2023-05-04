@@ -1,27 +1,33 @@
 const dotenv = require('dotenv');
-const { TwitterApi } = require('twitter-api-v2');
+require('dotenv').config();
 
-const run  = async () => {
-    const client = new TwitterApi({
-        appKey: process.env.TWITTER_CONSUMER_KEY,
-        appSecret: process.env.TWITTER_CONSUMER_SECRET,
-        accessToken: process.env.TWITTER_BEARER_TOKEN,
-        accessSecret: process.env.TWITTER_BEARER_TOKEN_SECRET,
-      });
+const Gatherer = require('../model/gatherer');
+const levelup = require('levelup');
+const Twitter = require('../adapters/twitter/twitter');
+const leveldown = require('leveldown');
+const db = levelup(leveldown(__dirname + '/localKOIIDB'));
+const Data = require('../model/data');
 
-      // TODO - move below into /adapter/twitter.js
+const run = async () => {
+    let query = {
+        limit: 100,
+        query: "Web3",
+        depth: 3,
+    }
+   
+    const username = process.env.TWITTER_USER_NAME;
+    const username_id = process.env.TWITTER_USER_ID;
+    const password = process.env.TWITTER_PASSWORD;
 
-    // With default prefix
-    const result = await client.v2.get('tweets/search/recent', { query: 'nodeJS', max_results: 100 });
-    console.log(result.data); // TweetV2[]
+    let credentials = {
+        username: username,
+        username_id: username_id,
+        password: password
+    }
+    
+    let twitter = new Twitter(credentials, db, 3);
 
-    // With custom prefix
-    const mediaStatus = await client.v1.get<MediaStatusV1Result>(
-        'media/upload.json',
-        { command: 'STATUS', media_id: '20' },
-        { prefix: 'https://upload.twitter.com/1.1/' }
-    );
-    console.log('Media is ready:', mediaStatus.processing_info.state === 'succeeded');
+    twitter.negotiateSession();
 }
 
 run ()

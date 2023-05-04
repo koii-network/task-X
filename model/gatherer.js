@@ -12,7 +12,6 @@
 const Adapter = require('./adapter');
 const Data = require('./data');
 const Search = require('./search');
-const Twitter = require('../adapters/twitter');
 
 class Gatherer {
     constructor(db, adapter, options ) {
