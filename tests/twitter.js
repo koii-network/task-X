@@ -15,6 +15,11 @@ const run = async () => {
         depth: 3,
     }
    
+    let options = {
+        maxRetry : 3, 
+        query : query
+    }
+
     const username = process.env.TWITTER_USERNAME;
     const password = process.env.TWITTER_PASSWORD;
 
@@ -22,11 +27,15 @@ const run = async () => {
         username: username,
         password: password
     }
-    console.log(credentials);
     
-    let twitter = new Twitter(credentials, db, 3);
+    let data = new Data('twitter', db);
 
-    twitter.negotiateSession();
+    let adapter = new Twitter(credentials, data, 3);
+
+    await adapter.negotiateSession(); 
+    
+    const tweetIds = await adapter.fetchList(query.query);
+    console.log(tweetIds);
 }
 
 run ()

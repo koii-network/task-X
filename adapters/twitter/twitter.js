@@ -1,6 +1,7 @@
 // Import required modules
 const Adapter = require('../../model/adapter');
 const puppeteer = require('puppeteer');
+const cheerio = require('cheerio');
 
 class Twitter extends Adapter {
   constructor(credentials, db, maxRetry) {
@@ -59,9 +60,70 @@ class Twitter extends Adapter {
     console.log('Step: Click login button');
 
     this.page.waitForNavigation({ waitUntil: 'load' });
+    await this.page.waitForTimeout(1000);
 
     console.log('Step: Login successful');
   };
+
+  fetchList = async(query) => {
+    // Go to the hashtag page
+    await this.page.waitForTimeout(1000);
+    await this.page.setViewport({ width: 1920, height: 10000 });
+    await this.page.goto(`https://twitter.com/search?q=${query}&src=typed_query`);
+  
+    // Wait an additional 5 seconds until fully loaded before scraping
+    await this.page.waitForTimeout(5000);
+    // Scrape the tweets
+
+    let scrapingData = {};
+
+    const html = await this.page.content();
+    const $ = cheerio.load(html);
+    
+    const links = $('a').toArray();
+
+    // Filter the matching elements with the specified pattern
+    const matchedLinks = links.filter((link) => {
+      const href = $(link).attr('href');
+      const regex = /\/status\/\d+[^/]*$/;
+      return regex.test(href);
+    });
+
+    const linkStrings = [];
+    matchedLinks.forEach((link) => {
+      linkStrings.push('https://twitter.com' + $(link).attr('href'));
+    });
+  
+    console.log("print unique links: ");
+    const uniqueLinks = getUnique(linkStrings);
+    uniqueLinks.forEach((link) => {
+      console.log(link);
+    });
+
+    return uniqueLinks;
+
+    // $('div[data-testid="cellInnerDiv"]').each((i, el) => { 
+    //   const tweet_text = $(el).find('div[data-testid="tweetText"]').text();
+    //   const tweet_user = $(el).find('a[tabindex="-1"]').text();
+    //   const tweet_record = $(el).find('span[data-testid="app-text-transition-container"]');
+    //   const commentCount = tweet_record.eq(0).text();
+    //   const likeCount = tweet_record.eq(1).text();
+    //   const shareCount = tweet_record.eq(2).text();
+    //   const viewCount = tweet_record.eq(3).text();
+    //   if (tweet_user && tweet_text) {
+    //     scrapingData[i] = {
+    //         user: tweet_user,
+    //         content: tweet_text.replace(/\n/g, '<br>'),
+    //         comment: commentCount,
+    //         like: likeCount,
+    //         share: shareCount,
+    //         view: viewCount,
+    //     };
+    //   }
+    // });
+    // return scrapingData;
+  };
+
 
   checkSession = async () => {
     return true;
@@ -71,6 +133,7 @@ class Twitter extends Adapter {
 
   }
 }
+
 
 const parseTweet = async (tweet) => {
     console.log('new tweet!', tweet)
@@ -87,6 +150,10 @@ const getIdListFromTweet = (tweet) => {
     // parse the tweet for IDs from comments and replies and return an array
     
     return [];
+}
+
+function getUnique(array) {
+  return [... new Set(array)];
 }
 
 module.exports = Twitter;
