@@ -15,15 +15,14 @@ const run = async () => {
         depth: 3,
     }
    
-    const username = process.env.TWITTER_USER_NAME;
-    const username_id = process.env.TWITTER_USER_ID;
+    const username = process.env.TWITTER_USERNAME;
     const password = process.env.TWITTER_PASSWORD;
 
     let credentials = {
         username: username,
-        username_id: username_id,
         password: password
     }
+    console.log(credentials);
     
     let twitter = new Twitter(credentials, db, 3);
 
