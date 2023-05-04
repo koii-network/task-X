@@ -36,6 +36,9 @@ const run = async () => {
     
     const tweetIds = await adapter.fetchList(query.query);
     console.log(tweetIds);
+
+    const dataz = await adapter.parseItem(tweetIds[0]);
+    console.log(dataz);
 }
 
 run ()
