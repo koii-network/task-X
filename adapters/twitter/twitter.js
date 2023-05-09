@@ -101,11 +101,11 @@ class Twitter extends Adapter {
     return data;
   }
 
-  fetchList = async(query) => {
+  fetchList = async(url) => {
     // Go to the hashtag page
     await this.page.waitForTimeout(1000);
     await this.page.setViewport({ width: 1920, height: 10000 });
-    await this.page.goto(`https://twitter.com/search?q=${query}&src=typed_query`);
+    await this.page.goto(url);
   
     // Wait an additional 5 seconds until fully loaded before scraping
     await this.page.waitForTimeout(5000);
@@ -130,7 +130,6 @@ class Twitter extends Adapter {
       linkStrings.push('https://twitter.com' + $(link).attr('href'));
     });
   
-    console.log("print unique links: ");
     const uniqueLinks = getUnique(linkStrings);
     uniqueLinks.forEach((link) => {
       console.log(link);

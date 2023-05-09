@@ -11,7 +11,7 @@ const Data = require('../model/data');
 const run = async () => {
     let query = {
         limit: 100,
-        query: "Web3",
+        query: `https://twitter.com/search?q=Web3&src=typed_query`,
         depth: 3,
     }
    
@@ -34,6 +34,7 @@ const run = async () => {
 
     await adapter.negotiateSession(); 
     
+
     const tweetIds = await adapter.fetchList(query.query);
     console.log(tweetIds);
 
