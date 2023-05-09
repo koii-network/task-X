@@ -34,12 +34,13 @@ const run = async () => {
 
     await adapter.negotiateSession(); 
     
+    await adapter.crawl(query);
+    // const tweetIds = await adapter.fetchList(query.query);
+    // console.log(tweetIds);
+    
 
-    const tweetIds = await adapter.fetchList(query.query);
-    console.log(tweetIds);
-
-    const dataz = await adapter.parseItem(tweetIds[0]);
-    console.log(dataz);
+    // const dataz = await adapter.parseItem(tweetIds[0]);
+    // console.log(dataz);
 }
 
 run ()

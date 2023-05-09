@@ -8,6 +8,8 @@ class Twitter extends Adapter {
       super(credentials, maxRetry);
       this.credentials = credentials;
       this.db = db;
+      this.toCrawl = []; 
+      this.parsed = {};
   }
 
   negotiateSession = async () => {
@@ -101,6 +103,21 @@ class Twitter extends Adapter {
     return data;
   }
 
+  crawl = async (query) => {
+    this.toCrawl = await this.fetchList(query.query);
+    while (this.toCrawl.length > 0) {
+      const url = this.toCrawl.shift();
+      var data = await this.parseItem(url);
+      this.parsed[url] = data;
+      console.log(this.parsed);
+
+      const newLinks = await this.fetchList(url);
+      console.log(newLinks);
+
+      this.toCrawl = this.toCrawl.concat(newLinks);
+    }
+  };
+
   fetchList = async(url) => {
     // Go to the hashtag page
     await this.page.waitForTimeout(1000);
@@ -158,6 +175,11 @@ class Twitter extends Adapter {
     // });
     // return scrapingData;
   };
+
+  processLinks = async (links) => {
+    links.forEach((link) => {
+    });
+  }
 
 
   checkSession = async () => {
