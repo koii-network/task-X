@@ -114,6 +114,8 @@ class Twitter extends Adapter {
       const newLinks = await this.fetchList(url);
       console.log(newLinks);
 
+      this.db.create({id: url, data: data});
+
       this.toCrawl = this.toCrawl.concat(newLinks);
     }
   };
