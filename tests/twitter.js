@@ -9,9 +9,13 @@ const db = levelup(leveldown(__dirname + '/localKOIIDB'));
 const Data = require('../model/data');
 
 const run = async () => {
+    const args = process.argv.slice(2);
+
+    var searchTerm = args.length > 0 ? args[0] : 'Web3';
+
     let query = {
         limit: 100,
-        query: `https://twitter.com/search?q=Web3&src=typed_query`,
+        query: `https://twitter.com/search?q=${searchTerm}&src=typed_query`,
         depth: 3,
     }
    
