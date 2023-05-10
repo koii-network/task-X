@@ -75,30 +75,29 @@ class Twitter extends Adapter {
     console.log("PARSE: " + url);
     const html = await this.page.content();
     const $ = cheerio.load(html);
-    var data = [];
+    let data = {};
     var count = 0;
 
     const articles = $('article[data-testid="tweet"]').toArray();
 
-    articles.forEach((el) => {
-      const tweet_text = $(el).find('div[data-testid="tweetText"]').text();
-      const tweet_user = $(el).find('a[tabindex="-1"]').text();
-      const tweet_record = $(el).find('span[data-testid="app-text-transition-container"]');
-      const commentCount = tweet_record.eq(0).text();
-      const likeCount = tweet_record.eq(1).text();
-      const shareCount = tweet_record.eq(2).text();
-      const viewCount = tweet_record.eq(3).text();
-      if (tweet_user && tweet_text) {
-        data.push({
-            user: tweet_user,
-            content: tweet_text.replace(/\n/g, '<br>'),
-            comment: commentCount,
-            like: likeCount,
-            share: shareCount,
-            view: viewCount,
-        });
-      }
-    });
+    const el = articles[0];
+    const tweet_text = $(el).find('div[data-testid="tweetText"]').text();
+    const tweet_user = $(el).find('a[tabindex="-1"]').text();
+    const tweet_record = $(el).find('span[data-testid="app-text-transition-container"]');
+    const commentCount = tweet_record.eq(0).text();
+    const likeCount = tweet_record.eq(1).text();
+    const shareCount = tweet_record.eq(2).text();
+    const viewCount = tweet_record.eq(3).text();
+    if (tweet_user && tweet_text) {
+      data = {
+          user: tweet_user,
+          content: tweet_text.replace(/\n/g, '<br>'),
+          comment: commentCount,
+          like: likeCount,
+          share: shareCount,
+          view: viewCount,
+      };
+    }
 
     return data;
   }
