@@ -15,6 +15,7 @@ const run = async () => {
 
     let query = {
         limit: 100,
+        searchTerm: searchTerm,
         query: `https://twitter.com/search?q=${searchTerm}&src=typed_query`,
         depth: 3,
     }

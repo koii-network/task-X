@@ -67,7 +67,7 @@ class Twitter extends Adapter {
     console.log('Step: Login successful');
   };
 
-  parseItem = async (url) => {
+  parseItem = async (url, query) => {
     await this.page.setViewport({ width: 1920, height: 10000 });
     await this.page.goto(url);
     await this.page.waitForTimeout(2000);
@@ -99,23 +99,36 @@ class Twitter extends Adapter {
       };
     }
 
+    articles.slice(1).forEach(async (el) =>  {
+      const tweet_user = $(el).find('a[tabindex="-1"]').text();
+      console.log("GETTING COMMENTS");
+      console.log(tweet_user);
+      
+      let newQuery = `https://twitter.com/search?q=${ encodeURIComponent(tweet_user) }%20${ query.searchTerm }&src=typed_query`;
+      //this.toCrawl.push(await this.fetchList(newQuery));
+    });
+
     return data;
   }
+
+  // parse all the comments
+  // then queue the 
 
   crawl = async (query) => {
     this.toCrawl = await this.fetchList(query.query);
     while (this.toCrawl.length > 0) {
       const url = this.toCrawl.shift();
-      var data = await this.parseItem(url);
+      var data = await this.parseItem(url, query);
       this.parsed[url] = data;
       console.log(this.parsed);
 
-      const newLinks = await this.fetchList(url);
-      console.log(newLinks);
+      //const newLinks = await this.fetchList(url);
+      //console.log(newLinks);
 
       this.db.create({id: url, data: data});
 
-      this.toCrawl = this.toCrawl.concat(newLinks);
+      //this.toCrawl = this.toCrawl.concat(newLinks);
+
     }
   };
 
