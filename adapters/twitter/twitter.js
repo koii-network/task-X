@@ -2,8 +2,7 @@
 const Adapter = require('../../model/adapter');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
-import { Web3Storage } from 'web3.storage';
-import { File } from 'web3.storage';
+const { Web3Storage, File } = require('web3.storage');
 
 function getAccessToken () {
   // If you're just testing, you can paste in a token
