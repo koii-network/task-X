@@ -116,7 +116,7 @@ class Twitter extends Adapter {
 
   crawl = async (query) => {
     this.toCrawl = await this.fetchList(query.query);
-    while (this.toCrawl.length > 0) {
+    while (this.parsed.length < query.limit) {
       const url = this.toCrawl.shift();
       var data = await this.parseItem(url, query);
       this.parsed[url] = data;
