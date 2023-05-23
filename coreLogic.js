@@ -1,98 +1,25 @@
 const { namespaceWrapper } = require('./namespaceWrapper');
-const crypto = require('crypto');
-const twitter = require('./adapters/twitter/twitter.js'); 
-const Gatherer = require('./model/gatherer');
-const levelup = require('levelup');
-const Twitter = require('../adapters/twitter');
-const leveldown = require('leveldown');
-const db = levelup(leveldown(__dirname + '/localKOIIDB'));
-const Data = require('../model/data');
-import { Web3Storage } from 'web3.storage';
-import { File } from 'web3.storage';
-
-function getAccessToken () {
-  // If you're just testing, you can paste in a token
-  // and uncomment the following line:
-  // return 'paste-your-token-here'
-
-  // In a real app, it's better to read an access token from an
-  // environement variable or other configuration that's kept outside of
-  // your code base. For this to work, you need to set the
-  // WEB3STORAGE_TOKEN environment variable before you run your code.
-  return process.env.WEB3STORAGE_TOKEN
-}
-
-function makeStorageClient () {
-  return new Web3Storage({ token: getAccessToken() })
-}
-
-function makeFileFromObjectWithName(obj, name) {
-  const buffer = Buffer.from(JSON.stringify(obj))
-  return new File([buffer], name)
-}
-
-async function storeFiles (files) {
-  const client = makeStorageClient()
-  const cid = await client.put(files)
-  console.log('stored files with cid:', cid)
-  return cid
-}
+const twitterTask = require('./twitter-task');
 
 class CoreLogic {
   async task() {
     // Write the logic to do the work required for submitting the values and optionally store the result in levelDB
 
-    let query = {
-      limit: 100,
-      searchTerm: 'Web3',
-      query: `https://twitter.com/search?q=${searchTerm}&src=typed_query`,
-      depth: 3,
-    }
-  
-    let options = {
-        maxRetry : 3, 
-        query : query
-    }
+    const proof_cid = await twitterTask();
 
-    const username = process.env.TWITTER_USERNAME;
-    const password = process.env.TWITTER_PASSWORD;
+    const round = await namespaceWrapper.getRound();
 
-    let credentials = {
-        username: username,
-        password: password
-    }
-    
-    let data = new Data('twitter', db);
-    let adapter = new Twitter(credentials, data, 3);
-    await adapter.negotiateSession(); 
-    await adapter.crawl(query);
+    // TEST For only testing purposes:
+    // const round = 1000
 
-    const web3Storage = makeStorageClient();
-    const file = makeFileFromObjectWithName(adapter.parsed, "twitter.json");
-    const cid = storeFiles([file]);
-
-    // send the tweets to ipfs
-    // get CIDs back, 
-    // take the CID, node public address, node signature -> thats a proof
-    // submit proofs to K2
-
-    // results of crawl should be stored in data
-    // which could submit data to ipfs
-    
-    try {
-      const x = Math.random().toString(); // generate random number and convert to string
-      const cid = crypto.createHash('sha1').update(x).digest('hex'); // convert to CID
-      console.log('HASH:', cid);
-
-      // fetching round number to store work accordingly
-
-      if (cid) {
-        await namespaceWrapper.storeSet('cid', cid); // store CID in levelDB
-      }
-    } catch (err) {
-      console.log('ERROR IN EXECUTING TASK', err);
+    if (proof_cid) {
+      await db.setNodeProofCid(round, proof_cid); // store CID in levelDB
+      console.log('Node Proof CID stored in round', round)
+    } else {
+      console.log('CID NOT FOUND');
     }
   }
+
   async fetchSubmission() {
     // Write the logic to fetch the submission values here and return the cid string
 
