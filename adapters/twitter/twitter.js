@@ -2,6 +2,36 @@
 const Adapter = require('../../model/adapter');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
+import { Web3Storage } from 'web3.storage';
+import { File } from 'web3.storage';
+
+function getAccessToken () {
+  // If you're just testing, you can paste in a token
+  // and uncomment the following line:
+  // return 'paste-your-token-here'
+
+  // In a real app, it's better to read an access token from an
+  // environement variable or other configuration that's kept outside of
+  // your code base. For this to work, you need to set the
+  // WEB3STORAGE_TOKEN environment variable before you run your code.
+  return process.env.WEB3STORAGE_TOKEN
+}
+
+function makeStorageClient () {
+  return new Web3Storage({ token: getAccessToken() })
+}
+
+function makeFileFromObjectWithName(obj, name) {
+  const buffer = Buffer.from(JSON.stringify(obj))
+  return new File([buffer], name)
+}
+
+async function storeFiles (files) {
+  const client = makeStorageClient()
+  const cid = await client.put(files)
+  console.log('stored files with cid:', cid)
+  return cid
+}
 
 class Twitter extends Adapter {
   constructor(credentials, db, maxRetry) {
@@ -116,6 +146,7 @@ class Twitter extends Adapter {
 
   crawl = async (query) => {
     this.toCrawl = await this.fetchList(query.query);
+    let cids = [];
     while (this.parsed.length < query.limit) {
       const url = this.toCrawl.shift();
       var data = await this.parseItem(url, query);
@@ -126,10 +157,12 @@ class Twitter extends Adapter {
       //console.log(newLinks);
 
       this.db.create({id: url, data: data});
-
+      const file = makeFileFromObjectWithName(data, url);
+      const cid = await storeFiles([file]);
+      cids.push(cid);
       //this.toCrawl = this.toCrawl.concat(newLinks);
-
     }
+    return cids;
   };
 
   fetchList = async(url) => {
