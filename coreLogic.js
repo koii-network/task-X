@@ -1,3 +1,4 @@
+const { Web3Storage } = require('web3.storage');
 const { namespaceWrapper } = require('./namespaceWrapper');
 const TwitterTask = require('./twitter-task');
 
@@ -30,7 +31,7 @@ class CoreLogic {
     // The code below shows how you can fetch your stored value from level DB
 
     const cid = await this.twitterTask.getRoundCID(namespaceWrapper.getRound());
-    console.log('CID', cid);
+    console.log('about to make submission with CID: ', cid);
     return cid;
   }
 
@@ -75,7 +76,18 @@ class CoreLogic {
             }
             if (numOfVotes < 0) continue;
           }
-          distributionList[candidatePublicKey] = 1;
+
+          // now we need to parse the value submitted and decide how much to pay
+          let cid = values[i];
+          console.log(`about to fetch ${cid} from IPFS`)
+          let ipfs_object = Web3Storage.get({ token: process.env.WEB3STORAGE_TOKEN }, cid);
+          if (ipfs_object == null) {
+            distributionList[candidatePublicKey] = 0;
+          } else {
+            if (ipfs_object.length == null || ipfs_object.length < 1) ipfs_object.length = 1;
+            let score = ipfs_object.length * 0.1; // multiply total records submitted by value per record (0.1 KOII)
+            distributionList[candidatePublicKey] = score;
+          }
         }
       }
       console.log('Distribution List', distributionList);
@@ -110,27 +122,7 @@ class CoreLogic {
   }
 
   async validateNode(submission_value, round) {
-    // Write your logic for the validation of submission value here and return a boolean value in response
-
-    // The sample logic can be something like mentioned below to validate the submission
-
-    // try{
-
-    console.log('Received submission_value', submission_value, round);
-    // const generatedValue = await namespaceWrapper.storeGet("cid");
-    // console.log("GENERATED VALUE", generatedValue);
-    // if(generatedValue == submission_value){
-    //   return true;
-    // }else{
-    //   return false;
-    // }
-    // }catch(err){
-    //   console.log("ERROR  IN VALDIATION", err);
-    //   return false;
-    // }
-
-    // For succesfull flow we return true for now
-    return true;
+    return this.twitterTask.validate(submission_value, round);
   }
 
   async shallowEqual(object1, object2) {

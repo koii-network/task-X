@@ -72,18 +72,40 @@ class TwitterTask {
     
   }
 
-  async validate(proofCid) {
+  async validate(proofCid, roundID) {
     // in order to validate, u need to take the proofCid 
     // and go get the results from web3.storage
-    
-    // access web3.storage
-    // get the result
-    
 
-    // get the node's ip adress 
-    // generate a random # 
-    // recursively check
+    let data = Web3Storage.get(proofCid); // check this
+    console.log(`validate got results for CID: ${ proofCid } for round ${ roundId }`, data);
     
+    // the data submitted should be an array of additional CIDs for individual tweets, so we'll try to parse it
+    let cids = JSON.parse(data);
+    let proofThreshold = 4; // an arbitrary number of records to check
+
+    for ( let i = 0; i < proofThreshold; i++ ) {
+      let randomIndex = Math.floor(Math.random() * cids.length);
+      let cid = cids[randomIndex];
+      let result = Web3Storage.get({ token: getAccessToken() }, cid);
+
+      // then, we need to compare the CID result to the actual result on twitter
+      // i.e. 
+
+      // need to check if there's an active session and set one if not
+      if (!this.adapter.checkSession()) {
+        await this.adapter.negotiateSession();
+        let twitterCheck = this.adapter.parseItem(result.id); // update to suit the adapter 
+      }
+      
+      // TODO - revise this check to make sure it handles issues with type conversions
+      if (cid !== twitterCheck) {
+        return false;
+      } 
+    }
+    
+    // if none of the random checks fail, return true
+    return true
+
   }
 
 }
