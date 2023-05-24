@@ -1,6 +1,7 @@
 const Twitter = require('./adapters/twitter/twitter.js'); 
 const db = require('./helpers/db');
 const { Web3Storage } = require('web3.storage');
+const Data = require('./model/data');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -11,7 +12,7 @@ class TwitterTask {
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
     this.searchTerm = 'Web3';
-    this.db = db;
+    this.db = new Data("db"); // now unused
     this.setAdapter = async ( ) => {
       const username = process.env.TWITTER_USERNAME;
       const password = process.env.TWITTER_PASSWORD;
@@ -24,7 +25,7 @@ class TwitterTask {
           username: username,
           password: password
       }
-      this.adapter = new Twitter(credentials, db, 3, this.proofs, this.cids);
+      this.adapter = new Twitter(credentials, db, 3);
     }
     
     this.updateRound = async () => {
@@ -73,26 +74,30 @@ class TwitterTask {
   }
 
   async getRoundCID(roundID) {
-    
-    return await this.adapter.getSubmissionCID(roundID)
+    let result = await this.adapter.getSubmissionCID(roundID);
+    console.log('returning round CID', result, 'for round', roundID)
+    return result;
     
   }
 
   async validate(proofCid, roundID) {
     // in order to validate, u need to take the proofCid 
     // and go get the results from web3.storage
+    let web3StorageClient = new Web3Storage({ token: process.env.WEB3STORAGE_TOKEN });
 
-    let data = Web3Storage.get(proofCid); // check this
-    console.log(`validate got results for CID: ${ proofCid } for round ${ roundId }`, data);
-    
+    let data = await web3StorageClient.get(  proofCid); // check this
+    console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data);
+
+    let storeObject = await handleW3SResults(data);
+
     // the data submitted should be an array of additional CIDs for individual tweets, so we'll try to parse it
-    let cids = JSON.parse(data);
+    let cids = JSON.parse(data.body);
     let proofThreshold = 4; // an arbitrary number of records to check
 
     for ( let i = 0; i < proofThreshold; i++ ) {
       let randomIndex = Math.floor(Math.random() * cids.length);
       let cid = cids[randomIndex];
-      let result = Web3Storage.get({ token: getAccessToken() }, cid);
+      let result = await web3StorageClient.get({ token: process.env.WEB3STORAGE_TOKEN }, cid);
 
       // then, we need to compare the CID result to the actual result on twitter
       // i.e. 
@@ -112,6 +117,10 @@ class TwitterTask {
     // if none of the random checks fail, return true
     return true
 
+  }
+
+  async handleW3SResults(data) {
+    // need to load the file and then parse it here for json... wow this is so dumb 
   }
 
 } 

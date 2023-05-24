@@ -8,20 +8,20 @@ const { TweetUserMentionTimelineV2Paginator } = require('twitter-api-v2');
 const run = async () => {
     let delay = 45000;
     var twitterTask = null;
-    let x = 1;
+    let round = 1;
 
     twitterTask = await new TwitterTask (async() => {
-        return x;
+        return round;
     });
-    console.log('started a new crawler at round', x);
+    console.log('started a new crawler at round', round);
         
 
     setTimeout(async ()  =>   {
-        console.log('stopping crawler at round', x)
+        console.log('stopping crawler at round', round)
         twitterTask.stop(); // unclear whether stop works
-        let proof_cid = await twitterTask.getRoundCID(x);
+        let proof_cid = await twitterTask.getRoundCID(round);
         console.log('got round result', proof_cid);
-        let output = twitterTask.validate(proof_cid);
+        let output = await twitterTask.validate(proof_cid, round);
         console.log('validated round result', output);
     }, delay)
 

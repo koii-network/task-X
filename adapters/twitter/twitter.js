@@ -18,12 +18,15 @@ function getAccessToken () {
 }
 
 class Twitter extends Adapter {
-  constructor(credentials, db, maxRetry, proofs, cids) {
+  constructor(credentials, db, maxRetry) {
       super(credentials, maxRetry);
       this.credentials = credentials;
-      this.db = new Data(db);
-      this.proofs = new Data(proofs);
-      this.cids = new Data(cids);
+      this.db = new Data("db", []);
+      this.db.intializeData();
+      this.proofs = new Data("proofs", []);
+      this.proofs.intializeData();
+      this.cids = new Data("cids", []);
+      this.cids.intializeData();
       this.toCrawl = []; 
       this.parsed = {};
       this.lastSessionCheck = null;
@@ -104,7 +107,8 @@ class Twitter extends Adapter {
   getSubmissionCID = async (round) => {
     if (this.proofs) {
       // check if the cid has already been stored
-      let proof_cid = this.proofs.getProof(round);
+      let proof_cid = await this.proofs.getItem(round);
+      console.log('got proofs item', proof_cid)
       if (proof_cid) {
         return proof_cid;
       } else {
