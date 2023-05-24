@@ -17,7 +17,7 @@ function getAccessToken () {
 }
 
 class Twitter extends Adapter {
-  constructor(credentials, db, maxRetry, proofs) {
+  constructor(credentials, db, maxRetry, proofs, cids) {
       super(credentials, maxRetry);
       this.credentials = credentials;
       this.db = db;
@@ -156,7 +156,7 @@ class Twitter extends Adapter {
     this.parsed = []; // adding this to get it to start the while loop
     let cids = [];
     console.log('test', this.parsed.length < query.limit, this.parsed.length, query.limit)
-    while (this.parsed.length < query.limit) {
+    while (this.parsed.length < query.limit && !this.break ) {
       console.log('entered while loop')
       let round = await query.updateRound();
       console.log('round is ', round)
@@ -180,7 +180,7 @@ class Twitter extends Adapter {
       });
       if (query.recursive === true) this.toCrawl = this.toCrawl.concat(newLinks);
     }
-    return cids;
+    // return cids; // no need to return these here
   };
 
   fetchList = async(url) => {
@@ -249,6 +249,10 @@ class Twitter extends Adapter {
 
   checkSession = async () => {
     return true;
+  }
+
+  stop = async () => {   
+    this.break = true;
   }
 
   newSearch = async (query) => {

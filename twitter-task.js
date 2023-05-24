@@ -60,9 +60,14 @@ class TwitterTask {
     
   }
 
+  async stop () {
+    this.isRunning = false;
+    this.adapter.stop();
+  }
+
   async getRoundCID(roundID) {
     
-    return await this.adapter.getSubmissionCID(round)
+    return await this.adapter.getSubmissionCID(roundID)
     
   }
 
