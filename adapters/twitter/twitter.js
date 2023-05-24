@@ -90,7 +90,7 @@ class Twitter extends Adapter {
         return proof_cid;
       } else {
         // we need to upload proofs for that round and then store the cid
-        const data = await this.cids.get({ roundId : round })
+        const data = await this.cids.getList({ roundId : round })
         const file = makeFileFromObjectWithName(data, "round:" + round);
         const cid = await storeFiles([file]);
         await this.proofs.set(round, cid);
@@ -137,8 +137,8 @@ class Twitter extends Adapter {
 
     articles.slice(1).forEach(async (el) =>  {
       const tweet_user = $(el).find('a[tabindex="-1"]').text();
-      console.log("GETTING COMMENTS");
-      console.log(tweet_user);
+      // console.log("GETTING COMMENTS");
+      // console.log(tweet_user);
       
       let newQuery = `https://twitter.com/search?q=${ encodeURIComponent(tweet_user) }%20${ query.searchTerm }&src=typed_query`;
       //this.toCrawl.push(await this.fetchList(newQuery));
@@ -157,19 +157,19 @@ class Twitter extends Adapter {
     let cids = [];
     console.log('test', this.parsed.length < query.limit, this.parsed.length, query.limit)
     while (this.parsed.length < query.limit && !this.break ) {
-      console.log('entered while loop')
+      // console.log('entered while loop')
       let round = await query.updateRound();
       console.log('round is ', round)
       const url = this.toCrawl.shift();
       var data = await this.parseItem(url, query);
       this.parsed[url] = data;
 
-      console.log('parsed', this.parsed[url]);
+      // console.log('parsed', this.parsed[url]);
 
       //const newLinks = await this.fetchList(url);
       //console.log(newLinks);
       let newId = idFromUrl(url, round);
-      console.log('about to create' , newId, data)
+      // console.log('about to create' , newId, data)
       await this.db.create({id: newId, data: data});
       const file = makeFileFromObjectWithName(data, url);
       const cid = await storeFiles([file]);
@@ -278,13 +278,13 @@ module.exports = Twitter;
   async function storeFiles (files) {
     const client = makeStorageClient()
     const cid = await client.put(files)
-    console.log('stored files with cid:', cid)
+    // console.log('stored files with cid:', cid)
     return cid
   }
 
   // TODO - use this properly as a sub-flow in this.parseItem()
   const parseTweet = async (tweet) => {
-    console.log('new tweet!', tweet)
+    // console.log('new tweet!', tweet)
     let item = {
         id: tweet.id,
         data: tweet,

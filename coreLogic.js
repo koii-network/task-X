@@ -18,7 +18,7 @@ class CoreLogic {
         console.log('started a new crawler at round', round);
         proof_cid = null;
     } else {
-        const cid = await this.twitterTask.getRoundCID(getRound());
+        const cid = await this.twitterTask.getRoundCID(namespaceWrapper.getRound());
         console.log('got round result', cid);
         proof_cid = cid;
     } 
