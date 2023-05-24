@@ -123,7 +123,7 @@ class Twitter extends Adapter {
 
   parseItem = async (url, query) => {
     await this.page.setViewport({ width: 1920, height: 10000 });
-    console.log("PARSE: " + url);
+    console.log("PARSE: " + url, query);
     await this.page.goto(url);
     await this.page.waitForTimeout(2000);
 
@@ -175,37 +175,45 @@ class Twitter extends Adapter {
   crawl = async (query) => {
     this.toCrawl = await this.fetchList(query.query);
     console.log('round is', query.round, query.updateRound)
+    console.log(`about to crawl ${this.toCrawl.length} items`)
     this.parsed = []; // adding this to get it to start the while loop
     let cids = [];
     console.log('test', this.parsed.length < query.limit, this.parsed.length, query.limit)
     while (this.parsed.length < query.limit && !this.break ) {
       // console.log('entered while loop')
       let round = await query.updateRound();
-      console.log('round is ', round)
+      // console.log('round is ', round)
       const url = this.toCrawl.shift();
-      var data = await this.parseItem(url, query);
-      this.parsed[url] = data;
-
-      // console.log('parsed', this.parsed[url]);
-
-      //const newLinks = await this.fetchList(url);
-      //console.log(newLinks);
-      let newId = idFromUrl(url, round);
-      // console.log('about to create' , newId, data)
-      await this.db.create({id: newId, data: data});
-      const file = makeFileFromObjectWithName(data, url);
-      const cid = await storeFiles([file]);
-      cids.push(cid); // TODO - this must be stored in the database
-      this.cids.create({
-        id: round + ":" + url, 
-        cid: cid
-      });
-      if (query.recursive === true) this.toCrawl = this.toCrawl.concat(newLinks);
+      // console.log(`about to crawl ${url}`)
+      if (url) {
+        var data = await this.parseItem(url, query);
+        this.parsed[url] = data;
+  
+        // console.log('parsed', this.parsed[url]);
+  
+        //const newLinks = await this.fetchList(url);
+        //console.log(newLinks);
+        let newId = idFromUrl(url, round);
+        // console.log('about to create' , newId, data)
+        await this.db.create({id: newId, data: data});
+        const file = makeFileFromObjectWithName(data, url);
+        const cid = await storeFiles([file]);
+        cids.push(cid); // TODO - this must be stored in the database
+        this.cids.create({
+          id: round + ":" + url, 
+          cid: cid
+        });
+        if (query.recursive === true) this.toCrawl = this.toCrawl.concat(newLinks);
+      } else {
+        // console.log('no url', url)
+      }
     }
     // return cids; // no need to return these here
   };
 
   fetchList = async(url) => {
+    console.log('fetching list for ', url)
+
     // Go to the hashtag page
     await this.page.waitForTimeout(1000);
     await this.page.setViewport({ width: 1920, height: 10000 });
@@ -221,6 +229,8 @@ class Twitter extends Adapter {
     const $ = cheerio.load(html);
     
     const links = $('a').toArray();
+
+    console.log(`got ${links.length} links`)
 
     // Filter the matching elements with the specified pattern
     const matchedLinks = links.filter((link) => {
@@ -274,7 +284,7 @@ class Twitter extends Adapter {
   }
 
   stop = async () => {   
-    this.break = true;
+    return this.break = true;
   }
 
   newSearch = async (query) => {

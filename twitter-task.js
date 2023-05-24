@@ -100,7 +100,7 @@ class TwitterTask {
       // need to check if there's an active session and set one if not
       if (!this.adapter.checkSession()) {
         await this.adapter.negotiateSession();
-        let twitterCheck = this.adapter.parseItem(result.id); // update to suit the adapter 
+        let twitterCheck = await this.adapter.parseItem(result.id); // update to suit the adapter 
       }
       
       // TODO - revise this check to make sure it handles issues with type conversions
