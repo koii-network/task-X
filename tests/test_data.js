@@ -4,15 +4,15 @@ const datadb = require('../helpers/db');
 
 
 
-// const Item = require('../model/item');
+const Item = require('../model/item');
 
-// const testData = [
-//   new Item({ id: 1, name: 'Item 1', description: 'First item' }),
-//   new Item({ id: 2, name: 'Item 2', description: 'Second item' }),
-//   new Item({ id: 3, name: 'Item 3', description: 'Third item' }),
-//   new Item({ id: 4, name: 'Item 4', description: 'Fourth item' }),
-//   new Item({ id: 5, name: 'Item 5', description: 'Fifth item' }),
-// ];
+const testData = [
+  new Item({ id: 1, name: 'Item 1', description: 'First item' }),
+  new Item({ id: 2, name: 'Item 2', description: 'Second item' }),
+  new Item({ id: 3, name: 'Item 3', description: 'Third item' }),
+  new Item({ id: 4, name: 'Item 4', description: 'Fourth item' }),
+  new Item({ id: 5, name: 'Item 5', description: 'Fifth item' }),
+];
 
 async function test() {
   await datadb.intializeData();
@@ -30,7 +30,6 @@ async function test() {
   // datadb
   //   .createItems(testData)
   //   .then(() => {
-    //lpFqWxqcFpBiElKo
   //     console.log('Create item test passed');
   //   })
   //   .catch(err => {
@@ -53,8 +52,8 @@ async function test() {
     
 
   // TEST get healthy list
-  let healthyList = await datadb.getHealthyList()
-  console.log('healthy list is ', healthyList);
+  // let healthyList = await datadb.getHealthyList()
+  // console.log('healthy list is ', healthyList);
 
   // console.log('test list is ', testlist);
   //     console.log('Create item test passed');
