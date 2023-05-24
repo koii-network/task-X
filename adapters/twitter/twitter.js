@@ -26,6 +26,21 @@ class Twitter extends Adapter {
       this.cids = new Data(cids);
       this.toCrawl = []; 
       this.parsed = {};
+      this.lastSessionCheck = null;
+      this.sessionValid = false;
+  }
+
+  checkSession = async () => {
+    // this function should check if a session is still valid, and negotiate a new session if not
+    // we should only negotiate a new session if the last session is more than 1 minute old, or return an error
+    // if the session is still valid, return true
+    if (this.sessionValid) {
+      return true;
+    } else if (Date.now() - this.lastSessionCheck > 60000) {
+      await this.negotiateSession();
+      return true;
+    }
+
   }
 
   negotiateSession = async () => {
@@ -33,7 +48,6 @@ class Twitter extends Adapter {
     this.page = await this.browser.newPage();
     // Enable console logs in the context of the page
     this.page.on('console', consoleObj => console.log(consoleObj.text()));
-    
     await this.page.setViewport({ width: 1920, height: 1000 });
 
     await this.twitterLogin();
@@ -79,6 +93,10 @@ class Twitter extends Adapter {
 
     this.page.waitForNavigation({ waitUntil: 'load' });
     await this.page.waitForTimeout(1000);
+    // TODO - add case for failed login handling here (e.g. wrong password) - DO NOT set following session params if failed
+
+    this.sessionValid = true;
+    this.lastSessionCheck = Date.now();
 
     console.log('Step: Login successful');
   };
@@ -137,14 +155,16 @@ class Twitter extends Adapter {
     }
     // TODO  - queue users to be crawled?
 
-    articles.slice(1).forEach(async (el) =>  {
-      const tweet_user = $(el).find('a[tabindex="-1"]').text();
-      // console.log("GETTING COMMENTS");
-      // console.log(tweet_user);
-      
-      let newQuery = `https://twitter.com/search?q=${ encodeURIComponent(tweet_user) }%20${ query.searchTerm }&src=typed_query`;
-      //this.toCrawl.push(await this.fetchList(newQuery));
-    });
+    if (query) {
+      articles.slice(1).forEach(async (el) =>  {
+        const tweet_user = $(el).find('a[tabindex="-1"]').text();
+        // console.log("GETTING COMMENTS");
+        // console.log(tweet_user);
+        
+        let newQuery = `https://twitter.com/search?q=${ encodeURIComponent(tweet_user) }%20${ query.searchTerm }&src=typed_query`;
+        //this.toCrawl.push(await this.fetchList(newQuery));
+      });
+    }
 
     return data;
   }
