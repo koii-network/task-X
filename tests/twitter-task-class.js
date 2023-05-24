@@ -30,7 +30,10 @@ const run = async () => {
         twitterTask.stop(); // unclear whether stop works
         let proof_cid = twitterTask.getRoundCID(0);
         console.log('got round result', proof_cid);
+        twitterTask.validate(proof_cid);
     }, delay*10)
+
+    
 }
 
 

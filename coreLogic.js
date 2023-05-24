@@ -16,19 +16,8 @@ class CoreLogic {
     if ( !this.twitterTask || !this.twitterTask.isRunning ) {
         this.twitterTask = await new TwitterTask (namespaceWrapper.getRound);
         console.log('started a new crawler at round', round);
-        proof_cid = null;
     } else {
-        const cid = await this.twitterTask.getRoundCID(namespaceWrapper.getRound());
-        console.log('got round result', cid);
-        proof_cid = cid;
     } 
-
-    if (proof_cid) {
-      await db.setNodeProofCid(round, proof_cid); // store CID in levelDB
-      console.log('Node Proof CID stored in round', round)
-    } else {
-      console.log('CID NOT FOUND');
-    }
   }
 
   async fetchSubmission() {
@@ -40,7 +29,7 @@ class CoreLogic {
 
     // The code below shows how you can fetch your stored value from level DB
 
-    const cid = await namespaceWrapper.storeGet('cid'); // retrieves the cid
+    const cid = await this.twitterTask.getRoundCID(namespaceWrapper.getRound());
     console.log('CID', cid);
     return cid;
   }

@@ -3,6 +3,7 @@ const levelup = require('levelup');
 const leveldown = require('leveldown');
 const db = levelup(leveldown(__dirname + '/localKOIIDB'));
 const Data = require('./model/data');
+const { Web3Storage } = require('web3.storage');
 
 class TwitterTask {
   constructor (getRound) {
@@ -68,6 +69,20 @@ class TwitterTask {
   async getRoundCID(roundID) {
     
     return await this.adapter.getSubmissionCID(roundID)
+    
+  }
+
+  async validate(proofCid) {
+    // in order to validate, u need to take the proofCid 
+    // and go get the results from web3.storage
+    
+    // access web3.storage
+    // get the result
+    
+
+    // get the node's ip adress 
+    // generate a random # 
+    // recursively check
     
   }
 
