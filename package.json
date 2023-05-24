@@ -23,6 +23,7 @@
     "fs": "^0.0.1-security",
     "leveldown": "^6.1.1",
     "levelup": "^5.1.1",
+    "nedb-promises": "^6.2.1",
     "needle": "^3.2.0",
     "node-cron": "^3.0.2",
     "puppeteer": "^19.11.1",
