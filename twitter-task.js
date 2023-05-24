@@ -1,19 +1,15 @@
 const Twitter = require('./adapters/twitter/twitter.js'); 
-const levelup = require('levelup');
-const leveldown = require('leveldown');
-const db = levelup(leveldown(__dirname + '/localKOIIDB'));
-const Data = require('./model/data');
+const db = require('./helpers/db');
 const { Web3Storage } = require('web3.storage');
 
 class TwitterTask {
   constructor (getRound) {
+    
     this.round = getRound();
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
     this.searchTerm = 'Web3';
-    this.data = new Data('tweets', db);
-    this.proofs = new Data('proofs', db);
-    this.cids = new Data('cids', db);
+    this.db = db;
     this.setAdapter = async ( ) => {
       const username = process.env.TWITTER_USERNAME;
       const password = process.env.TWITTER_PASSWORD;
@@ -22,8 +18,9 @@ class TwitterTask {
           username: username,
           password: password
       }
-      this.adapter = new Twitter(credentials, this.data, 3, this.proofs, this.cids);
+      this.adapter = new Twitter(credentials, db, 3, this.proofs, this.cids);
     }
+    
     this.updateRound = async () => {
       // if it has been more than 1 minute since the last round check, check the round and update this.round
       if (Date.now() - this.lastRoundCheck > 60000) {
@@ -38,6 +35,9 @@ class TwitterTask {
   // the start method accepts a 
   async start () {
     await this.setAdapter();
+
+    await db.intializeData();
+
     this.isRunning = true;
 
     let query = {
@@ -86,6 +86,6 @@ class TwitterTask {
     
   }
 
-}
+}  await dataDb.intializeData();
 
 module.exports = TwitterTask;
