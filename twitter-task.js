@@ -1,10 +1,12 @@
 const Twitter = require('./adapters/twitter/twitter.js'); 
 const db = require('./helpers/db');
 const { Web3Storage } = require('web3.storage');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 class TwitterTask {
   constructor (getRound) {
-    
     this.round = getRound();
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
@@ -13,6 +15,10 @@ class TwitterTask {
     this.setAdapter = async ( ) => {
       const username = process.env.TWITTER_USERNAME;
       const password = process.env.TWITTER_PASSWORD;
+
+      if (!username || !password) {
+        throw new Error('Environment variables TWITTER_USERNAME and/or TWITTER_PASSWORD are not set');
+      }
   
       let credentials = {
           username: username,
@@ -86,6 +92,6 @@ class TwitterTask {
     
   }
 
-}  await dataDb.intializeData();
+} 
 
 module.exports = TwitterTask;

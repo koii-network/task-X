@@ -25,5 +25,5 @@ namespaceWrapper.getDb().then((db)=>{
   
 });
 
-let dataDb = new Data('arweaveNodes');
+let dataDb = new Data('twitterscrape');
 module.exports = dataDb;

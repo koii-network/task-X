@@ -10,7 +10,7 @@ const credentials = {}; // arweave doesn't need credentials
 const run = async () => { 
     let query = "web3"; // the query our twitter search will use
 
-    let dataDb = new Data('arweaveNodes', db);
+    let dataDb = new Data('twitterscrape', db);
 
     let options = {
         maxRetry : 3, 

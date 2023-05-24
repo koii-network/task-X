@@ -3,6 +3,7 @@ const Adapter = require('../../model/adapter');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const { Web3Storage, File } = require('web3.storage');
+const Data = require('../../model/data');
 
 function getAccessToken () {
   // If you're just testing, you can paste in a token
@@ -20,9 +21,9 @@ class Twitter extends Adapter {
   constructor(credentials, db, maxRetry, proofs, cids) {
       super(credentials, maxRetry);
       this.credentials = credentials;
-      this.db = db;
-      this.proofs = proofs;
-      this.cids = cids;
+      this.db = new Data(db);
+      this.proofs = new Data(proofs);
+      this.cids = new Data(cids);
       this.toCrawl = []; 
       this.parsed = {};
   }
@@ -85,15 +86,15 @@ class Twitter extends Adapter {
   getSubmissionCID = async (round) => {
     if (this.proofs) {
       // check if the cid has already been stored
-      let proof_cid = this.proofs.get(round);
+      let proof_cid = this.proofs.getProof(round);
       if (proof_cid) {
         return proof_cid;
       } else {
         // we need to upload proofs for that round and then store the cid
-        const data = await this.cids.getList({ roundId : round })
+        const data = await this.cids.getProofList()
         const file = makeFileFromObjectWithName(data, "round:" + round);
         const cid = await storeFiles([file]);
-        await this.proofs.set(round, cid);
+        await this.proofs.addProof(round, cid);
         return cid;
       }
     } else {
@@ -104,6 +105,7 @@ class Twitter extends Adapter {
 
   parseItem = async (url, query) => {
     await this.page.setViewport({ width: 1920, height: 10000 });
+    console.log("PARSE: " + url);
     await this.page.goto(url);
     await this.page.waitForTimeout(2000);
 
