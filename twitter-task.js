@@ -1,24 +1,19 @@
-const crypto = require('crypto');
 const Twitter = require('./adapters/twitter/twitter.js'); 
-const Gatherer = require('./model/gatherer');
 const levelup = require('levelup');
 const leveldown = require('leveldown');
 const db = levelup(leveldown(__dirname + '/localKOIIDB'));
 const Data = require('./model/data');
 
-  const main = async() => {
-    let query = {
-        limit: 100,
-        searchTerm: 'Web3',
-        query: `https://twitter.com/search?q=${searchTerm}&src=typed_query`,
-        depth: 3,
-      }
-    
-      let options = {
-          maxRetry : 3, 
-          query : query
-      }
-  
+class TwitterTask {
+  constructor (getRound) {
+    this.round = getRound();
+    this.lastRoundCheck = Date.now();
+    this.isRunning = false;
+    this.searchTerm = 'Web3';
+    this.data = new Data('tweets', db);
+    this.proofs = new Data('proofs', db);
+    this.cids = new Data('cids', db);
+    this.setAdapter = async ( ) => {
       const username = process.env.TWITTER_USERNAME;
       const password = process.env.TWITTER_PASSWORD;
   
@@ -26,13 +21,51 @@ const Data = require('./model/data');
           username: username,
           password: password
       }
-      
-      let data = new Data('twitter', db);
-      let adapter = new Twitter(credentials, data, 3);
-      await adapter.negotiateSession(); 
-      let cids = await adapter.crawl(query);
-     
-      return cids;
+      this.adapter = new Twitter(credentials, this.data, 3, this.proofs, this.cids);
+    }
+    this.updateRound = async () => {
+      // if it has been more than 1 minute since the last round check, check the round and update this.round
+      if (Date.now() - this.lastRoundCheck > 60000) {
+        this.round = await getRound();
+        this.lastRoundCheck = Date.now();
+      }
+      return this.round;
+    }
+    this.start();
   }
 
-  module.exports = main;
+  // the start method accepts a 
+  async start () {
+    await this.setAdapter();
+    this.isRunning = true;
+
+    let query = {
+      limit: 100,
+      searchTerm: this.searchTerm,
+      query: `https://twitter.com/search?q=${this.searchTerm}&src=typed_query`,
+      depth: 3,
+      updateRound: async () => {
+        return this.updateRound()
+      },
+      round: this.round
+    }
+  
+    let options = { // TODO - unused?
+        maxRetry : 3, 
+        query : query
+    }
+    
+    await this.adapter.negotiateSession(); 
+    this.adapter.crawl(query); // let it ride
+    
+  }
+
+  async getRoundCID(roundID) {
+    
+    return await this.adapter.getSubmissionCID(round)
+    
+  }
+
+}
+
+module.exports = TwitterTask;

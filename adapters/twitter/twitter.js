@@ -16,27 +16,13 @@ function getAccessToken () {
   return process.env.WEB3STORAGE_TOKEN
 }
 
-function makeStorageClient () {
-  return new Web3Storage({ token: getAccessToken() })
-}
-
-function makeFileFromObjectWithName(obj, name) {
-  const buffer = Buffer.from(JSON.stringify(obj))
-  return new File([buffer], name)
-}
-
-async function storeFiles (files) {
-  const client = makeStorageClient()
-  const cid = await client.put(files)
-  console.log('stored files with cid:', cid)
-  return cid
-}
-
 class Twitter extends Adapter {
-  constructor(credentials, db, maxRetry) {
+  constructor(credentials, db, maxRetry, proofs) {
       super(credentials, maxRetry);
       this.credentials = credentials;
       this.db = db;
+      this.proofs = proofs;
+      this.cids = cids;
       this.toCrawl = []; 
       this.parsed = {};
   }
@@ -96,6 +82,26 @@ class Twitter extends Adapter {
     console.log('Step: Login successful');
   };
 
+  getSubmissionCID = async (round) => {
+    if (this.proofs) {
+      // check if the cid has already been stored
+      let proof_cid = this.proofs.get(round);
+      if (proof_cid) {
+        return proof_cid;
+      } else {
+        // we need to upload proofs for that round and then store the cid
+        const data = await this.cids.get({ roundId : round })
+        const file = makeFileFromObjectWithName(data, "round:" + round);
+        const cid = await storeFiles([file]);
+        await this.proofs.set(round, cid);
+        return cid;
+      }
+    } else {
+      throw new Error ("No proofs database provided");
+    }
+  } 
+
+
   parseItem = async (url, query) => {
     await this.page.setViewport({ width: 1920, height: 10000 });
     await this.page.goto(url);
@@ -127,6 +133,7 @@ class Twitter extends Adapter {
           view: viewCount,
       };
     }
+    // TODO  - queue users to be crawled?
 
     articles.slice(1).forEach(async (el) =>  {
       const tweet_user = $(el).find('a[tabindex="-1"]').text();
@@ -145,21 +152,33 @@ class Twitter extends Adapter {
 
   crawl = async (query) => {
     this.toCrawl = await this.fetchList(query.query);
+    console.log('round is', query.round, query.updateRound)
+    this.parsed = []; // adding this to get it to start the while loop
     let cids = [];
+    console.log('test', this.parsed.length < query.limit, this.parsed.length, query.limit)
     while (this.parsed.length < query.limit) {
+      console.log('entered while loop')
+      let round = await query.updateRound();
+      console.log('round is ', round)
       const url = this.toCrawl.shift();
       var data = await this.parseItem(url, query);
       this.parsed[url] = data;
-      console.log(this.parsed);
+
+      console.log('parsed', this.parsed[url]);
 
       //const newLinks = await this.fetchList(url);
       //console.log(newLinks);
-
-      this.db.create({id: url, data: data});
+      let newId = idFromUrl(url, round);
+      console.log('about to create' , newId, data)
+      await this.db.create({id: newId, data: data});
       const file = makeFileFromObjectWithName(data, url);
       const cid = await storeFiles([file]);
-      cids.push(cid);
-      //this.toCrawl = this.toCrawl.concat(newLinks);
+      cids.push(cid); // TODO - this must be stored in the database
+      this.cids.create({
+        id: round + ":" + url, 
+        cid: cid
+      });
+      if (query.recursive === true) this.toCrawl = this.toCrawl.concat(newLinks);
     }
     return cids;
   };
@@ -195,31 +214,31 @@ class Twitter extends Adapter {
   
     const uniqueLinks = getUnique(linkStrings);
     uniqueLinks.forEach((link) => {
-      console.log(link);
+      console.log("fetchlist link:", link);
     });
 
     return uniqueLinks;
 
     // $('div[data-testid="cellInnerDiv"]').each((i, el) => { 
-    //   const tweet_text = $(el).find('div[data-testid="tweetText"]').text();
-    //   const tweet_user = $(el).find('a[tabindex="-1"]').text();
-    //   const tweet_record = $(el).find('span[data-testid="app-text-transition-container"]');
-    //   const commentCount = tweet_record.eq(0).text();
-    //   const likeCount = tweet_record.eq(1).text();
-    //   const shareCount = tweet_record.eq(2).text();
-    //   const viewCount = tweet_record.eq(3).text();
-    //   if (tweet_user && tweet_text) {
-    //     scrapingData[i] = {
-    //         user: tweet_user,
-    //         content: tweet_text.replace(/\n/g, '<br>'),
-    //         comment: commentCount,
-    //         like: likeCount,
-    //         share: shareCount,
-    //         view: viewCount,
-    //     };
-    //   }
-    // });
-    // return scrapingData;
+      //   const tweet_text = $(el).find('div[data-testid="tweetText"]').text();
+      //   const tweet_user = $(el).find('a[tabindex="-1"]').text();
+      //   const tweet_record = $(el).find('span[data-testid="app-text-transition-container"]');
+      //   const commentCount = tweet_record.eq(0).text();
+      //   const likeCount = tweet_record.eq(1).text();
+      //   const shareCount = tweet_record.eq(2).text();
+      //   const viewCount = tweet_record.eq(3).text();
+      //   if (tweet_user && tweet_text) {
+      //     scrapingData[i] = {
+      //         user: tweet_user,
+      //         content: tweet_text.replace(/\n/g, '<br>'),
+      //         comment: commentCount,
+      //         like: likeCount,
+      //         share: shareCount,
+      //         view: viewCount,
+      //     };
+      //   }
+      // });
+      // return scrapingData;
   };
 
   processLinks = async (links) => {
@@ -237,8 +256,30 @@ class Twitter extends Adapter {
   }
 }
 
+module.exports = Twitter;
 
-const parseTweet = async (tweet) => {
+
+
+// TODO - move the following functions to a utils file?
+
+  function makeStorageClient () {
+    return new Web3Storage({ token: getAccessToken() })
+  }
+
+  function makeFileFromObjectWithName(obj, name) {
+    const buffer = Buffer.from(JSON.stringify(obj))
+    return new File([buffer], name)
+  }
+
+  async function storeFiles (files) {
+    const client = makeStorageClient()
+    const cid = await client.put(files)
+    console.log('stored files with cid:', cid)
+    return cid
+  }
+
+  // TODO - use this properly as a sub-flow in this.parseItem()
+  const parseTweet = async (tweet) => {
     console.log('new tweet!', tweet)
     let item = {
         id: tweet.id,
@@ -247,16 +288,18 @@ const parseTweet = async (tweet) => {
     }
 
     return item;
-}
+  }
 
-const getIdListFromTweet = (tweet) => {
+  const getIdListFromTweet = (tweet) => {
     // parse the tweet for IDs from comments and replies and return an array
     
     return [];
-}
+  }
 
-function getUnique(array) {
+  function getUnique(array) {
   return [... new Set(array)];
-}
+  }
 
-module.exports = Twitter;
+  function idFromUrl(url, round) {
+  return round + ':' + url;
+  }

@@ -18,6 +18,8 @@ const run = async () => {
         searchTerm: searchTerm,
         query: `https://twitter.com/search?q=${searchTerm}&src=typed_query`,
         depth: 3,
+        getRound: nameSpaceGetRoundMock,
+        round: nameSpaceGetRoundMock()
     }
    
     let options = {
@@ -46,6 +48,10 @@ const run = async () => {
 
     // const dataz = await adapter.parseItem(tweetIds[0]);
     // console.log(dataz);
+}
+
+const nameSpaceGetRoundMock = () => {
+    return 6;
 }
 
 run ()

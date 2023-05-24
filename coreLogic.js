@@ -1,16 +1,27 @@
 const { namespaceWrapper } = require('./namespaceWrapper');
-const twitterTask = require('./twitter-task');
+const TwitterTask = require('./twitter-task');
 
 class CoreLogic {
+  constructor() {
+    this.twitterTask = null;
+  }
+
   async task() {
-    // Write the logic to do the work required for submitting the values and optionally store the result in levelDB
+    // we will work to create a proof that can be submitted to K2 to claim rewards
+    let proof_cid;
 
-    const proof_cid = await twitterTask();
+    // in order for this proof to withstand scrutiny (see validateNode, below, for audit flow) the proof must be generated from a full round of valid work
 
-    const round = await namespaceWrapper.getRound();
-
-    // TEST For only testing purposes:
-    // const round = 1000
+    // the following function starts the crawler if not already started, or otherwise fetches a submission CID for a particular round
+    if ( !this.twitterTask || !this.twitterTask.isRunning ) {
+        this.twitterTask = await new TwitterTask (namespaceWrapper.getRound);
+        console.log('started a new crawler at round', round);
+        proof_cid = null;
+    } else {
+        const cid = await this.twitterTask.getRoundCID(getRound());
+        console.log('got round result', cid);
+        proof_cid = cid;
+    } 
 
     if (proof_cid) {
       await db.setNodeProofCid(round, proof_cid); // store CID in levelDB

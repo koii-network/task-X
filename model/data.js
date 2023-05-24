@@ -65,6 +65,7 @@ class Data {
         keys: true,
         values: true,
       };
+      if (options.roundId) options.lt = `${this.name}:${options.roundId}~`;
     return new Promise((resolve, reject) => {
       let dataStore = [];
       this.db
