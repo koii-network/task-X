@@ -49,11 +49,15 @@ class Twitter extends Adapter {
   negotiateSession = async () => {
     // this.browser = await puppeteer.launch({ headless: false });
 
-    const browserFetcher = await puppeteer.createBrowserFetcher();
-    const revisionInfo = await browserFetcher.download('1120569');
+    const browserFetcher = await puppeteer.createBrowserFetcher({
+      product: 'firefox',
+    });
+    const browserRevision = '115.0a1';
+    let revisionInfo = await browserFetcher.download(browserRevision);
     this.browser = await puppeteer.launch({
-      headless: false, // For testing, set to true for production
       executablePath: revisionInfo.executablePath,
+      product: 'firefox',
+      headless: false, // other options can be included here
     });
 
     console.log('Step: Open new page');
@@ -68,7 +72,7 @@ class Twitter extends Adapter {
     console.log('Step: Go to twitter.com');
     await this.page.goto('https://twitter.com');
     // Wait 1 second before scraping
-    await this.page.waitForTimeout(1000);
+    // await this.page.waitForTimeout(1000);
     console.log('Step: Go to login page');
     await this.page.goto('https://twitter.com/i/flow/login');
     // Wait an additional 5 seconds before scraping
