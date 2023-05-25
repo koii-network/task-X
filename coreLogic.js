@@ -14,6 +14,7 @@ class CoreLogic {
     // in order for this proof to withstand scrutiny (see validateNode, below, for audit flow) the proof must be generated from a full round of valid work
 
     // the following function starts the crawler if not already started, or otherwise fetches a submission CID for a particular round
+    let round = await namespaceWrapper.getRound();
     if ( !this.twitterTask || !this.twitterTask.isRunning ) {
         this.twitterTask = await new TwitterTask (namespaceWrapper.getRound);
         console.log('started a new crawler at round', round);
