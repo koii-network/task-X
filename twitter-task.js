@@ -3,6 +3,7 @@ const db = require('./helpers/db');
 const { Web3Storage } = require('web3.storage');
 const Data = require('./model/data');
 const dotenv = require('dotenv');
+const { default: axios } = require('axios');
 
 dotenv.config();
 
@@ -112,41 +113,35 @@ class TwitterTask {
       });
     });
   }
-  
+
   async validate(proofCid, roundID) {
-    // in order to validate, u need to take the proofCid 
+    // in order to validate, we need to take the proofCid 
     // and go get the results from web3.storage
-    let web3StorageClient = new Web3Storage({ token: process.env.WEB3STORAGE_TOKEN });
 
-    let data = await web3StorageClient.get(  proofCid); // check this
-    console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data);
-
-    let files = await data.files();
-    for (const file of files) {
-      console.log(`${file.cid} -- ${file.path} -- ${file.size}`)
-    }
-    // let storeObject = await this.handleW3SResults(stream);
+    let data = await getJSONFromCID(proofCid); // check this
+    console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data, typeof(data), data[0]);
 
     // the data submitted should be an array of additional CIDs for individual tweets, so we'll try to parse it
-    let cids = JSON.parse(data.body);
+
     let proofThreshold = 4; // an arbitrary number of records to check
 
     for ( let i = 0; i < proofThreshold; i++ ) {
-      let randomIndex = Math.floor(Math.random() * cids.length);
-      let cid = cids[randomIndex];
-      let result = await web3StorageClient.get({ token: process.env.WEB3STORAGE_TOKEN }, cid);
+      let randomIndex = Math.floor(Math.random() * data.length);
+      let item = data[randomIndex];
+      let result = await getJSONFromCID(item.cid);
 
       // then, we need to compare the CID result to the actual result on twitter
       // i.e. 
 
       // need to check if there's an active session and set one if not
+      let twitterCheck;
       if (!this.adapter.checkSession()) {
         await this.adapter.negotiateSession();
-        let twitterCheck = await this.adapter.parseItem(result.id); // update to suit the adapter 
+        twitterCheck = await this.adapter.parseItem(result.id); // update to suit the adapter 
       }
       
       // TODO - revise this check to make sure it handles issues with type conversions
-      if (cid !== twitterCheck) {
+      if (data !== twitterCheck) {
         return false;
       } 
     }
@@ -160,3 +155,21 @@ class TwitterTask {
 } 
 
 module.exports = TwitterTask;
+
+const getJSONFromCID = async (cid) => {
+  return new Promise ((resolve, reject) => {
+    let url = `https://${cid}.ipfs.dweb.link/data.json`
+    console.log('making call to ', url)
+    axios.get(url) 
+      .then((response) => {
+        if (response.status !== 200) {
+          console.log('error', response)
+          reject(response)
+        } else {
+          console.log('response', response)
+          resolve(response.data)
+        }
+      }
+    )
+    })
+}

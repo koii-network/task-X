@@ -13,9 +13,10 @@ const run = async () => {
     twitterTask = await new TwitterTask (async() => {
         return round;
     });
-    console.log('started a new crawler at round', round);
+    console.log('validating at round', round);
 
-    let cid = "bafybeidbeuy3olx5lw44muzho5ndt7xyqtlqilkucousxpdlyepkgaox6u";
+    let cid = "bafybeicnt4zakdwcvnuwryskesj2lxn4h4ndq5y7twy3mntozaj56i2giq";
+    console.log('with CID', cid)
     let output = await twitterTask.validate(cid, round);
     console.log('validated round result', output);
     
