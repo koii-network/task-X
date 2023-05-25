@@ -18,8 +18,6 @@ const run = async () => {
     let cid = "bafybeidbeuy3olx5lw44muzho5ndt7xyqtlqilkucousxpdlyepkgaox6u";
     let output = await twitterTask.validate(cid, round);
     console.log('validated round result', output);
-
-
     
 }
 

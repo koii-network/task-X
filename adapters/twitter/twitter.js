@@ -2,6 +2,7 @@
 const Adapter = require('../../model/adapter');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
+var crypto = require('crypto');
 const { Web3Storage, File } = require('web3.storage');
 const Data = require('../../model/data');
 
@@ -110,13 +111,19 @@ class Twitter extends Adapter {
       let proof_cid = await this.proofs.getItem(round);
       console.log('got proofs item', proof_cid)
       if (proof_cid) {
+        console.log('returning proof cid A', proof_cid)
         return proof_cid;
       } else {
         // we need to upload proofs for that round and then store the cid
-        const data = await this.cids.getProofList()
-        const file = makeFileFromObjectWithName(data, "round:" + round);
+        const data = await this.cids.getList({ round: round })
+        console.log(`got cids list for round ${round}`, data)
+        const file = await makeFileFromObjectWithName(data, "round:" + round);
         const cid = await storeFiles([file]);
-        await this.proofs.addProof(round, cid);
+        await this.proofs.create({
+          round: round, 
+          cid: cid
+        });
+        console.log('returning proof cid B', cid)
         return cid;
       }
     } else {
@@ -166,7 +173,7 @@ class Twitter extends Adapter {
         // console.log(tweet_user);
         
         let newQuery = `https://twitter.com/search?q=${ encodeURIComponent(tweet_user) }%20${ query.searchTerm }&src=typed_query`;
-        //this.toCrawl.push(await this.fetchList(newQuery));
+        if(query.isRecursive) this.toCrawl.push(await this.fetchList(newQuery));
       });
     }
 
@@ -193,19 +200,12 @@ class Twitter extends Adapter {
         var data = await this.parseItem(url, query);
         this.parsed[url] = data;
   
-        // console.log('parsed', this.parsed[url]);
-  
-        //const newLinks = await this.fetchList(url);
-        //console.log(newLinks);
-        let newId = idFromUrl(url, round);
-        // console.log('about to create' , newId, data)
-        await this.db.create({id: newId, data: data});
-        const file = makeFileFromObjectWithName(data, url);
+        const file = await makeFileFromObjectWithName(data, url);
         const cid = await storeFiles([file]);
-        cids.push(cid); // TODO - this must be stored in the database
         this.cids.create({
-          id: round + ":" + url, 
-          cid: cid
+          id: url, 
+          round: round || 0,
+          cid: cid,
         });
         if (query.recursive === true) this.toCrawl = this.toCrawl.concat(newLinks);
       } else {
@@ -306,15 +306,18 @@ module.exports = Twitter;
     return new Web3Storage({ token: getAccessToken() })
   }
 
-  function makeFileFromObjectWithName(obj, name) {
+  async function makeFileFromObjectWithName(obj, name) {
+    console.log('making file from', obj, name)
+    obj.url = name;
     const buffer = Buffer.from(JSON.stringify(obj))
-    return new File([buffer], name)
+    console.log('buffer is', buffer)
+    return new File([buffer], "data.json", { type: "application/json" })
   }
 
   async function storeFiles (files) {
     const client = makeStorageClient()
     const cid = await client.put(files)
-    // console.log('stored files with cid:', cid)
+    console.log('stored files with cid:', cid)
     return cid
   }
 

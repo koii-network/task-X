@@ -74,12 +74,45 @@ class TwitterTask {
   }
 
   async getRoundCID(roundID) {
+    console.log('starting submission prep for ')
     let result = await this.adapter.getSubmissionCID(roundID);
     console.log('returning round CID', result, 'for round', roundID)
     return result;
     
   }
 
+  async handleW3SResults(data) {
+    // need to load the file and then parse it here for json... wow this is so dumb 
+    // Start the download and return a stream
+    console.log('type', typeof data, data)
+    const downloadStream = data;
+
+    // Create a Promise to handle the asynchronous parsing
+    return new Promise((resolve, reject) => {
+      let buffer = '';
+
+      // Handle data events from the download stream
+      downloadStream.on('data', (data) => {
+        buffer += data.toString();
+      });
+
+      // Handle the end event when the download is complete
+      downloadStream.on('end', () => {
+        try {
+          const jsonObject = JSON.parse(buffer);
+          resolve(jsonObject);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      // Handle any errors that occur during the download
+      downloadStream.on('error', (error) => {
+        reject(error);
+      });
+    });
+  }
+  
   async validate(proofCid, roundID) {
     // in order to validate, u need to take the proofCid 
     // and go get the results from web3.storage
@@ -88,7 +121,11 @@ class TwitterTask {
     let data = await web3StorageClient.get(  proofCid); // check this
     console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data);
 
-    let storeObject = await handleW3SResults(data);
+    let files = await data.files();
+    for (const file of files) {
+      console.log(`${file.cid} -- ${file.path} -- ${file.size}`)
+    }
+    // let storeObject = await this.handleW3SResults(stream);
 
     // the data submitted should be an array of additional CIDs for individual tweets, so we'll try to parse it
     let cids = JSON.parse(data.body);
@@ -119,9 +156,6 @@ class TwitterTask {
 
   }
 
-  async handleW3SResults(data) {
-    // need to load the file and then parse it here for json... wow this is so dumb 
-  }
 
 } 
 

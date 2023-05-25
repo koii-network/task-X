@@ -19,7 +19,7 @@ class Data {
     try {
       let itemId = this.createId(item.id);
       // console.log({ itemId, item });
-      await this.db.insert({ itemId, item });
+      await this.db.insert(item);
     } catch (e) {
       console.error(e.key, e.errorType);
       return undefined;
@@ -58,9 +58,21 @@ class Data {
 
   // return items by name
   async getList(options) {
-    const itemListRaw = await this.db.find({ item: { $exists: true } });
-    let itemList = itemListRaw.map(itemList => itemList.item);
-    return itemList;
+    // doesn't support options or rounds yet?
+    let itemListRaw;
+    if (!options) {
+      itemListRaw = await this.db.find({ item: { $exists: true } });
+      
+    } else {
+      if ( options.round ) {
+        console.log('has round', options.round)
+        // itemListRaw = await this.db.find({ item: { $exists: true } });
+        itemListRaw = await this.db.find({ round: { $exists: true }});
+      
+      }
+    }
+    // let itemList = itemListRaw.map(itemList => itemList.item);
+    return itemListRaw;
   }
 
   // create pending item
