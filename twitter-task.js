@@ -137,10 +137,13 @@ class TwitterTask {
       let twitterCheck;
       if (!this.adapter.checkSession()) {
         await this.adapter.negotiateSession();
-        twitterCheck = await this.adapter.parseItem(result.id); // update to suit the adapter 
+        twitterCheck = await this.adapter.parseItem(item.id); // update to suit the adapter 
       }
       
       // TODO - revise this check to make sure it handles issues with type conversions
+      console.log('ipfs', item)
+      console.log('twitterCheck', twitterCheck)
+      console.log('data !== twitterCheck', data !== twitterCheck)
       if (data !== twitterCheck) {
         return false;
       } 

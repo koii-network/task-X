@@ -133,6 +133,9 @@ class Twitter extends Adapter {
 
 
   parseItem = async (url, query) => {
+    if (!this.sessionValid) { 
+      await this.negotiateSession(); 
+    }
     await this.page.setViewport({ width: 1920, height: 10000 });
     console.log("PARSE: " + url, query);
     await this.page.goto(url);

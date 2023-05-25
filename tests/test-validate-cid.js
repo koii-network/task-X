@@ -19,7 +19,7 @@ const run = async () => {
     console.log('with CID', cid)
     let output = await twitterTask.validate(cid, round);
     console.log('validated round result', output);
-    
+    twitterTask.stop();
 }
 
 
