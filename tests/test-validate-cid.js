@@ -17,6 +17,8 @@ const run = async () => {
 
     let cid = "bafybeicnt4zakdwcvnuwryskesj2lxn4h4ndq5y7twy3mntozaj56i2giq";
     console.log('with CID', cid)
+    await twitterTask.setAdapter();
+    // await twitterTask.db.initializeData();
     let output = await twitterTask.validate(cid, round);
     console.log('validated round result', output);
     twitterTask.stop();

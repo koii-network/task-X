@@ -13,7 +13,7 @@ class TwitterTask {
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
     this.searchTerm = 'Web3';
-    this.db = new Data("db"); // now unused
+    // this.db = new Data("db"); // now unused
     this.setAdapter = async ( ) => {
       const username = process.env.TWITTER_USERNAME;
       const password = process.env.TWITTER_PASSWORD;
@@ -26,7 +26,8 @@ class TwitterTask {
           username: username,
           password: password
       }
-      this.adapter = new Twitter(credentials, db, 3);
+      this.adapter = new Twitter(credentials, this.db, 3);
+      await this.adapter.negotiateSession(); 
     }
     
     this.updateRound = async () => {
@@ -44,7 +45,7 @@ class TwitterTask {
   async start () {
     await this.setAdapter();
 
-    await db.intializeData();
+    // await db.initializeData();
 
     this.isRunning = true;
 
@@ -64,7 +65,6 @@ class TwitterTask {
         query : query
     }
     
-    await this.adapter.negotiateSession(); 
     this.adapter.crawl(query); // let it ride
     
   }
@@ -119,7 +119,7 @@ class TwitterTask {
     // and go get the results from web3.storage
 
     let data = await getJSONFromCID(proofCid); // check this
-    console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data, typeof(data), data[0]);
+    // console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data, typeof(data), data[0]);
 
     // the data submitted should be an array of additional CIDs for individual tweets, so we'll try to parse it
 
@@ -135,16 +135,21 @@ class TwitterTask {
 
       // need to check if there's an active session and set one if not
       let twitterCheck;
-      if (!this.adapter.checkSession()) {
-        await this.adapter.negotiateSession();
+      let sessionValid = await this.adapter.checkSession();
+      if (sessionValid) {
+        console.log('about to parse item on twitter', item.id)
         twitterCheck = await this.adapter.parseItem(item.id); // update to suit the adapter 
+      } else {
+        console.error('could not negotiate a twitter session to validate')
       }
       
       // TODO - revise this check to make sure it handles issues with type conversions
       console.log('ipfs', item)
+      let ipfsCheck = await getJSONFromCID(item.cid)
+      console.log('ipfsCheck', ipfsCheck)
       console.log('twitterCheck', twitterCheck)
-      console.log('data !== twitterCheck', data !== twitterCheck)
-      if (data !== twitterCheck) {
+      console.log('data !== twitterCheck', ipfsCheck.content !== twitterCheck.content)
+      if (ipfsCheck.content !== twitterCheck.content) {
         return false;
       } 
     }
@@ -162,14 +167,14 @@ module.exports = TwitterTask;
 const getJSONFromCID = async (cid) => {
   return new Promise ((resolve, reject) => {
     let url = `https://${cid}.ipfs.dweb.link/data.json`
-    console.log('making call to ', url)
+    // console.log('making call to ', url)
     axios.get(url) 
       .then((response) => {
         if (response.status !== 200) {
           console.log('error', response)
           reject(response)
         } else {
-          console.log('response', response)
+          // console.log('response', response)
           resolve(response.data)
         }
       }

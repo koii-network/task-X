@@ -32,6 +32,7 @@ class Twitter extends Adapter {
     this.parsed = {};
     this.lastSessionCheck = null;
     this.sessionValid = false;
+    this.browser = null;
   }
 
   checkSession = async () => {
@@ -43,33 +44,39 @@ class Twitter extends Adapter {
     } else if (Date.now() - this.lastSessionCheck > 60000) {
       await this.negotiateSession();
       return true;
+    } else {
+      return false; 
     }
   };
 
   negotiateSession = async () => {
-    // this.browser = await puppeteer.launch({ headless: false });
+    this.browser = await puppeteer.launch({ 
+      headless: false 
+    });
 
-    const browserFetcher = await puppeteer.createBrowserFetcher({
-      product: 'firefox',
-    });
-    const browserRevision = '115.0a1';
-    let revisionInfo = await browserFetcher.download(browserRevision);
-    this.browser = await puppeteer.launch({
-      executablePath: revisionInfo.executablePath,
-      product: 'firefox',
-      headless: false, // other options can be included here
-    });
+    // const browserFetcher = await puppeteer.createBrowserFetcher({
+    //   product: 'firefox',
+    // });
+    // const browserRevision = '115.0a1';
+    // let revisionInfo = await browserFetcher.download(browserRevision);
+    // this.browser = await puppeteer.launch({
+    //   executablePath: revisionInfo.executablePath,
+    //   product: 'firefox',
+    //   headless: false, // other options can be included here
+    // });
 
     console.log('Step: Open new page');
     this.page = await this.browser.newPage();
+    
     // Enable console logs in the context of the page
-    this.page.on('console', consoleObj => console.log(consoleObj.text()));
+    // this.page.on('console', consoleObj => console.log('cccc', consoleObj.text()));
     await this.page.setViewport({ width: 1920, height: 1000 });
     await this.twitterLogin();
   };
 
   twitterLogin = async () => {
     console.log('Step: Go to twitter.com');
+    console.log('isBrowser?', this.browser, 'isPage?', this.page);
     await this.page.goto('https://twitter.com');
     // Wait 1 second before scraping
     // await this.page.waitForTimeout(1000);
@@ -120,6 +127,7 @@ class Twitter extends Adapter {
     this.lastSessionCheck = Date.now();
 
     console.log('Step: Login successful');
+
   };
 
   getSubmissionCID = async round => {
@@ -251,7 +259,7 @@ class Twitter extends Adapter {
     // Go to the hashtag page
     await this.page.waitForTimeout(1000);
     await this.page.setViewport({ width: 1920, height: 10000 });
-    await this.page.goto(url);
+    await this.page.goto(url, );
 
     // Wait an additional 5 seconds until fully loaded before scraping
     await this.page.waitForTimeout(5000);
