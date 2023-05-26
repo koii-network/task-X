@@ -51,7 +51,7 @@ class Twitter extends Adapter {
 
   negotiateSession = async () => {
     this.browser = await puppeteer.launch({ 
-      headless: false 
+      headless: true 
     });
 
     // const browserFetcher = await puppeteer.createBrowserFetcher({

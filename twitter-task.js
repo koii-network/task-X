@@ -57,6 +57,7 @@ class TwitterTask {
       updateRound: async () => {
         return this.updateRound()
       },
+      recursive: true,
       round: this.round
     }
   

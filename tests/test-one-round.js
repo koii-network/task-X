@@ -6,7 +6,7 @@ const { TweetUserMentionTimelineV2Paginator } = require('twitter-api-v2');
 // warning, this doesn't really work that well, but it's a start
 
 const run = async () => {
-    let delay = 4500000;
+    let delay = 60000;
     var twitterTask = null;
     let round = 1;
 
