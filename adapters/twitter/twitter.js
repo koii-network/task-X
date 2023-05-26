@@ -135,7 +135,7 @@ class Twitter extends Adapter {
   getSubmissionCID = async round => {
     if (this.proofs) {
       // check if the cid has already been stored
-      let proof_cid = await this.proofs.getItem(round);
+      let proof_cid = await this.proofs.getItem(round); // TODO - this is always going to fail 
       console.log('got proofs item', proof_cid);
       if (proof_cid) {
         console.log('returning proof cid A', proof_cid);
@@ -147,9 +147,9 @@ class Twitter extends Adapter {
         const file = await makeFileFromObjectWithName(data, 'round:' + round);
         const cid = await storeFiles([file]);
         await this.proofs.create({
-          round: round,
-          cid: cid,
-        });
+          proof_round: round,
+          proof_cid: cid,
+        }); // TODO - add better ID structure here
         console.log('returning proof cid B', cid);
         return cid;
       }
@@ -344,7 +344,7 @@ function makeStorageClient() {
 }
 
 async function makeFileFromObjectWithName(obj, name) {
-  console.log('making file from', obj, name);
+  console.log('making file from', typeof(obj), obj.length, name);
   obj.url = name;
   const buffer = Buffer.from(JSON.stringify(obj));
   console.log('buffer is', buffer);

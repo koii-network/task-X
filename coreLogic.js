@@ -81,7 +81,7 @@ class CoreLogic {
           // now we need to parse the value submitted and decide how much to pay
           let cid = values[i].submission_value;
           console.log(`about to fetch ${cid} from IPFS`)
-          let ipfs_object = Web3Storage.get({ token: process.env.WEB3STORAGE_TOKEN }, cid);
+          let ipfs_object = this.twitterTask.getJSONofCID(cid);
           if (ipfs_object == null) {
             distributionList[candidatePublicKey] = 0;
           } else {

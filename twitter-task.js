@@ -61,11 +61,6 @@ class TwitterTask {
       round: this.round
     }
   
-    let options = { // TODO - unused?
-        maxRetry : 3, 
-        query : query
-    }
-    
     this.adapter.crawl(query); // let it ride
     
   }
@@ -83,39 +78,11 @@ class TwitterTask {
     
   }
 
-  async handleW3SResults(data) {
-    // need to load the file and then parse it here for json... wow this is so dumb 
-    // Start the download and return a stream
-    console.log('type', typeof data, data)
-    const downloadStream = data;
-
-    // Create a Promise to handle the asynchronous parsing
-    return new Promise((resolve, reject) => {
-      let buffer = '';
-
-      // Handle data events from the download stream
-      downloadStream.on('data', (data) => {
-        buffer += data.toString();
-      });
-
-      // Handle the end event when the download is complete
-      downloadStream.on('end', () => {
-        try {
-          const jsonObject = JSON.parse(buffer);
-          resolve(jsonObject);
-        } catch (error) {
-          reject(error);
-        }
-      });
-
-      // Handle any errors that occur during the download
-      downloadStream.on('error', (error) => {
-        reject(error);
-      });
-    });
+  async getJSONofCID (cid) {
+    return await getJSONFromCID(cid)
   }
 
-  async validate(proofCid, roundID) {
+  async validate(proofCid) {
     // in order to validate, we need to take the proofCid 
     // and go get the results from web3.storage
 
@@ -133,27 +100,34 @@ class TwitterTask {
 
       // then, we need to compare the CID result to the actual result on twitter
       // i.e. 
+      console.log('item was', item)
 
       // need to check if there's an active session and set one if not
       let twitterCheck;
       let sessionValid = await this.adapter.checkSession();
-      if (sessionValid) {
-        console.log('about to parse item on twitter', item.id)
-        twitterCheck = await this.adapter.parseItem(item.id); // update to suit the adapter 
-      } else {
-        console.error('could not negotiate a twitter session to validate')
-      }
-      
-      // TODO - revise this check to make sure it handles issues with type conversions
-      console.log('ipfs', item)
-      let ipfsCheck = await getJSONFromCID(item.cid)
-      console.log('ipfsCheck', ipfsCheck)
-      console.log('twitterCheck', twitterCheck)
-      console.log('data !== twitterCheck', ipfsCheck.content !== twitterCheck.content)
-      if (ipfsCheck.content !== twitterCheck.content) {
+      if (item.id) {
+        if (sessionValid ) {
+          console.log('about to parse item on twitter', item.id)
+          twitterCheck = await this.adapter.parseItem(item.id); // update to suit the adapter 
+        } else {
+          console.error('could not negotiate a twitter session to validate')
+        }
+        
+        // TODO - revise this check to make sure it handles issues with type conversions
+        console.log('ipfs', item)
+        let ipfsCheck = await this.getJSONofCID(item.cid)
+        console.log('ipfsCheck', ipfsCheck)
+        console.log('twitterCheck', twitterCheck)
+        console.log('data !== twitterCheck', ipfsCheck.content !== twitterCheck.content)
+        if (ipfsCheck.content !== twitterCheck.content) {
+          return false;
+        } 
+      } else { 
+        console.log('invalid item id', item.id)
         return false;
-      } 
+      }
     }
+
     
     // if none of the random checks fail, return true
     return true

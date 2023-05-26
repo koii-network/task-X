@@ -1,7 +1,6 @@
 const dotenv = require('dotenv');
 require('dotenv').config();
 const TwitterTask = require('../twitter-task');
-const { TweetUserMentionTimelineV2Paginator } = require('twitter-api-v2');
 
 // warning, this doesn't really work that well, but it's a start
 
@@ -23,9 +22,10 @@ const run = async () => {
         console.log('got round result', proof_cid);
         let output = await twitterTask.validate(proof_cid, round);
         console.log('validated round result', output);
+
+
     }, delay)
 
-    
 }
 
 

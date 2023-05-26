@@ -43,6 +43,7 @@ class Data {
   // returns item by id
   async getItem(item) {
     let itemId = this.createId(item);
+    console.log('trying to retrieve with ID', itemId);
     try {
       const resp = await this.db.findOne({ itemId });
       if (resp) {
