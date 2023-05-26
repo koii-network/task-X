@@ -1,6 +1,7 @@
 // Import required modules
 const Adapter = require('../../model/adapter');
-const puppeteer = require('puppeteer');
+//const puppeteer = require('puppeteer');
+const PCR = require("puppeteer-chromium-resolver");
 const cheerio = require('cheerio');
 var crypto = require('crypto');
 const { Web3Storage, File } = require('web3.storage');
@@ -50,20 +51,23 @@ class Twitter extends Adapter {
   };
 
   negotiateSession = async () => {
-    this.browser = await puppeteer.launch({ 
-      headless: true 
-    });
+    const options = {};
+    const stats = await PCR(options);
 
     // const browserFetcher = await puppeteer.createBrowserFetcher({
-    //   product: 'firefox',
+    //   product: 'chrome',
     // });
-    // const browserRevision = '115.0a1';
+    // const browserRevision = '533271';
     // let revisionInfo = await browserFetcher.download(browserRevision);
     // this.browser = await puppeteer.launch({
     //   executablePath: revisionInfo.executablePath,
-    //   product: 'firefox',
     //   headless: false, // other options can be included here
     // });
+
+    this.browser = await stats.puppeteer.launch({ 
+      headless: false,
+      executablePath: stats.executablePath 
+    });
 
     console.log('Step: Open new page');
     this.page = await this.browser.newPage();
@@ -244,8 +248,11 @@ class Twitter extends Adapter {
           round: round || 0,
           cid: cid,
         });
-        if (query.recursive === true)
+        
+        if (query.recursive === true) {
+          const newLinks = await this.fetchList(url);
           this.toCrawl = this.toCrawl.concat(newLinks);
+        }
       } else {
         // console.log('no url', url)
       }
