@@ -1,6 +1,6 @@
 // Import required modules
 const Adapter = require('../../model/adapter');
-//const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer');
 const PCR = require("puppeteer-chromium-resolver");
 const cheerio = require('cheerio');
 var crypto = require('crypto');
@@ -54,18 +54,16 @@ class Twitter extends Adapter {
     const options = {};
     const stats = await PCR(options);
 
-    // const browserFetcher = await puppeteer.createBrowserFetcher({
-    //   product: 'chrome',
-    // });
-    // const browserRevision = '533271';
+    // const browserFetcher = await puppeteer.createBrowserFetcher();
+    // const browserRevision = '1000022';
     // let revisionInfo = await browserFetcher.download(browserRevision);
-    // this.browser = await puppeteer.launch({
+    // this.browser = await stats.puppeteer.launch({
     //   executablePath: revisionInfo.executablePath,
-    //   headless: false, // other options can be included here
+    //   headless: 'new', // other options can be included here
     // });
 
     this.browser = await stats.puppeteer.launch({ 
-      headless: false,
+      headless: 'new',
       executablePath: stats.executablePath 
     });
 

@@ -1,8 +1,8 @@
 #Provide the taskId if you are updating the task
-task_id: ''
+task_id: 'AS9Wdw2iNC71jVA41MSyEYkSFzGaPCGE6TofbiioxDq9'
 # Name and desciption of your task
-task_name: 'Twitter-Scraping-test'
-task_description: 'Twitter-Scraping-test'
+task_name: 'Twitter-Scraping'
+task_description: 'Twitter-Scraping'
 
 # network value can be DEVELOPMENT , ARWEAVE or IPFS
 task_executable_network: 'IPFS'
@@ -11,10 +11,10 @@ task_executable_network: 'IPFS'
 secret_web3_storage_key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGY0ODYxMzAzOTdDNTY1QzlDYTRCOTUzZTA2RWQ4NUI4MGRBQzRkYTIiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NjYzNjU1OTk5MDMsIm5hbWUiOiJTb21hIn0.TU-KUFS9vjI9blN5dx6VsLLuIjJnpjPrxDHBvjXQUxw'
 
 # Path to your executable webpack if the selected network is IPFS otherwise leave blank
-task_audit_program: 'main.js'
+task_audit_program: 'dist/main.js'
 
 # Provide your transaction ID in case of ARWEAVE and in case of DEVELOPMENT give your executable name as main otherwise leave blank
-task_audit_program_id: 'main.js'
+task_audit_program_id: ''
 
 # Total round time of your task : it must be given in slots and each slot is rougly equal to 4ms
 round_time: 600
@@ -28,7 +28,7 @@ minimum_stake_amount: 5
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 200
+total_bounty_amount: 10
 
 bounty_amount_per_round: 1
 
@@ -41,8 +41,8 @@ space: 5
 # Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
 # To add more global variables and task variables, please refer the type,value,description format shown below
 
-author: 'Al'
-description: 'Twitter-Scraping-test'
+author: 'author'
+description: 'Twitter-Scraping'
 repositoryUrl: 'Github/gitlab link'
 imageUrl: 'Enter you image URL'
 requirementsTags:
