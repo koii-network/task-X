@@ -8,8 +8,8 @@ const { default: axios } = require('axios');
 dotenv.config();
 
 class TwitterTask {
-  constructor (getRound) {
-    this.round = getRound();
+  constructor (getRound, round) {
+    this.round = round;
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
     this.searchTerm = 'Web3';

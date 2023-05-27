@@ -144,17 +144,20 @@ class Twitter extends Adapter {
         // we need to upload proofs for that round and then store the cid
         const data = await this.cids.getList({ round: round });
         console.log(`got cids list for round ${round}`, data);
-        if (data || data.length === 0) {
+        if (data && data.length === 0) {
           throw new Error('No cids found for round ' + round);
+          return null;
+        } else {
+          const file = await makeFileFromObjectWithName(data, 'round:' + round);
+          const cid = await storeFiles([file]);
+          await this.proofs.create({
+            id : "proof:" + round,
+            proof_round: round,
+            proof_cid: cid,
+          }); // TODO - add better ID structure here
+          console.log('returning proof cid B', cid);
+          return cid;
         }
-        const file = await makeFileFromObjectWithName(data, 'round:' + round);
-        const cid = await storeFiles([file]);
-        await this.proofs.create({
-          proof_round: round,
-          proof_cid: cid,
-        }); // TODO - add better ID structure here
-        console.log('returning proof cid B', cid);
-        return cid;
       }
     } else {
       throw new Error('No proofs database provided');

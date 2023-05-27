@@ -18,7 +18,7 @@ class CoreLogic {
     let round = await namespaceWrapper.getRound();
     if ( !this.twitterTask || !this.twitterTask.isRunning ) {
       try {
-        this.twitterTask = await new TwitterTask (namespaceWrapper.getRound);
+        this.twitterTask = await new TwitterTask (namespaceWrapper.getRound, round);
         console.log('started a new crawler at round', round);
       } catch (e) {
         console.log('error starting crawler', e);
@@ -37,12 +37,14 @@ class CoreLogic {
     console.log('IN FETCH SUBMISSION');
 
     // The code below shows how you can fetch your stored value from level DB
-    let round = namespaceWrapper.getRound() 
+    let round = await namespaceWrapper.getRound() 
+    console.log('the round is', round)
     let lastRound = round - 1;
     if ( lastRound < 0 ) lastRound = 0;
     const cid = await this.twitterTask.getRoundCID(lastRound);
     console.log('about to make submission with CID: ', cid);
     return cid;
+
   }
 
   async generateDistributionList(round, _dummyTaskState) {

@@ -1,8 +1,8 @@
 #Provide the taskId if you are updating the task
-task_id: 'AjqVTE19yfY3weU7Awr4uZmfmLfM2VDJqw3jXdp1gMuu'
+task_id: '7L9dCqArV6d8RgWhC8T3to4JmQeaczwQeSyawf5sVXU2'
 # Name and desciption of your task
-task_name: 'Twitter-Scraping'
-task_description: 'Twitter-Scraping'
+task_name: 'Twitter Crawler'
+task_description: 'Crawls for all tweets with #koii and stores them on IPFS.'
 
 # network value can be DEVELOPMENT , ARWEAVE or IPFS
 task_executable_network: 'IPFS'
