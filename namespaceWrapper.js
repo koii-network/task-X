@@ -38,6 +38,7 @@ class NamespaceWrapper {
    */
   async storeGet(key) {
     try {
+      await this.initializeDB();
       const resp = await this.#db.findOne({ key: key });
       if (resp) {
         return resp[key];
@@ -56,8 +57,8 @@ class NamespaceWrapper {
    */
   async storeSet(key, value) {
     try {
-      console.log({ [key]: value, key });
-      await this.#db.insert({ [key]: value, key });
+      await this.initializeDB();
+      await this.#db.update({ key: key }, { [key]: value, key }, { upsert: true })
     } catch (e) {
       console.error(e);
       return undefined;

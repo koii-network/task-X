@@ -7,7 +7,7 @@ const TwitterTask = require('../twitter-task');
 const run = async () => {
     let delay = 60000;
     var twitterTask = null;
-    let round = 2;
+    let round = 4;
 
     twitterTask = await new TwitterTask (async() => {
         return round;
@@ -18,7 +18,7 @@ const run = async () => {
     setTimeout(async ()  =>   {
         console.log('stopping crawler at round', round)
         twitterTask.stop(); // unclear whether stop works
-        let proof_cid = await twitterTask.getRoundCID(round);
+        let proof_cid = await twitterTask.getRoundCID(round-1);
         console.log('got round result', proof_cid);
         let output = await twitterTask.validate(proof_cid, round);
         console.log('validated round result', output);

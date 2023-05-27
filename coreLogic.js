@@ -17,9 +17,15 @@ class CoreLogic {
     // the following function starts the crawler if not already started, or otherwise fetches a submission CID for a particular round
     let round = await namespaceWrapper.getRound();
     if ( !this.twitterTask || !this.twitterTask.isRunning ) {
+      try {
         this.twitterTask = await new TwitterTask (namespaceWrapper.getRound);
         console.log('started a new crawler at round', round);
+      } catch (e) {
+        console.log('error starting crawler', e);
+      }
+    
     } else {
+      console.log('crawler already running at round', round);
     } 
   }
 

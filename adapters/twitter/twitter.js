@@ -141,12 +141,12 @@ class Twitter extends Adapter {
         console.log('returning proof cid A', proof_cid);
         return proof_cid;
       } else {
-        if (!round) round = 0;
-        let roundish = round - 1;
-        if ( roundish < 1 ) roundish = 0;
         // we need to upload proofs for that round and then store the cid
-        const data = await this.cids.getList({ round: roundish });
+        const data = await this.cids.getList({ round: round });
         console.log(`got cids list for round ${round}`, data);
+        if (data || data.length === 0) {
+          throw new Error('No cids found for round ' + round);
+        }
         const file = await makeFileFromObjectWithName(data, 'round:' + round);
         const cid = await storeFiles([file]);
         await this.proofs.create({
