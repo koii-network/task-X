@@ -141,8 +141,11 @@ class Twitter extends Adapter {
         console.log('returning proof cid A', proof_cid);
         return proof_cid;
       } else {
+        if (!round) round = 0;
+        let roundish = round - 1;
+        if ( roundish < 1 ) roundish = 0;
         // we need to upload proofs for that round and then store the cid
-        const data = await this.cids.getList({ round: round });
+        const data = await this.cids.getList({ round: roundish });
         console.log(`got cids list for round ${round}`, data);
         const file = await makeFileFromObjectWithName(data, 'round:' + round);
         const cid = await storeFiles([file]);
@@ -344,7 +347,7 @@ function makeStorageClient() {
 }
 
 async function makeFileFromObjectWithName(obj, name) {
-  console.log('making file from', typeof(obj), obj.length, name);
+  console.log('making file from', typeof(obj), name);
   obj.url = name;
   const buffer = Buffer.from(JSON.stringify(obj));
   console.log('buffer is', buffer);

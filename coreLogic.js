@@ -1,6 +1,7 @@
-const { Web3Storage } = require('web3.storage');
 const { namespaceWrapper } = require('./namespaceWrapper');
 const TwitterTask = require('./twitter-task');
+const { LAMPORTS_PER_SOL } = require("@_koi/web3.js");
+
 
 class CoreLogic {
   constructor() {
@@ -30,8 +31,10 @@ class CoreLogic {
     console.log('IN FETCH SUBMISSION');
 
     // The code below shows how you can fetch your stored value from level DB
-
-    const cid = await this.twitterTask.getRoundCID(namespaceWrapper.getRound());
+    let round = namespaceWrapper.getRound() 
+    let lastRound = round - 1;
+    if ( lastRound < 0 ) lastRound = 0;
+    const cid = await this.twitterTask.getRoundCID(lastRound);
     console.log('about to make submission with CID: ', cid);
     return cid;
   }
@@ -81,14 +84,16 @@ class CoreLogic {
           // now we need to parse the value submitted and decide how much to pay
           let cid = values[i].submission_value;
           console.log(`about to fetch ${cid} from IPFS`)
-          let ipfs_object = this.twitterTask.getJSONofCID(cid);
-          if (ipfs_object == null) {
-            distributionList[candidatePublicKey] = 0;
-          } else {
-            if (ipfs_object.length == null || ipfs_object.length < 1) ipfs_object.length = 1;
-            let score = ipfs_object.length * 0.1; // multiply total records submitted by value per record (0.1 KOII)
-            distributionList[candidatePublicKey] = score;
-          }
+          // let ipfs_object = this.twitterTask.getJSONofCID(cid);
+          // if (ipfs_object == null || !ipfs_object) {
+          //   distributionList[candidatePublicKey] = 0;
+          // } else {
+          //   if (ipfs_object.length == null || ipfs_object.length < 1) ipfs_object.length = 1;
+          //   let score = ipfs_object.length * 0.1; // multiply total records submitted by value per record (0.1 KOII)
+          //   distributionList[candidatePublicKey] = score;
+          // }
+
+          distributionList[candidatePublicKey] = 1 * LAMPORTS_PER_SOL;
         }
       }
       console.log('Distribution List', distributionList);
@@ -148,40 +153,40 @@ class CoreLogic {
   ) => {
     // Write your logic for the validation of submission value here and return a boolean value in response
     // this logic can be same as generation of distribution list function and based on the comparision will final object , decision can be made
+    return true;
+    // try {
+    //   console.log('Distribution list Submitter', distributionListSubmitter);
+    //   const rawDistributionList = await namespaceWrapper.getDistributionList(
+    //     distributionListSubmitter,
+    //     round,
+    //   );
+    //   let fetchedDistributionList;
+    //   if (rawDistributionList == null) {
+    //     fetchedDistributionList = _dummyDistributionList;
+    //   } else {
+    //     fetchedDistributionList = JSON.parse(rawDistributionList);
+    //   }
+    //   console.log('FETCHED DISTRIBUTION LIST', fetchedDistributionList);
+    //   const generateDistributionList = await this.generateDistributionList(
+    //     round,
+    //     _dummyTaskState,
+    //   );
 
-    try {
-      console.log('Distribution list Submitter', distributionListSubmitter);
-      const rawDistributionList = await namespaceWrapper.getDistributionList(
-        distributionListSubmitter,
-        round,
-      );
-      let fetchedDistributionList;
-      if (rawDistributionList == null) {
-        fetchedDistributionList = _dummyDistributionList;
-      } else {
-        fetchedDistributionList = JSON.parse(rawDistributionList);
-      }
-      console.log('FETCHED DISTRIBUTION LIST', fetchedDistributionList);
-      const generateDistributionList = await this.generateDistributionList(
-        round,
-        _dummyTaskState,
-      );
+    //   // compare distribution list
 
-      // compare distribution list
-
-      const parsed = fetchedDistributionList;
-      console.log(
-        'compare distribution list',
-        parsed,
-        generateDistributionList,
-      );
-      const result = await this.shallowEqual(parsed, generateDistributionList);
-      console.log('RESULT', result);
-      return result;
-    } catch (err) {
-      console.log('ERROR IN VALIDATING DISTRIBUTION', err);
-      return false;
-    }
+    //   const parsed = fetchedDistributionList;
+    //   console.log(
+    //     'compare distribution list',
+    //     parsed,
+    //     generateDistributionList,
+    //   );
+    //   const result = await this.shallowEqual(parsed, generateDistributionList);
+    //   console.log('RESULT', result);
+    //   return result;
+    // } catch (err) {
+    //   console.log('ERROR IN VALIDATING DISTRIBUTION', err);
+    //   return false;
+    // }
   };
   // Submit Address with distributioon list to K2
   async submitTask(roundNumber) {

@@ -68,7 +68,7 @@ class Data {
       if ( options.round ) {
         console.log('has round', options.round)
         // itemListRaw = await this.db.find({ item: { $exists: true } });
-        itemListRaw = await this.db.find({ round: { $exists: true }});
+        itemListRaw = await this.db.find({ round: options.round });
       
       }
     }

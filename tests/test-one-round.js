@@ -7,7 +7,7 @@ const TwitterTask = require('../twitter-task');
 const run = async () => {
     let delay = 60000;
     var twitterTask = null;
-    let round = 1;
+    let round = 2;
 
     twitterTask = await new TwitterTask (async() => {
         return round;
