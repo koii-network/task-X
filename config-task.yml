@@ -8,7 +8,7 @@ task_description: 'Crawls for all tweets with #koii and stores them on IPFS.'
 task_executable_network: 'IPFS'
 
 # Provide your web3.storage key as it is needed for uploading your metadata
-secret_web3_storage_key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGY0ODYxMzAzOTdDNTY1QzlDYTRCOTUzZTA2RWQ4NUI4MGRBQzRkYTIiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NjYzNjU1OTk5MDMsIm5hbWUiOiJTb21hIn0.TU-KUFS9vjI9blN5dx6VsLLuIjJnpjPrxDHBvjXQUxw'
+secret_web3_storage_key: ''
 
 # Path to your executable webpack if the selected network is IPFS otherwise leave blank
 task_audit_program: 'dist/main.js'

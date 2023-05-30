@@ -1,3 +1,0 @@
-$ node index.js
-SETTING UP EXPRESS
-Local listening on port 10000

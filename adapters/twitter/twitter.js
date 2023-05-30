@@ -7,17 +7,13 @@ var crypto = require('crypto');
 const { Web3Storage, File } = require('web3.storage');
 const Data = require('../../model/data');
 
-function getAccessToken() {
-  // If you're just testing, you can paste in a token
-  // and uncomment the following line:
-  // return 'paste-your-token-here'
-
-  // In a real app, it's better to read an access token from an
-  // environement variable or other configuration that's kept outside of
-  // your code base. For this to work, you need to set the
-  // WEB3STORAGE_TOKEN environment variable before you run your code.
-  return process.env.WEB3STORAGE_TOKEN;
-}
+/**
+ * Twitter
+ * @class
+ * @extends Adapter
+ * @description
+ * Provides a crawler interface for the data gatherer nodes to use to interact with twitter
+ */
 
 class Twitter extends Adapter {
   constructor(credentials, db, maxRetry) {
@@ -36,10 +32,16 @@ class Twitter extends Adapter {
     this.browser = null;
   }
 
+  /**
+   * checkSession
+   * @returns {Promise<boolean>}
+   * @description
+   * 1. Check if the session is still valid 
+   * 2. If the session is still valid, return true
+   * 3. If the session is not valid, check if the last session check was more than 1 minute ago
+   * 4. If the last session check was more than 1 minute ago, negotiate a new session
+   */
   checkSession = async () => {
-    // this function should check if a session is still valid, and negotiate a new session if not
-    // we should only negotiate a new session if the last session is more than 1 minute old, or return an error
-    // if the session is still valid, return true
     if (this.sessionValid) {
       return true;
     } else if (Date.now() - this.lastSessionCheck > 60000) {
@@ -50,17 +52,19 @@ class Twitter extends Adapter {
     }
   };
 
+  /** 
+   * negotiateSession
+   * @returns {Promise<void>}
+   * @description
+   * 1. Get the path to the Chromium executable
+   * 2. Launch a new browser instance
+   * 3. Open a new page
+   * 4. Set the viewport size
+   * 5. Queue twitterLogin()
+   */
   negotiateSession = async () => {
     const options = {};
     const stats = await PCR(options);
-
-    // const browserFetcher = await puppeteer.createBrowserFetcher();
-    // const browserRevision = '1000022';
-    // let revisionInfo = await browserFetcher.download(browserRevision);
-    // this.browser = await stats.puppeteer.launch({
-    //   executablePath: revisionInfo.executablePath,
-    //   headless: 'new', // other options can be included here
-    // });
 
     this.browser = await stats.puppeteer.launch({ 
       headless: 'new',
@@ -70,26 +74,39 @@ class Twitter extends Adapter {
     console.log('Step: Open new page');
     this.page = await this.browser.newPage();
     
-    // Enable console logs in the context of the page
-    // this.page.on('console', consoleObj => console.log('cccc', consoleObj.text()));
+    // TODO - Enable console logs in the context of the page and export them for diagnostics here
     await this.page.setViewport({ width: 1920, height: 1000 });
     await this.twitterLogin();
+
+    return true;
   };
 
+  /**
+   * twitterLogin
+   * @returns {Promise<void>}
+   * @description
+   * 1. Go to twitter.com
+   * 2. Go to login page
+   * 3. Fill in username
+   * 4. Fill in password
+   * 5. Click login
+   * 6. Wait for login to complete
+   * 7. Check if login was successful
+   * 8. If login was successful, return true
+   * 9. If login was unsuccessful, return false
+   * 10. If login was unsuccessful, try again
+   */
   twitterLogin = async () => {
     console.log('Step: Go to twitter.com');
-    console.log('isBrowser?', this.browser, 'isPage?', this.page);
+    // console.log('isBrowser?', this.browser, 'isPage?', this.page);
     await this.page.goto('https://twitter.com');
-    // Wait 1 second before scraping
-    // await this.page.waitForTimeout(1000);
+    
     console.log('Step: Go to login page');
     await this.page.goto('https://twitter.com/i/flow/login');
-    // Wait an additional 5 seconds before scraping
-    // await this.page.waitForTimeout(5000);
-
+    
     console.log('Step: Fill in username');
-
     console.log(this.credentials.username);
+
     await this.page.waitForSelector('input[autocomplete="username"]');
     await this.page.type(
       'input[autocomplete="username"]',
@@ -114,49 +131,65 @@ class Twitter extends Adapter {
     }
 
     console.log('Step: Fill in password');
-
     await this.page.waitForSelector('input[name="password"]');
     await this.page.type('input[name="password"]', this.credentials.password);
     await this.page.keyboard.press('Enter');
 
+    // TODO - catch unsuccessful login and retry up to query.maxRetry 
     console.log('Step: Click login button');
-
     this.page.waitForNavigation({ waitUntil: 'load' });
     await this.page.waitForTimeout(1000);
-    // TODO - add case for failed login handling here (e.g. wrong password) - DO NOT set following session params if failed
 
     this.sessionValid = true;
     this.lastSessionCheck = Date.now();
 
     console.log('Step: Login successful');
 
+    return true;
   };
 
+  /**
+   * getSubmissionCID
+   * @param {string} round - the round to get the submission cid for
+   * @returns {string} - the cid of the submission
+   * @description - this function should return the cid of the submission for the given round
+   * if the submission has not been uploaded yet, it should upload it and return the cid
+   */
   getSubmissionCID = async round => {
     if (this.proofs) {
       // check if the cid has already been stored
-      let proof_cid = await this.proofs.getItem(round); // TODO - this is always going to fail 
+      let proof_cid = await this.proofs.getItem(round);
       console.log('got proofs item', proof_cid);
       if (proof_cid) {
+
         console.log('returning proof cid A', proof_cid);
         return proof_cid;
+
       } else {
+
         // we need to upload proofs for that round and then store the cid
         const data = await this.cids.getList({ round: round });
         console.log(`got cids list for round ${round}`, data);
+
         if (data && data.length === 0) {
+
           throw new Error('No cids found for round ' + round);
           return null;
+
         } else {
+
           const file = await makeFileFromObjectWithName(data, 'round:' + round);
           const cid = await storeFiles([file]);
+
           await this.proofs.create({
             id : "proof:" + round,
             proof_round: round,
             proof_cid: cid,
           }); // TODO - add better ID structure here
+
           console.log('returning proof cid B', cid);
           return cid;
+
         }
       }
     } else {
@@ -164,11 +197,22 @@ class Twitter extends Adapter {
     }
   };
 
+  /**
+   * parseItem
+   * @param {string} url - the url of the item to parse
+   * @param {object} query - the query object to use for parsing
+   * @returns {object} - the parsed item
+   * @description - this function should parse the item at the given url and return the parsed item data 
+   *               according to the query object and for use in either crawl() or validate()
+   */
   parseItem = async (url, query) => {
+
     if (!this.sessionValid) {
       await this.negotiateSession();
     }
+
     await this.page.setViewport({ width: 1920, height: 10000 });
+
     console.log('PARSE: ' + url, query);
     await this.page.goto(url);
     await this.page.waitForTimeout(2000);
@@ -204,11 +248,9 @@ class Twitter extends Adapter {
     // TODO  - queue users to be crawled?
 
     if (query) {
+      // get the comments and other attached tweet items and queue them
       articles.slice(1).forEach(async el => {
         const tweet_user = $(el).find('a[tabindex="-1"]').text();
-        // console.log("GETTING COMMENTS");
-        // console.log(tweet_user);
-
         let newQuery = `https://twitter.com/search?q=${encodeURIComponent(
           tweet_user,
         )}%20${query.searchTerm}&src=typed_query`;
@@ -220,27 +262,28 @@ class Twitter extends Adapter {
     return data;
   };
 
-  // parse all the comments
-  // then queue the
-
+  /**
+   * crawl
+   * @param {string} query
+   * @returns {Promise<string[]>}
+   * @description Crawls the queue of known links
+   */
   crawl = async query => {
     this.toCrawl = await this.fetchList(query.query);
     console.log('round is', query.round, query.updateRound);
     console.log(`about to crawl ${this.toCrawl.length} items`);
-    this.parsed = []; // adding this to get it to start the while loop
-    let cids = [];
+    this.parsed = []; 
+
     console.log(
       'test',
       this.parsed.length < query.limit,
       this.parsed.length,
       query.limit,
     );
+
     while (this.parsed.length < query.limit && !this.break) {
-      // console.log('entered while loop')
       let round = await query.updateRound();
-      // console.log('round is ', round)
       const url = this.toCrawl.shift();
-      // console.log(`about to crawl ${url}`)
       if (url) {
         var data = await this.parseItem(url, query);
         this.parsed[url] = data;
@@ -257,13 +300,16 @@ class Twitter extends Adapter {
           const newLinks = await this.fetchList(url);
           this.toCrawl = this.toCrawl.concat(newLinks);
         }
-      } else {
-        // console.log('no url', url)
-      }
+      } 
     }
-    // return cids; // no need to return these here
   };
 
+  /**
+   * fetchList
+   * @param {string} url
+   * @returns {Promise<string[]>}
+   * @description Fetches a list of links from a given url
+   */
   fetchList = async url => {
     console.log('fetching list for ', url);
 
@@ -274,10 +320,8 @@ class Twitter extends Adapter {
 
     // Wait an additional 5 seconds until fully loaded before scraping
     await this.page.waitForTimeout(5000);
+    
     // Scrape the tweets
-
-    let scrapingData = {};
-
     const html = await this.page.content();
     const $ = cheerio.load(html);
 
@@ -303,48 +347,36 @@ class Twitter extends Adapter {
     });
 
     return uniqueLinks;
-
-    // $('div[data-testid="cellInnerDiv"]').each((i, el) => {
-    //   const tweet_text = $(el).find('div[data-testid="tweetText"]').text();
-    //   const tweet_user = $(el).find('a[tabindex="-1"]').text();
-    //   const tweet_record = $(el).find('span[data-testid="app-text-transition-container"]');
-    //   const commentCount = tweet_record.eq(0).text();
-    //   const likeCount = tweet_record.eq(1).text();
-    //   const shareCount = tweet_record.eq(2).text();
-    //   const viewCount = tweet_record.eq(3).text();
-    //   if (tweet_user && tweet_text) {
-    //     scrapingData[i] = {
-    //         user: tweet_user,
-    //         content: tweet_text.replace(/\n/g, '<br>'),
-    //         comment: commentCount,
-    //         like: likeCount,
-    //         share: shareCount,
-    //         view: viewCount,
-    //     };
-    //   }
-    // });
-    // return scrapingData;
   };
 
+  /**
+   * processLinks
+   * @param {string[]} links
+   * @returns {Promise<void>}
+   * @description Processes a list of links
+   * @todo Implement this function 
+   * @todo Implement a way to queue links
+   */
   processLinks = async links => {
     links.forEach(link => {});
   };
 
-  checkSession = async () => {
-    return true;
-  };
-
+  /**
+   * stop
+   * @returns {Promise<boolean>}
+   * @description Stops the crawler
+   */
   stop = async () => {
     return (this.break = true);
   };
-
-  newSearch = async query => {};
 }
 
 module.exports = Twitter;
 
-// TODO - move the following functions to a utils file?
 
+
+
+// TODO - move the following functions to a utils file?
 function makeStorageClient() {
   return new Web3Storage({ token: getAccessToken() });
 }
@@ -388,4 +420,16 @@ function getUnique(array) {
 
 function idFromUrl(url, round) {
   return round + ':' + url;
+}
+
+function getAccessToken() {
+  // If you're just testing, you can paste in a token
+  // and uncomment the following line:
+  // return 'paste-your-token-here'
+
+  // In a real app, it's better to read an access token from an
+  // environement variable or other configuration that's kept outside of
+  // your code base. For this to work, you need to set the
+  // WEB3STORAGE_TOKEN environment variable before you run your code.
+  return process.env.WEB3STORAGE_TOKEN;
 }
