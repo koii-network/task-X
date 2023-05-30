@@ -5,15 +5,7 @@
  * @version 0.0.1
  * @module model/adapter
  * @requires axios
- * @requires model/search
- * @requires model/data
- * @requires model/gatherer
- * @requires model/processor
- * @requires model/transformer
- * @requires model/validator
- * @requires model/visualizer
- * @requires model/scraper
- *      
+ * 
  * @description
  * 
  * The Adapter class is the main class for the API. It is responsible for
@@ -29,7 +21,6 @@
  */
 
 const axios = require('axios');
-const Search = require(__dirname + '/search');
 
 class Adapter {
     constructor(credentials, maxRetry, shims) {

@@ -9,13 +9,14 @@ const Data = require('../model/data');
  */
 namespaceWrapper.getDb().then((db)=>{
   console.log("DB",db)
-  db.ensureIndex({ fieldName: 'healthyId', unique: true, sparse:true }, function (err) {
-    if (err) console.error('Index creation error:', err);
-  });
+  // TODO - finish tuning db
+  // db.ensureIndex({ fieldName: 'cid', unique: true, sparse:true }, function (err) {
+  //   if (err) console.error('Index creation error:', err);
+  // });
   
-  db.ensureIndex({ fieldName: 'pendingId', unique: true, sparse:true }, function (err) {
-    if (err) console.error('Index creation error:', err);
-  });
+  // db.ensureIndex({ fieldName: 'round', unique: true, sparse:true }, function (err) {
+  //   if (err) console.error('Index creation error:', err);
+  // });
   
   db.ensureIndex({ fieldName: 'runningId', unique: true, sparse:true }, function (err) {
     if (err) console.error('Index creation error:', err);

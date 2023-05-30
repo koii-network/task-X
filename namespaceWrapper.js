@@ -13,7 +13,7 @@ const { default: axios } = require('axios');
 const { TASK_ID, SECRET_KEY, TASK_NODE_PORT } = require('./init');
 const { Connection, PublicKey, Keypair } = require('@_koi/web3.js');
 const taskNodeAdministered = !!TASK_ID;
-const BASE_ROOT_URL = `http://localhost:${TASK_NODE_PORT}/namespace-wrapper`;
+const BASE_ROOT_URL = `http://localhost:${TASK_NODE_PORT}/namespace-wrapper`; // TODO - REMOVE?
 const Datastore = require('nedb-promises');
 class NamespaceWrapper {
   #db;
