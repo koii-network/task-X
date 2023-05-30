@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "go": "yarn && yarn start > log.txt |  tail -f log.txt | yarn test:api ",
-    "test": "node tests/full.js",
-    "test:api": "node tests/api.js",
+    "test": "node tests/test-one-round.js",
     "start": "node index.js",
     "webpack": "webpack",
     "webpack:prod": "webpack --mode production"
