@@ -1,5 +1,5 @@
 #Provide the taskId if you are updating the task
-task_id: '7L9dCqArV6d8RgWhC8T3to4JmQeaczwQeSyawf5sVXU2'
+task_id: 'qLLji8L8SkEXh1rmy1RfF1HUtL6p53BRFyVsomyswgi'
 # Name and desciption of your task
 task_name: 'Twitter Crawler'
 task_description: 'Crawls for all tweets with #koii and stores them on IPFS.'
@@ -28,9 +28,9 @@ minimum_stake_amount: 5
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 10
+total_bounty_amount: 1000
 
-bounty_amount_per_round: 1
+bounty_amount_per_round: 100
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 4
