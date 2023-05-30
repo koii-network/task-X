@@ -4,8 +4,20 @@ const { Web3Storage } = require('web3.storage');
 const Data = require('./model/data');
 const dotenv = require('dotenv');
 const { default: axios } = require('axios');
-
 dotenv.config();
+
+/**
+ * TwitterTask is a class that handles the Twitter crawler and validator
+ * 
+ * @param {function} getRound - a function that returns the current round
+ * @param {number} round - the current round
+ * @param {string} searchTerm - the search term to use for the crawler
+ * @param {string} adapter - the adapter to use for the crawler
+ * @param {string} db - the database to use for the crawler
+ *  
+ * @returns {TwitterTask} - a TwitterTask object
+ * 
+ */
 
 class TwitterTask {
   constructor (getRound, round) {
@@ -13,7 +25,7 @@ class TwitterTask {
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
     this.searchTerm = 'Web3';
-    // this.db = new Data("db"); // now unused
+    this.adapter = null;
     this.setAdapter = async ( ) => {
       const username = process.env.TWITTER_USERNAME;
       const password = process.env.TWITTER_PASSWORD;
@@ -41,7 +53,13 @@ class TwitterTask {
     this.start();
   }
 
-  // the start method accepts a 
+  /**
+   * strat
+   * @description starts the crawler
+   * 
+   * @returns {void}
+   * 
+   */
   async start () {
     await this.setAdapter();
 
@@ -65,11 +83,22 @@ class TwitterTask {
     
   }
 
+  /**
+   * stop
+   * @description stops the crawler
+   * 
+   * @returns {void}
+   */
   async stop () {
     this.isRunning = false;
     this.adapter.stop();
   }
 
+  /**
+   * getRoundCID
+   * @param {*} roundID 
+   * @returns 
+   */
   async getRoundCID(roundID) {
     console.log('starting submission prep for ')
     let result = await this.adapter.getSubmissionCID(roundID);
@@ -78,10 +107,22 @@ class TwitterTask {
     
   }
 
+  /**
+   * getJSONofCID
+   * @description gets the JSON of a CID
+   * @param {*} cid 
+   * @returns 
+   */
   async getJSONofCID (cid) {
     return await getJSONFromCID(cid)
   }
 
+  /**
+   * validate
+   * @description validates a round of results from another node against the Twitter API 
+   * @param {*} proofCid
+   * @returns
+   */
   async validate(proofCid) {
     // in order to validate, we need to take the proofCid 
     // and go get the results from web3.storage
@@ -128,7 +169,6 @@ class TwitterTask {
       }
     }
 
-    
     // if none of the random checks fail, return true
     return true
 
@@ -139,6 +179,12 @@ class TwitterTask {
 
 module.exports = TwitterTask;
 
+/**
+ * getJSONFromCID
+ * @description gets the JSON from a CID
+ * @param {*} cid
+ * @returns promise<JSON>
+ */
 const getJSONFromCID = async (cid) => {
   return new Promise ((resolve, reject) => {
     let url = `https://${cid}.ipfs.dweb.link/data.json`

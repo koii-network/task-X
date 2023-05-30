@@ -136,7 +136,7 @@ class CoreLogic {
   }
 
   async validateNode(submission_value, round) {
-    return this.twitterTask.validate(submission_value, round);
+    return await this.twitterTask.validate(submission_value, round);
   }
 
   async shallowEqual(object1, object2) {
