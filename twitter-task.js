@@ -9,6 +9,17 @@ dotenv.config();
 /**
  * TwitterTask is a class that handles the Twitter crawler and validator
  * 
+ * @description TwitterTask is a class that handles the Twitter crawler and validator
+ *              In this task, the crawler asynchronously populates a database, which is later 
+ *              read by the validator. The validator then uses the database to prepare a submission CID
+ *              for the current round, and submits that for rewards. 
+ * 
+ *              Four main functions control this process:
+ *              @crawl crawls Twitter and populates the database
+ *              @validate verifies the submissions of other nodes
+ *              @getRoundCID returns the submission for a given round
+ *              @stop stops the crawler
+ * 
  * @param {function} getRound - a function that returns the current round
  * @param {number} round - the current round
  * @param {string} searchTerm - the search term to use for the crawler

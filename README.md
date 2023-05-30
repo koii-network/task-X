@@ -18,6 +18,8 @@ Please consult with a legal professional before engaging in any form of web-craw
 
 Koii tasks are community based activities where participants run common code on their local machines. This repo provides an example of how to use headless browsers and DOM manipulation to automate user actions, using tasks, to provide new possibilities for community coordination.
 
+In the Koii architecture, community nodes run tasks and generate 'submissions' which they submit to claim rewards. When a submission is posted to the network, other nodes verify, or 'audit' that submission, and then choose whether to approve rewards. See `twitter-task.js` for the task implementation. 
+
 ## What's in the Project?
 This is an implementation of the default data-gatherer class of Koii tasks.
 
