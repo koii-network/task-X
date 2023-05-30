@@ -1,0 +1,69 @@
+#Provide the taskId if you are updating the task
+task_id: 'qLLji8L8SkEXh1rmy1RfF1HUtL6p53BRFyVsomyswgi'
+# Name and desciption of your task
+task_name: 'Twitter Crawler'
+task_description: 'Crawls for all tweets with #koii and stores them on IPFS.'
+
+# network value can be DEVELOPMENT , ARWEAVE or IPFS
+task_executable_network: 'IPFS'
+
+# Provide your web3.storage key as it is needed for uploading your metadata
+secret_web3_storage_key: ''
+
+# Path to your executable webpack if the selected network is IPFS otherwise leave blank
+task_audit_program: 'dist/main.js'
+
+# Provide your transaction ID in case of ARWEAVE and in case of DEVELOPMENT give your executable name as main otherwise leave blank
+task_audit_program_id: ''
+
+# Total round time of your task : it must be given in slots and each slot is rougly equal to 4ms
+round_time: 600
+
+audit_window: 200
+submission_window: 200
+
+# Amounts in KOII
+
+minimum_stake_amount: 5
+
+# total_bounty_amount cannot be grater than bounty_amount_per_round
+# total bounty is not accepted in case of update task
+total_bounty_amount: 1000
+
+bounty_amount_per_round: 100
+
+#Number of times allowed to re-submit the distribution  list in case the distribution list is audited
+allowed_failed_distributions: 4
+
+#Space in MBs
+space: 5
+
+# Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
+# To add more global variables and task variables, please refer the type,value,description format shown below
+
+author: 'author'
+description: 'Twitter-Scraping'
+repositoryUrl: 'Github/gitlab link'
+imageUrl: 'Enter you image URL'
+requirementsTags:
+  - type: TASK_VARIABLE
+    value: 'WEB3STORAGE_TOKEN'
+    description: 'used to connect web3.storage'
+  - type: TASK_VARIABLE
+    value: 'TWITTER_USERNAME'
+    description: 'TWITTER_USERNAME'
+  - type: TASK_VARIABLE
+    value: 'TWITTER_PASSWORD'
+    description: 'TWITTER_PASSWORD'
+  - type: CPU
+    value: '4-core'
+  - type: RAM
+    value: '5 GB'
+  - type: STORAGE
+    value: 'Some'
+  - type: NETWORK
+    value: 'Fast'
+  - type: ARCHITECTURE
+    value: 'AMD'
+  - type: OS
+    value: 'OSX'

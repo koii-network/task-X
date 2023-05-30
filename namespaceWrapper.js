@@ -1,3 +1,14 @@
+/**
+ * namespaceWrapper.js
+ * @description This file contains the namespace wrapper class
+ *             which is used to interact with the namespace
+ *             and the task node
+ * 
+ *             Note: Generally, it is not necessary to modify this file
+ *  
+ * @version 1.0.0
+ */
+
 const { default: axios } = require('axios');
 const { TASK_ID, SECRET_KEY, TASK_NODE_PORT } = require('./init');
 const { Connection, PublicKey, Keypair } = require('@_koi/web3.js');

@@ -5,6 +5,12 @@ const {
   taskNodeAdministered,
 } = require('./namespaceWrapper');
 
+
+/**
+ * setup
+ * @description sets up the task node, particularly the inter-process communication to start and stop the task
+ * @returns {void}
+ */
 async function setup() {
   console.log('setup function called');
   // Run default setup
@@ -34,6 +40,7 @@ async function setup() {
 if (taskNodeAdministered) {
   setup();
 }
+
 if (app) {
   //  Write your Express Endpoints here.
   //  For Example

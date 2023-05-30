@@ -29,24 +29,43 @@ class CoreLogic {
     } 
   }
 
+  /**
+   * @fetchSubmission
+   * @description This function is called by the Koi core to fetch the submission values
+   *              before the node makes it's submission to claim rewards at the end of each round
+   * @param {string} round
+   * @returns {string} cid
+   */
   async fetchSubmission() {
-    // Write the logic to fetch the submission values here and return the cid string
-
-    // fetching round number to store work accordingly
-
-    console.log('IN FETCH SUBMISSION');
-
-    // The code below shows how you can fetch your stored value from level DB
+    console.log('fetchSubmission called');
     let round = await namespaceWrapper.getRound() 
-    console.log('the round is', round)
     let lastRound = round - 1;
+
     if ( lastRound < 0 ) lastRound = 0;
+
     const cid = await this.twitterTask.getRoundCID(lastRound);
+
     console.log('about to make submission with CID: ', cid);
+
     return cid;
 
   }
 
+  /**
+   * generateDistributionList
+   * @param {*} round 
+   * @param {*} _dummyTaskState 
+   * @description This function is called by the Koi core to generate the distribution list
+   *             before the node makes it's submission to claim rewards at the end of each round
+   *            The distribution list is a JSON object with the following structure:
+   *           {
+   *            "address1": 0.1,
+   *           "address2": 0.2,
+   *          "address3": 0.3,
+   *         "address4": 0.4
+   *        } where each address is the address of a validator node and the value is the percentage of the reward that the node will receive
+   * @returns 
+   */
   async generateDistributionList(round, _dummyTaskState) {
     try {
       console.log('GenerateDistributionList called');
@@ -111,6 +130,15 @@ class CoreLogic {
     }
   }
 
+  /**
+   * submitDistributionList
+   * @description This function is called by the Koi core to submit the distribution list
+   *             after the node makes it's submission to claim rewards at the end of each round
+   * @param {*} distributionList // must be populated by generateDistributionList
+   * @param {*} round 
+   * @returns
+   * @memberof Node
+   */
   async submitDistributionList(round) {
     // This function just upload your generated dustribution List and do the transaction for that
 
@@ -135,10 +163,28 @@ class CoreLogic {
     }
   }
 
+  /**
+   * validateNode
+   * @description This function is called auditSubmission() to validate the submission value
+   *           submitted by the node at the end of each round, and uses the more extensive
+   *         validation logic in twitter-task.js to determine if the node is eligible for rewards  
+   * @param {*} submission_value
+   * @param {*} submission_value 
+   * @param {*} round 
+   * @returns 
+   */
   async validateNode(submission_value, round) {
     return await this.twitterTask.validate(submission_value, round);
   }
 
+  /**
+   * shallowEqual
+   * @description This function is called by the Koi core to compare the submission values
+   * 
+   * @param {*} object1 
+   * @param {*} object2 
+   * @returns 
+   */
   async shallowEqual(object1, object2) {
     const keys1 = Object.keys(object1);
     const keys2 = Object.keys(object2);
@@ -153,6 +199,17 @@ class CoreLogic {
     return true;
   }
 
+  /**
+   * validateDistribution
+   * @description This function is called by the Koi core to validate the distribution list 
+   *              and piggybacks off of generateDistributionList
+   * @param {*} distributionListSubmitter
+   * @param {*} round
+   * @param {*} _dummyDistributionList
+   * @param {*} _dummyTaskState
+   * @returns
+   * @memberof Node
+   */
   validateDistribution = async (
     distributionListSubmitter,
     round,
@@ -196,7 +253,14 @@ class CoreLogic {
     //   return false;
     // }
   };
-  // Submit Address with distributioon list to K2
+  
+  /**
+   * submitTask
+   * @description This function is called by the Koi core to submit the submission value
+   *             at the end of each round
+   * @param {*} roundNumber 
+   * @returns Promise<void>
+   */
   async submitTask(roundNumber) {
     console.log('submitTask called with round', roundNumber);
     try {
@@ -217,6 +281,14 @@ class CoreLogic {
     }
   }
 
+  /**
+   * auditTask
+   * @description This function is called by the Koi core to audit the submission value
+   *            at the end of each round
+   * @param {*} roundNumber
+   * @returns Promise<void>
+   * @memberof Node
+   */
   async auditTask(roundNumber) {
     console.log('auditTask called with round', roundNumber);
     console.log(
@@ -229,6 +301,15 @@ class CoreLogic {
     );
   }
 
+  /**
+   * auditDistribution
+   * @description This function is called by the Koi core to audit the distribution list
+   *           at the end of each round
+   * @param {*} roundNumber
+   * @returns Promise<void>
+   * @memberof Node
+   */
+  
   async auditDistribution(roundNumber) {
     console.log('auditDistribution called with round', roundNumber);
     await namespaceWrapper.validateAndVoteOnDistributionList(
