@@ -1,5 +1,5 @@
 #Provide the taskId if you are updating the task
-task_id: 'qLLji8L8SkEXh1rmy1RfF1HUtL6p53BRFyVsomyswgi'
+task_id: 'CFdZLaaUHTSL565m7XaAwEtJG3GdrKe1Z5mT4spjs1fn'
 # Name and desciption of your task
 task_name: 'Twitter Crawler'
 task_description: 'Crawls for all tweets with #koii and stores them on IPFS.'
