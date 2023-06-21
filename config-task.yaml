@@ -1,5 +1,5 @@
 #Provide the taskId if you are updating the task
-task_id: 'qLLji8L8SkEXh1rmy1RfF1HUtL6p53BRFyVsomyswgi'
+task_id: 'CFdZLaaUHTSL565m7XaAwEtJG3GdrKe1Z5mT4spjs1fn'
 # Name and desciption of your task
 task_name: 'Twitter Crawler'
 task_description: 'Crawls for all tweets with #koii and stores them on IPFS.'
@@ -42,19 +42,19 @@ space: 5
 # To add more global variables and task variables, please refer the type,value,description format shown below
 
 author: 'author'
-description: 'Twitter-Scraping'
-repositoryUrl: 'Github/gitlab link'
-imageUrl: 'Enter you image URL'
+description: 'This task volunteers your spare Twitter account to help us archive the #koii hashtag community. This is a not-for-profit endeavor, sponsored by the Koii Foundation :)'
+repositoryUrl: 'https://github.com/GET-store-CAT/twitter-crawler'
+imageUrl: ''
 requirementsTags:
   - type: TASK_VARIABLE
     value: 'WEB3STORAGE_TOKEN'
-    description: 'used to connect web3.storage'
+    description: 'Used to upload data to IPFS - get 1GB for free at https://web3.storage/'
   - type: TASK_VARIABLE
     value: 'TWITTER_USERNAME'
-    description: 'TWITTER_USERNAME'
+    description: 'The username of your volunteer Twitter account.'
   - type: TASK_VARIABLE
     value: 'TWITTER_PASSWORD'
-    description: 'TWITTER_PASSWORD'
+    description: 'The password of your volunteer Twitter account.'
   - type: CPU
     value: '4-core'
   - type: RAM
