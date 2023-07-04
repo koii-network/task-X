@@ -1,5 +1,5 @@
 name: 🐛 Bug Report
-description: Create a report to help us improve
+description: Face a issue with task? Create a report to help us improve
 labels: ["bug"]
 body:
   - type: markdown
@@ -16,9 +16,36 @@ body:
   - type: input
     id: version
     attributes:
-      label: Desktop Node Version
+      label: 🌐 Desktop Node Version
       description: What is the latest version of desktop node that this issue reproduces on? 
       placeholder: ex. 0.2.14
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: 🖥️ Operating System
+      description: What is the operating system of the desktop node where this issue is being reproduced?
+      placeholder: ex. Win10/Mac M1/Ubuntu
+    validations:
+      required: true
+  - type: dropdown
+    id: task-status
+    attributes:
+      label: 🚦Task Status
+      description: What is the current status of the task?
+      options:
+        - Pending
+        - Error
+        - Stop
+    validations:
+      required: true
+  - type: input
+    id: key
+    attributes:
+      label: 🔑 System Key
+      description: What is your system key? If you cannot reach your system key, provide none.
+      placeholder: ex. zZgi5uUnoz8gYmgLKe6M2sw7H...
     validations:
       required: true
   - type: input
@@ -31,6 +58,6 @@ body:
     id: reproduction
     attributes:
       label: Steps to reproduce
-      description: Provide a detailed list of steps that reproduce the issue.
+      description: Provide a detailed list of steps that reproduce the issue or provide the screenshot.
     validations:
       required: true
