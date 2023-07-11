@@ -50,7 +50,7 @@ class Data {
    * @description gets an item from the database by ID (CID)
    */
   async getItem(item) {
-    console.log('trying to retrieve with ID', itemId);
+    console.log('trying to retrieve with ID', item);
     try {
       const resp = await this.db.findOne({ item });
       if (resp) {

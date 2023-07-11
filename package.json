@@ -8,7 +8,10 @@
     "test": "node tests/test-one-round.js",
     "start": "node index.js",
     "webpack": "webpack",
-    "webpack:prod": "webpack --mode production"
+    "webpack:prod": "webpack --mode production",
+    "webpack:deploy" : "yarn webpack:prod && yarn deploy",
+    "deploy": "create-task-cli",
+    "whammy" : "yarn webpack:deploy"
   },
   "author": "",
   "license": "ISC",
