@@ -20,11 +20,11 @@ class Twitter extends Adapter {
     super(credentials, maxRetry);
     this.credentials = credentials;
     this.db = new Data('db', []);
-    this.db.intializeData();
+    this.db.initializeData();
     this.proofs = new Data('proofs', []);
-    this.proofs.intializeData();
+    this.proofs.initializeData();
     this.cids = new Data('cids', []);
-    this.cids.intializeData();
+    this.cids.initializeData();
     this.toCrawl = [];
     this.parsed = {};
     this.lastSessionCheck = null;
@@ -287,6 +287,8 @@ class Twitter extends Adapter {
       if (url) {
         var data = await this.parseItem(url, query);
         this.parsed[url] = data;
+
+        console.log('got tweet item', data)
 
         const file = await makeFileFromObjectWithName(data, url);
         const cid = await storeFiles([file]);

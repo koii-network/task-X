@@ -15,7 +15,7 @@ const testData = [
 ];
 
 async function test() {
-  await datadb.intializeData();
+  await datadb.initializeData();
 
   // TEST create healthy Item
 

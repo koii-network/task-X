@@ -23,7 +23,7 @@ class Data {
    * initializeData
    * @returns {void}
    */
-  async intializeData() {
+  async initializeData() {
     if (this.db) return;
     const db = await namespaceWrapper.getDb();
     this.db = db;
@@ -50,10 +50,9 @@ class Data {
    * @description gets an item from the database by ID (CID)
    */
   async getItem(item) {
-    let itemId = this.createId(item);
     console.log('trying to retrieve with ID', itemId);
     try {
-      const resp = await this.db.findOne({ itemId });
+      const resp = await this.db.findOne({ item });
       if (resp) {
         return resp.item;
       } else {
