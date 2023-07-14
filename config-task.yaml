@@ -1,7 +1,7 @@
 #Provide the taskId if you are updating the task
-task_id: 'CFdZLaaUHTSL565m7XaAwEtJG3GdrKe1Z5mT4spjs1fn'
+task_id: '4UYDF7JjsHwxTQWS5yNTDLyywgjhFNoyKcTwtkbcDRVR'
 # Name and desciption of your task
-task_name: 'Twitter Crawler'
+task_name: 'Twitter Crawler v3'
 task_description: 'Crawls for all tweets with #koii and stores them on IPFS.'
 
 # network value can be DEVELOPMENT , ARWEAVE or IPFS
@@ -10,17 +10,21 @@ task_executable_network: 'IPFS'
 # Provide your web3.storage key as it is needed for uploading your metadata
 secret_web3_storage_key: ''
 
+# last deploy : date: 2021-05-10T12:00:00.000Z
+# Task Id: 4UYDF7JjsHwxTQWS5yNTDLyywgjhFNoyKcTwtkbcDRVR
+# Stake Pot Account Pubkey: stakepotaccountoAu3FaRrZwh2daX2s6wLDZyQaTRk
+
 # Path to your executable webpack if the selected network is IPFS otherwise leave blank
 task_audit_program: 'dist/main.js'
 
 # Provide your transaction ID in case of ARWEAVE and in case of DEVELOPMENT give your executable name as main otherwise leave blank
 task_audit_program_id: ''
 
-# Total round time of your task : it must be given in slots and each slot is rougly equal to 4ms
-round_time: 600
+# Total round time of your task : it must be given in slots and each slot is roughly equal to 4ms
+round_time: 6000
 
-audit_window: 200
-submission_window: 200
+audit_window: 2000
+submission_window: 2000
 
 # Amounts in KOII
 
@@ -44,7 +48,7 @@ space: 5
 author: 'author'
 description: 'This task volunteers your spare Twitter account to help us archive the #koii hashtag community. This is a not-for-profit endeavor, sponsored by the Koii Foundation :)'
 repositoryUrl: 'https://github.com/GET-store-CAT/twitter-crawler'
-imageUrl: ''
+imageUrl: 'https://ichef.bbci.co.uk/news/976/cpsprodpb/16620/production/_91408619_55df76d5-2245-41c1-8031-07a4da3f313f.jpg'
 requirementsTags:
   - type: TASK_VARIABLE
     value: 'WEB3STORAGE_TOKEN'
