@@ -84,7 +84,7 @@ class TwitterTask {
       query: `https://twitter.com/search?q=${this.searchTerm}&src=typed_query`,
       depth: 3,
       updateRound: async () => {
-        return this.updateRound()
+        return this.updateRound() // TODO - verify that this works as an import
       },
       recursive: true,
       round: this.round
