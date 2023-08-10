@@ -69,6 +69,7 @@ class Twitter extends Adapter {
       '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
     );
     this.browser = await stats.puppeteer.launch({
+      headless: false,
       userAgent:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       args: ['--disable-gpu'],
@@ -137,21 +138,55 @@ class Twitter extends Adapter {
     }
 
     console.log('Step: Fill in password');
+    const currentURL = await this.page.url();
     await this.page.waitForSelector('input[name="password"]');
     await this.page.type('input[name="password"]', this.credentials.password);
+    console.log('Step: Click login button');
     await this.page.keyboard.press('Enter');
 
     // TODO - catch unsuccessful login and retry up to query.maxRetry
-    console.log('Step: Click login button');
-    this.page.waitForNavigation({ waitUntil: 'load' });
-    await this.page.waitForTimeout(1000);
+    if (!(await this.isPasswordCorrect(this.page, currentURL))) {
+      console.log('Password is incorrect.');
+      this.sessionValid = false;
+    } else if (await this.isEmailVerificationRequired(this.page)) {
+      console.log('Email verification required.');
+      this.sessionValid = false;
+      await this.page.waitForTimeout(1000000);
+    } else {
+      console.log('Password is correct.');
+      this.page.waitForNavigation({ waitUntil: 'load' });
+      await this.page.waitForTimeout(1000);
 
-    this.sessionValid = true;
-    this.lastSessionCheck = Date.now();
+      this.sessionValid = true;
+      this.lastSessionCheck = Date.now();
 
-    console.log('Step: Login successful');
+      console.log('Step: Login successful');
+    }
 
+    return this.sessionValid;
+  };
+
+  isPasswordCorrect = async (page, currentURL) => {
+    await this.page.waitForTimeout(2000);
+
+    const newURL = await this.page.url();
+    if (newURL === currentURL) {
+      return false;
+    }
     return true;
+  };
+
+  isEmailVerificationRequired = async page => {
+    // Wait for some time to allow the page to load the required elements
+    await page.waitForTimeout(2000);
+
+    // Check if the specific text is present on the page
+    const textContent = await this.page.evaluate(
+      () => document.body.textContent,
+    );
+    return textContent.includes(
+      'Verify your identity by entering the email address associated with your X account.',
+    );
   };
 
   /**
@@ -205,7 +240,7 @@ class Twitter extends Adapter {
    *               according to the query object and for use in either crawl() or validate()
    */
   parseItem = async (url, query) => {
-    if (!this.sessionValid) {
+    if (this.sessionValid == false) {
       await this.negotiateSession();
     }
 
@@ -216,6 +251,7 @@ class Twitter extends Adapter {
     await this.page.waitForTimeout(2000);
 
     console.log('PARSE: ' + url);
+    const tweets_id = url.match(/status\/(\d+)/)[1];
     const html = await this.page.content();
     const $ = cheerio.load(html);
     let data = {};
@@ -224,8 +260,42 @@ class Twitter extends Adapter {
     const articles = $('article[data-testid="tweet"]').toArray();
 
     const el = articles[0];
-    const tweet_text = $(el).find('div[data-testid="tweetText"]').text();
-    const tweet_user = $(el).find('a[tabindex="-1"]').text();
+    const screen_name = $(el).find('a[tabindex="-1"]').text();
+    const allText = $(el).find('a[role="link"]').text();
+    const user_name = allText.split('@')[0];
+    console.log('user_name', user_name);
+    const user_url =
+      'https://twitter.com' + $(el).find('a[role="link"]').attr('href');
+    const user_img = $(el).find('img[draggable="true"]').attr('src');
+
+    const tweet_text = $(el)
+      .find('div[data-testid="tweetText"]')
+      .first()
+      .text();
+
+    const outerMediaElements = $(el).find('div[data-testid="tweetText"] a');
+
+    const outer_media_urls = [];
+    const outer_media_short_urls = [];
+
+    outerMediaElements.each(function () {
+      const fullURL = $(this).attr('href');
+      const shortURL = $(this).text().replace(/\s/g, '');
+
+      // Ignore URLs containing "/search?q=" or "twitter.com"
+      if (
+        fullURL &&
+        !fullURL.includes('/search?q=') &&
+        !fullURL.includes('twitter.com') &&
+        !fullURL.includes('/hashtag/')
+      ) {
+        outer_media_urls.push(fullURL);
+        outer_media_short_urls.push(shortURL);
+      }
+    });
+
+    const timeRaw = $(el).find('time').attr('datetime');
+    const time = await this.convertToTimestamp(timeRaw);
     const tweet_record = $(el).find(
       'span[data-testid="app-text-transition-container"]',
     );
@@ -233,24 +303,35 @@ class Twitter extends Adapter {
     const likeCount = tweet_record.eq(1).text();
     const shareCount = tweet_record.eq(2).text();
     const viewCount = tweet_record.eq(3).text();
-    if (tweet_user && tweet_text) {
+    if (screen_name && tweet_text) {
       data = {
-        user: tweet_user,
-        content: tweet_text.replace(/\n/g, '<br>'),
+        user_name: user_name,
+        screen_name: screen_name,
+        user_url: user_url,
+        user_img: user_img,
+        tweets_id: tweets_id,
+        tweets_url: url,
+        tweets_content: tweet_text.replace(/\n/g, '<br>'),
+        time: time,
         comment: commentCount,
         like: likeCount,
         share: shareCount,
         view: viewCount,
+        outer_media_url: outer_media_urls,
+        outer_media_short_url: outer_media_short_urls,
       };
     }
+
+    console.log('PARSE: ' + url, data);
+    await this.page.waitForTimeout(99999999);
     // TODO  - queue users to be crawled?
 
     if (query) {
       // get the comments and other attached tweet items and queue them
       articles.slice(1).forEach(async el => {
-        const tweet_user = $(el).find('a[tabindex="-1"]').text();
+        const user_name = $(el).find('a[tabindex="-1"]').text();
         let newQuery = `https://twitter.com/search?q=${encodeURIComponent(
-          tweet_user,
+          user_name,
         )}%20${query.searchTerm}&src=typed_query`;
         if (query.isRecursive)
           this.toCrawl.push(await this.fetchList(newQuery));
@@ -258,6 +339,11 @@ class Twitter extends Adapter {
     }
 
     return data;
+  };
+
+  convertToTimestamp = async dateString => {
+    const date = new Date(dateString);
+    return Math.floor(date.getTime() / 1000);
   };
 
   /**
