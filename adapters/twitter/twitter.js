@@ -321,9 +321,7 @@ class Twitter extends Adapter {
         outer_media_short_url: outer_media_short_urls,
       };
     }
-
-    console.log('PARSE: ' + url, data);
-    await this.page.waitForTimeout(99999999);
+    // await this.page.waitForTimeout(99999999);
     // TODO  - queue users to be crawled?
 
     if (query) {
@@ -375,7 +373,8 @@ class Twitter extends Adapter {
         console.log('got tweet item', data);
 
         const file = await makeFileFromObjectWithName(data, url);
-        const cid = await storeFiles([file]);
+        // const cid = await storeFiles([file]);
+        const cid = 'testcid'
         this.cids.create({
           id: url,
           round: round || 0,
@@ -401,7 +400,7 @@ class Twitter extends Adapter {
 
     // Go to the hashtag page
     await this.page.waitForTimeout(1000);
-    await this.page.setViewport({ width: 1024, height: 768 });
+    await this.page.setViewport({ width: 1024, height: 7768 });
     await this.page.goto(url);
 
     // Wait an additional 5 seconds until fully loaded before scraping
@@ -465,10 +464,10 @@ function makeStorageClient() {
 }
 
 async function makeFileFromObjectWithName(obj, name) {
-  console.log('making file from', typeof obj, name);
+  // console.log('making file from', typeof obj, name);
   obj.url = name;
   const buffer = Buffer.from(JSON.stringify(obj));
-  console.log('buffer is', buffer);
+  // console.log('buffer is', buffer);
   return new File([buffer], 'data.json', { type: 'application/json' });
 }
 
