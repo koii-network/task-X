@@ -69,10 +69,10 @@ class Twitter extends Adapter {
       '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
     );
     this.browser = await stats.puppeteer.launch({
-      headless: 'new',
+      headless: false,
       userAgent:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      args: ['--disable-gpu'],
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
       executablePath: stats.executablePath,
     });
 
@@ -82,7 +82,7 @@ class Twitter extends Adapter {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     );
     // TODO - Enable console logs in the context of the page and export them for diagnostics here
-    await this.page.setViewport({ width: 1024, height: 768 });
+    await this.page.setViewport({ width: 1920, height: 25000 });
     await this.twitterLogin();
 
     return true;
@@ -198,33 +198,27 @@ class Twitter extends Adapter {
    */
   getSubmissionCID = async round => {
     if (this.proofs) {
-      // check if the cid has already been stored
-      let proof_cid = await this.proofs.getItem(round);
-      console.log('got proofs item', proof_cid);
-      if (proof_cid) {
-        console.log('returning proof cid A', proof_cid);
-        return proof_cid;
+      // we need to upload proofs for that round and then store the cid
+      const data = await this.cids.getList({ round: round });
+      console.log(`got cids list for round ${round}`, data);
+
+      if (data && data.length === 0) {
+        console.log('No cids found for round ' + round);
+        return null;
       } else {
-        // we need to upload proofs for that round and then store the cid
-        const data = await this.cids.getList({ round: round });
-        console.log(`got cids list for round ${round}`, data);
+        const file = await makeFileFromObjectWithName(data, 'round:' + round);
+        // TEST USE
+        const cid = await storeFiles([file]);
+        // const cid = "cid"
 
-        if (data && data.length === 0) {
-          throw new Error('No cids found for round ' + round);
-          return null;
-        } else {
-          const file = await makeFileFromObjectWithName(data, 'round:' + round);
-          const cid = await storeFiles([file]);
+        await this.proofs.create({
+          id: 'proof:' + round,
+          proof_round: round,
+          proof_cid: cid,
+        }); 
 
-          await this.proofs.create({
-            id: 'proof:' + round,
-            proof_round: round,
-            proof_cid: cid,
-          }); // TODO - add better ID structure here
-
-          console.log('returning proof cid B', cid);
-          return cid;
-        }
+        console.log('returning proof cid for submission', cid);
+        return cid;
       }
     } else {
       throw new Error('No proofs database provided');
@@ -244,7 +238,7 @@ class Twitter extends Adapter {
       await this.negotiateSession();
     }
 
-    await this.page.setViewport({ width: 1024, height: 768 });
+    await this.page.setViewport({ width: 1024, height: 10000 });
 
     console.log('PARSE: ' + url, query);
     await this.page.goto(url);
@@ -312,7 +306,8 @@ class Twitter extends Adapter {
         tweets_id: tweets_id,
         tweets_url: url,
         tweets_content: tweet_text.replace(/\n/g, '<br>'),
-        time: time,
+        time_post: time,
+        time_read: Date.now(),
         comment: commentCount,
         like: likeCount,
         share: shareCount,
