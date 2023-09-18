@@ -72,7 +72,7 @@ class Twitter extends Adapter {
       headless: false,
       userAgent:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
       executablePath: stats.executablePath,
     });
 
@@ -215,7 +215,7 @@ class Twitter extends Adapter {
           id: 'proof:' + round,
           proof_round: round,
           proof_cid: cid,
-        }); 
+        });
 
         console.log('returning proof cid for submission', cid);
         return cid;
@@ -233,27 +233,18 @@ class Twitter extends Adapter {
    * @description - this function should parse the item at the given url and return the parsed item data
    *               according to the query object and for use in either crawl() or validate()
    */
-  parseItem = async (url, query) => {
+  parseItem = async item => {
     if (this.sessionValid == false) {
       await this.negotiateSession();
     }
 
-    await this.page.setViewport({ width: 1024, height: 10000 });
-
-    console.log('PARSE: ' + url, query);
-    await this.page.goto(url);
-    await this.page.waitForTimeout(2000);
-
-    console.log('PARSE: ' + url);
-    const tweets_id = url.match(/status\/(\d+)/)[1];
-    const html = await this.page.content();
-    const $ = cheerio.load(html);
+    const $ = cheerio.load(item);
     let data = {};
-    var count = 0;
 
     const articles = $('article[data-testid="tweet"]').toArray();
-
     const el = articles[0];
+    const tweetUrl = $('a[href*="/status/"]').attr('href');
+    const tweetId = tweetUrl.split('/').pop();
     const screen_name = $(el).find('a[tabindex="-1"]').text();
     const allText = $(el).find('a[role="link"]').text();
     const user_name = allText.split('@')[0];
@@ -303,8 +294,7 @@ class Twitter extends Adapter {
         screen_name: screen_name,
         user_url: user_url,
         user_img: user_img,
-        tweets_id: tweets_id,
-        tweets_url: url,
+        tweets_id: tweetId,
         tweets_content: tweet_text.replace(/\n/g, '<br>'),
         time_post: time,
         time_read: Date.now(),
@@ -315,20 +305,6 @@ class Twitter extends Adapter {
         outer_media_url: outer_media_urls,
         outer_media_short_url: outer_media_short_urls,
       };
-    }
-    // await this.page.waitForTimeout(99999999);
-    // TODO  - queue users to be crawled?
-
-    if (query) {
-      // get the comments and other attached tweet items and queue them
-      articles.slice(1).forEach(async el => {
-        const user_name = $(el).find('a[tabindex="-1"]').text();
-        let newQuery = `https://twitter.com/search?q=${encodeURIComponent(
-          user_name,
-        )}%20${query.searchTerm}&src=typed_query`;
-        if (query.isRecursive)
-          this.toCrawl.push(await this.fetchList(newQuery));
-      });
     }
 
     return data;
@@ -369,7 +345,7 @@ class Twitter extends Adapter {
 
         const file = await makeFileFromObjectWithName(data, url);
         // const cid = await storeFiles([file]);
-        const cid = 'testcid'
+        const cid = 'testcid';
         this.cids.create({
           id: url,
           round: round || 0,
@@ -395,38 +371,32 @@ class Twitter extends Adapter {
 
     // Go to the hashtag page
     await this.page.waitForTimeout(1000);
-    await this.page.setViewport({ width: 1024, height: 7768 });
+    await this.page.setViewport({ width: 1024, height: 900 });
     await this.page.goto(url);
 
     // Wait an additional 5 seconds until fully loaded before scraping
     await this.page.waitForTimeout(5000);
 
     // Scrape the tweets
-    const html = await this.page.content();
-    const $ = cheerio.load(html);
 
-    const links = $('a').toArray();
-
-    console.log(`got ${links.length} links`);
-
-    // Filter the matching elements with the specified pattern
-    const matchedLinks = links.filter(link => {
-      const href = $(link).attr('href');
-      const regex = /\/status\/\d+[^/]*$/;
-      return regex.test(href);
+    const item = await this.page.evaluate(() => {
+      const element = document.querySelector('article[aria-labelledby]');
+      return element ? element.outerHTML : null;
     });
+    console.log('got item', item);
+    let data = await this.parseItem(item);
+    console.log(data);
 
-    const linkStrings = [];
-    matchedLinks.forEach(link => {
-      linkStrings.push('https://twitter.com' + $(link).attr('href'));
-    });
-
-    const uniqueLinks = getUnique(linkStrings);
-    uniqueLinks.forEach(link => {
-      console.log('fetchlist link:', link);
-    });
+    await this.scrollPage(this.page);
 
     return uniqueLinks;
+  };
+
+  scrollPage = async page => {
+    await page.evaluate(() => {
+      window.scrollBy(0, window.innerHeight);
+    });
+    await page.waitForTimeout(1000); // Adjust the timeout as necessary
   };
 
   /**
