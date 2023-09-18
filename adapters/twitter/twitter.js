@@ -378,7 +378,7 @@ class Twitter extends Adapter {
     await this.page.waitForTimeout(5000);
 
     // Scrape the tweets
-
+    // TODO: Loop here for all tags
     const item = await this.page.evaluate(() => {
       const element = document.querySelector('article[aria-labelledby]');
       return element ? element.outerHTML : null;
@@ -386,7 +386,7 @@ class Twitter extends Adapter {
     console.log('got item', item);
     let data = await this.parseItem(item);
     console.log(data);
-
+    // TODO: Save the data to dabase with round
     await this.scrollPage(this.page);
 
     return uniqueLinks;
