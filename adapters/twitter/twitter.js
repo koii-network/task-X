@@ -210,7 +210,6 @@ class Twitter extends Adapter {
         // TEST USE
         const cid = await storeFiles([file]);
         // const cid = "cid"
-
         await this.proofs.create({
           id: 'proof:' + round,
           proof_round: round,
@@ -237,77 +236,79 @@ class Twitter extends Adapter {
     if (this.sessionValid == false) {
       await this.negotiateSession();
     }
+    try {
+      const $ = cheerio.load(item);
+      let data = {};
 
-    const $ = cheerio.load(item);
-    let data = {};
+      const articles = $('article[data-testid="tweet"]').toArray();
+      const el = articles[0];
+      const tweetUrl = $('a[href*="/status/"]').attr('href');
+      const tweetId = tweetUrl.split('/').pop();
+      const screen_name = $(el).find('a[tabindex="-1"]').text();
+      const allText = $(el).find('a[role="link"]').text();
+      const user_name = allText.split('@')[0];
+      // console.log('user_name', user_name);
+      const user_url =
+        'https://twitter.com' + $(el).find('a[role="link"]').attr('href');
+      const user_img = $(el).find('img[draggable="true"]').attr('src');
 
-    const articles = $('article[data-testid="tweet"]').toArray();
-    const el = articles[0];
-    const tweetUrl = $('a[href*="/status/"]').attr('href');
-    const tweetId = tweetUrl.split('/').pop();
-    const screen_name = $(el).find('a[tabindex="-1"]').text();
-    const allText = $(el).find('a[role="link"]').text();
-    const user_name = allText.split('@')[0];
-    console.log('user_name', user_name);
-    const user_url =
-      'https://twitter.com' + $(el).find('a[role="link"]').attr('href');
-    const user_img = $(el).find('img[draggable="true"]').attr('src');
+      const tweet_text = $(el)
+        .find('div[data-testid="tweetText"]')
+        .first()
+        .text();
 
-    const tweet_text = $(el)
-      .find('div[data-testid="tweetText"]')
-      .first()
-      .text();
+      const outerMediaElements = $(el).find('div[data-testid="tweetText"] a');
 
-    const outerMediaElements = $(el).find('div[data-testid="tweetText"] a');
+      const outer_media_urls = [];
+      const outer_media_short_urls = [];
 
-    const outer_media_urls = [];
-    const outer_media_short_urls = [];
+      outerMediaElements.each(function () {
+        const fullURL = $(this).attr('href');
+        const shortURL = $(this).text().replace(/\s/g, '');
 
-    outerMediaElements.each(function () {
-      const fullURL = $(this).attr('href');
-      const shortURL = $(this).text().replace(/\s/g, '');
+        // Ignore URLs containing "/search?q=" or "twitter.com"
+        if (
+          fullURL &&
+          !fullURL.includes('/search?q=') &&
+          !fullURL.includes('twitter.com') &&
+          !fullURL.includes('/hashtag/')
+        ) {
+          outer_media_urls.push(fullURL);
+          outer_media_short_urls.push(shortURL);
+        }
+      });
 
-      // Ignore URLs containing "/search?q=" or "twitter.com"
-      if (
-        fullURL &&
-        !fullURL.includes('/search?q=') &&
-        !fullURL.includes('twitter.com') &&
-        !fullURL.includes('/hashtag/')
-      ) {
-        outer_media_urls.push(fullURL);
-        outer_media_short_urls.push(shortURL);
+      const timeRaw = $(el).find('time').attr('datetime');
+      const time = await this.convertToTimestamp(timeRaw);
+      const tweet_record = $(el).find(
+        'span[data-testid="app-text-transition-container"]',
+      );
+      const commentCount = tweet_record.eq(0).text();
+      const likeCount = tweet_record.eq(1).text();
+      const shareCount = tweet_record.eq(2).text();
+      const viewCount = tweet_record.eq(3).text();
+      if (screen_name && tweet_text) {
+        data = {
+          user_name: user_name,
+          screen_name: screen_name,
+          user_url: user_url,
+          user_img: user_img,
+          tweets_id: tweetId,
+          tweets_content: tweet_text.replace(/\n/g, '<br>'),
+          time_post: time,
+          time_read: Date.now(),
+          comment: commentCount,
+          like: likeCount,
+          share: shareCount,
+          view: viewCount,
+          outer_media_url: outer_media_urls,
+          outer_media_short_url: outer_media_short_urls,
+        };
       }
-    });
-
-    const timeRaw = $(el).find('time').attr('datetime');
-    const time = await this.convertToTimestamp(timeRaw);
-    const tweet_record = $(el).find(
-      'span[data-testid="app-text-transition-container"]',
-    );
-    const commentCount = tweet_record.eq(0).text();
-    const likeCount = tweet_record.eq(1).text();
-    const shareCount = tweet_record.eq(2).text();
-    const viewCount = tweet_record.eq(3).text();
-    if (screen_name && tweet_text) {
-      data = {
-        user_name: user_name,
-        screen_name: screen_name,
-        user_url: user_url,
-        user_img: user_img,
-        tweets_id: tweetId,
-        tweets_content: tweet_text.replace(/\n/g, '<br>'),
-        time_post: time,
-        time_read: Date.now(),
-        comment: commentCount,
-        like: likeCount,
-        share: shareCount,
-        view: viewCount,
-        outer_media_url: outer_media_urls,
-        outer_media_short_url: outer_media_short_urls,
-      };
+      return data;
+    } catch (e) {
+      console.error(e, "Continueing to next item");
     }
-
-    return data;
   };
 
   convertToTimestamp = async dateString => {
@@ -322,42 +323,7 @@ class Twitter extends Adapter {
    * @description Crawls the queue of known links
    */
   crawl = async query => {
-    this.toCrawl = await this.fetchList(query.query);
-    console.log('round is', query.round, query.updateRound);
-    console.log(`about to crawl ${this.toCrawl.length} items`);
-    this.parsed = [];
-
-    console.log(
-      'test',
-      this.parsed.length < query.limit,
-      this.parsed.length,
-      query.limit,
-    );
-
-    while (this.parsed.length < query.limit && !this.break) {
-      let round = await query.updateRound();
-      const url = this.toCrawl.shift();
-      if (url) {
-        var data = await this.parseItem(url, query);
-        this.parsed[url] = data;
-
-        console.log('got tweet item', data);
-
-        const file = await makeFileFromObjectWithName(data, url);
-        // const cid = await storeFiles([file]);
-        const cid = 'testcid';
-        this.cids.create({
-          id: url,
-          round: round || 0,
-          cid: cid,
-        });
-
-        if (query.recursive === true) {
-          const newLinks = await this.fetchList(url);
-          this.toCrawl = this.toCrawl.concat(newLinks);
-        }
-      }
-    }
+    await this.fetchList(query.query, query.round);
   };
 
   /**
@@ -366,30 +332,48 @@ class Twitter extends Adapter {
    * @returns {Promise<string[]>}
    * @description Fetches a list of links from a given url
    */
-  fetchList = async url => {
+  fetchList = async (url, round) => {
     console.log('fetching list for ', url);
 
     // Go to the hashtag page
     await this.page.waitForTimeout(1000);
-    await this.page.setViewport({ width: 1024, height: 900 });
+    await this.page.setViewport({ width: 1024, height: 4000 });
     await this.page.goto(url);
 
     // Wait an additional 5 seconds until fully loaded before scraping
     await this.page.waitForTimeout(5000);
 
-    // Scrape the tweets
-    // TODO: Loop here for all tags
-    const item = await this.page.evaluate(() => {
-      const element = document.querySelector('article[aria-labelledby]');
-      return element ? element.outerHTML : null;
-    });
-    console.log('got item', item);
-    let data = await this.parseItem(item);
-    console.log(data);
-    // TODO: Save the data to dabase with round
-    await this.scrollPage(this.page);
+    for (let i = 0; i < 10; i++) {
+      // Scrape the tweets
+      const items = await this.page.evaluate(() => {
+        const elements = document.querySelectorAll('article[aria-labelledby]');
+        return Array.from(elements).map(element => element.outerHTML);
+      });
 
-    return uniqueLinks;
+      for (const item of items) {
+        let data = await this.parseItem(item);
+        // console.log(data);
+        const file = await makeFileFromObjectWithName(data);
+        const cid = await storeFiles([file]);
+        this.cids.create({
+          id: data.tweets_id,
+          round: round || 0,
+          cid: cid,
+        });
+      }
+
+      // Scroll the page for next batch of elements
+      await this.scrollPage(this.page);
+
+      // Optional: wait for a moment to allow new elements to load
+      await this.page.waitForTimeout(1000);
+
+      // Refetch the elements after scrolling
+      await this.page.evaluate(() => {
+        return document.querySelectorAll('article[aria-labelledby]');
+      });
+    }
+    return;
   };
 
   scrollPage = async page => {
@@ -428,11 +412,8 @@ function makeStorageClient() {
   return new Web3Storage({ token: getAccessToken() });
 }
 
-async function makeFileFromObjectWithName(obj, name) {
-  // console.log('making file from', typeof obj, name);
-  obj.url = name;
+async function makeFileFromObjectWithName(obj) {
   const buffer = Buffer.from(JSON.stringify(obj));
-  // console.log('buffer is', buffer);
   return new File([buffer], 'data.json', { type: 'application/json' });
 }
 

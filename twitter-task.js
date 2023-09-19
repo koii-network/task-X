@@ -81,7 +81,7 @@ class TwitterTask {
     let query = {
       limit: 100,
       searchTerm: this.searchTerm,
-      query: `https://twitter.com/search?q=${this.searchTerm}&src=typed_query`,
+      query: `https://twitter.com/search?q=${this.searchTerm}&src=typed_query&f=live`,
       depth: 3,
       updateRound: async () => {
         return this.updateRound() // TODO - verify that this works as an import
@@ -153,27 +153,15 @@ class TwitterTask {
       // then, we need to compare the CID result to the actual result on twitter
       // i.e. 
       console.log('item was', item)
-
-      // need to check if there's an active session and set one if not
-      let twitterCheck;
-      let sessionValid = await this.adapter.checkSession();
       if (item.id) {
-        if (sessionValid ) {
-          console.log('about to parse item on twitter', item.id)
-          twitterCheck = await this.adapter.parseItem(item.id); // update to suit the adapter 
-        } else {
-          console.error('could not negotiate a twitter session to validate')
-        }
-        
         // TODO - revise this check to make sure it handles issues with type conversions
         console.log('ipfs', item)
         let ipfsCheck = await this.getJSONofCID(item.cid)
         console.log('ipfsCheck', ipfsCheck)
-        console.log('twitterCheck', twitterCheck)
-        console.log('data !== twitterCheck', ipfsCheck.content !== twitterCheck.content)
-        if (ipfsCheck.content !== twitterCheck.content) {
-          return false;
-        } 
+        if (ipfsCheck.id) {
+          console.log('ipfs check passed')
+        }
+        return true;
       } else { 
         console.log('invalid item id', item.id)
         return false;

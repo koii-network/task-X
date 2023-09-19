@@ -2,12 +2,12 @@ const { namespaceWrapper } = require('../namespaceWrapper');
 
 /**
  * Data class
- * 
+ *
  * @param {string} name - the name of the database
  * @param {object} data - the initial data to be stored in the database
- * 
+ *
  * @returns {Data} - a Data object
- * 
+ *
  */
 
 class Data {
@@ -31,30 +31,50 @@ class Data {
 
   /**
    * create
-   * @param {*} item 
+   * @param {*} item
    * @returns {void}
    */
   async create(item) {
     try {
+      const existingItem = await this.getItem(item);
+      console.log('get item', existingItem);
+
+      if (existingItem && existingItem !== null && existingItem !== '[]') {
+        if (
+          !existingItem.timestamp ||
+          (item.timestamp && item.timestamp > existingItem.timestamp)
+        ) {
+          // Remove the old item with the same ID
+          await this.db.remove({ id: item.id }, {});
+          console.log('Old item removed');
+          this.db.compactDatafile();
+        } else {
+          console.log('New item has a lower or equal timestamp; ignoring');
+          return undefined;
+        }
+      }
+
       await this.db.insert(item);
+      console.log('Item inserted', item);
     } catch (e) {
-      console.error(e.key, e.errorType);
+      console.error(e);
       return undefined;
     }
   }
-  
+
   /**
    * getItem
-   * @param {*} item 
-   * @returns 
+   * @param {*} item
+   * @returns
    * @description gets an item from the database by ID (CID)
    */
   async getItem(item) {
-    console.log('trying to retrieve with ID', item);
+    console.log('trying to retrieve with ID', item.id);
     try {
-      const resp = await this.db.findOne({ item });
+      const resp = await this.db.find({ id: item.id });
+      // console.log('resp is ', resp);
       if (resp) {
-        return resp.item;
+        return resp;
       } else {
         return null;
       }
@@ -66,29 +86,20 @@ class Data {
 
   /**
    * getList
-   * @param {*} options 
-   * @returns 
-   * @description gets a list of items from the database by ID (CID) 
+   * @param {*} options
+   * @returns
+   * @description gets a list of items from the database by ID (CID)
    * or by round
    */
   async getList(options) {
     // doesn't support options or rounds yet?
     let itemListRaw;
-    if (!options) {
-      itemListRaw = await this.db.find({ item: { $exists: true } });
-      
-    } else {
-      if ( options.round ) {
-        console.log('has round', options.round)
-        // itemListRaw = await this.db.find({ item: { $exists: true } });
-        itemListRaw = await this.db.find({ round: options.round });
-      
-      }
-    }
-    // let itemList = itemListRaw.map(itemList => itemList.item);
+    console.log('has round', options.round);
+    // itemListRaw = await this.db.find({ item: { $exists: true } });
+    itemListRaw = await this.db.find({ round: options.round });
+
     return itemListRaw;
   }
-
 }
 
 module.exports = Data;
