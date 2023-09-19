@@ -35,7 +35,7 @@ class TwitterTask {
     this.round = round;
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
-    this.searchTerm = 'Web3';
+    this.searchTerm =  process.env.KEYWORD || 'web3';
     this.adapter = null;
     this.setAdapter = async ( ) => {
       const username = process.env.TWITTER_USERNAME;

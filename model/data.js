@@ -37,9 +37,9 @@ class Data {
   async create(item) {
     try {
       const existingItem = await this.getItem(item);
-      console.log('get item', existingItem);
+      // console.log('get item', existingItem);
 
-      if (existingItem && existingItem !== null && existingItem !== '[]') {
+      if (existingItem.id) {
         if (
           !existingItem.timestamp ||
           (item.timestamp && item.timestamp > existingItem.timestamp)

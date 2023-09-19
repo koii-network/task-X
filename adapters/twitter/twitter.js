@@ -307,7 +307,7 @@ class Twitter extends Adapter {
       }
       return data;
     } catch (e) {
-      console.error(e, "Continueing to next item");
+      console.error(e, 'Continueing to next item');
     }
   };
 
@@ -343,7 +343,7 @@ class Twitter extends Adapter {
     // Wait an additional 5 seconds until fully loaded before scraping
     await this.page.waitForTimeout(5000);
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 100; i++) {
       // Scrape the tweets
       const items = await this.page.evaluate(() => {
         const elements = document.querySelectorAll('article[aria-labelledby]');
@@ -351,15 +351,21 @@ class Twitter extends Adapter {
       });
 
       for (const item of items) {
-        let data = await this.parseItem(item);
-        // console.log(data);
-        const file = await makeFileFromObjectWithName(data);
-        const cid = await storeFiles([file]);
-        this.cids.create({
-          id: data.tweets_id,
-          round: round || 0,
-          cid: cid,
-        });
+        try {
+          let data = await this.parseItem(item);
+          // console.log(data);
+          if (data.tweets_id) {
+            const file = await makeFileFromObjectWithName(data);
+            const cid = await storeFiles([file]);
+            this.cids.create({
+              id: data.tweets_id,
+              round: round,
+              cid: cid,
+            });
+          }
+        } catch (e) {
+          console.error(e, 'Continueing to next item');
+        }
       }
 
       // Scroll the page for next batch of elements

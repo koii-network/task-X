@@ -7,11 +7,11 @@ const TwitterTask = require('../twitter-task');
 const run = async () => {
     let delay = 120000;
     var twitterTask = null;
-    let round = 0;
+    let round = 1;
 
     twitterTask = await new TwitterTask (async() => {
         return round;
-    });
+    }, round);
     console.log('started a new crawler at round', round);
         
 

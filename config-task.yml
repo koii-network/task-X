@@ -12,7 +12,7 @@ task_executable_network: 'IPFS'
 task_audit_program: 'dist/main.js'
 
 # Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
-round_time: 6000
+round_time: 5000
 
 audit_window: 1000
 submission_window: 1000
@@ -40,6 +40,9 @@ requirementsTags:
   - type: TASK_VARIABLE
     value: 'WEB3STORAGE_TOKEN'
     description: 'Used to upload data to IPFS - get 1GB for free at https://web3.storage/'
+  - type: TASK_VARIABLE
+    value: 'KEYWORD'
+    description: 'The keyword to search for in Twitter.'
   - type: TASK_VARIABLE
     value: 'TWITTER_USERNAME'
     description: 'The username of your volunteer Twitter account.'
