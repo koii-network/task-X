@@ -39,14 +39,14 @@ class Data {
       const existingItem = await this.getItem(item);
       // console.log('get item', existingItem);
 
-      if (existingItem.id) {
+      if (existingItem) {
         if (
-          !existingItem.timestamp ||
-          (item.timestamp && item.timestamp > existingItem.timestamp)
+          !existingItem[0].timestamp ||
+          (item.timestamp && item.timestamp > existingItem[0].timestamp)
         ) {
           // Remove the old item with the same ID
           await this.db.remove({ id: item.id }, {});
-          console.log('Old item removed');
+          // console.log('Old item removed');
           this.db.compactDatafile();
         } else {
           console.log('New item has a lower or equal timestamp; ignoring');
@@ -55,7 +55,7 @@ class Data {
       }
 
       await this.db.insert(item);
-      console.log('Item inserted', item);
+      // console.log('Item inserted', item);
     } catch (e) {
       console.error(e);
       return undefined;
@@ -69,11 +69,11 @@ class Data {
    * @description gets an item from the database by ID (CID)
    */
   async getItem(item) {
-    console.log('trying to retrieve with ID', item.id);
+    // console.log('trying to retrieve with ID', item.id);
     try {
       const resp = await this.db.find({ id: item.id });
       // console.log('resp is ', resp);
-      if (resp) {
+      if (resp.length !== 0) {
         return resp;
       } else {
         return null;

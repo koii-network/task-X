@@ -1,5 +1,5 @@
 # Name and metadata of your task
-task_name: 'Twitter Task v5 short'
+task_name: 'Twitter Beta v5.2 short'
 author: 'Soma'
 description: 'This will be description of your task'
 repositoryUrl: 'https://github.com/koii-network/task-examples'
@@ -12,7 +12,7 @@ task_executable_network: 'IPFS'
 task_audit_program: 'dist/main.js'
 
 # Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
-round_time: 600
+round_time: 1000
 
 audit_window: 200
 submission_window: 200

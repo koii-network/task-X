@@ -6,6 +6,7 @@ const cheerio = require('cheerio');
 var crypto = require('crypto');
 const { Web3Storage, File } = require('web3.storage');
 const Data = require('../../model/data');
+const { namespaceWrapper } = require('../../namespaceWrapper');
 
 /**
  * Twitter
@@ -44,7 +45,7 @@ class Twitter extends Adapter {
   checkSession = async () => {
     if (this.sessionValid) {
       return true;
-    } else if (Date.now() - this.lastSessionCheck > 60000) {
+    } else if (Date.now() - this.lastSessionCheck > 50000) {
       await this.negotiateSession();
       return true;
     } else {
@@ -82,7 +83,7 @@ class Twitter extends Adapter {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     );
     // TODO - Enable console logs in the context of the page and export them for diagnostics here
-    await this.page.setViewport({ width: 1920, height: 25000 });
+    await this.page.setViewport({ width: 1920, height: 1080 });
     await this.twitterLogin();
 
     return true;
@@ -323,7 +324,15 @@ class Twitter extends Adapter {
    * @description Crawls the queue of known links
    */
   crawl = async query => {
-    await this.fetchList(query.query, query.round);
+    while (true) {
+      console.log('valid? ', this.sessionValid);
+      if (this.sessionValid == true) {
+        await this.fetchList(query.query, query.round);
+        await new Promise(resolve => setTimeout(resolve, 300000)); // If the error message is found, wait for 5 minutes, refresh the page, and continue
+      } else {
+        await this.negotiateSession();
+      }
+    }
   };
 
   /**
@@ -343,7 +352,20 @@ class Twitter extends Adapter {
     // Wait an additional 5 seconds until fully loaded before scraping
     await this.page.waitForTimeout(5000);
 
-    for (let i = 0; i < 100; i++) {
+    while (true) {
+      round = await namespaceWrapper.getRound();
+      // Check if the error message is present on the page inside an article element
+      const errorMessage = await this.page.evaluate(() => {
+        const elements = document.querySelectorAll('div[dir="ltr"]');
+        for (let element of elements) {
+          console.log(element.textContent);
+          if (element.textContent === 'Something went wrong. Try reloading.') {
+            return true;
+          }
+        }
+        return false;
+      });
+
       // Scrape the tweets
       const items = await this.page.evaluate(() => {
         const elements = document.querySelectorAll('article[aria-labelledby]');
@@ -355,13 +377,22 @@ class Twitter extends Adapter {
           let data = await this.parseItem(item);
           // console.log(data);
           if (data.tweets_id) {
-            const file = await makeFileFromObjectWithName(data);
-            const cid = await storeFiles([file]);
-            this.cids.create({
+            // Check if id exists in database
+            let checkItem = {
               id: data.tweets_id,
-              round: round,
-              cid: cid,
-            });
+            };
+            const existingItem = await this.db.getItem(checkItem);
+            if (!existingItem) {
+              // Store the item in the database
+              const file = await makeFileFromObjectWithName(data);
+              const cid = await storeFiles([file]);
+              // const cid = 'testcid';
+              this.cids.create({
+                id: data.tweets_id,
+                round: round,
+                cid: cid,
+              });
+            }
           }
         } catch (e) {
           console.error(e, 'Continueing to next item');
@@ -378,6 +409,14 @@ class Twitter extends Adapter {
       await this.page.evaluate(() => {
         return document.querySelectorAll('article[aria-labelledby]');
       });
+
+      // If the error message is found, wait for 2 minutes, refresh the page, and continue
+      if (errorMessage) {
+        console.log('Rate limit reach, waiting for 5 minutes...');
+        this.sessionValid = false;
+        await this.browser.close(); // Refresh the page
+        break;
+      }
     }
     return;
   };
@@ -426,34 +465,8 @@ async function makeFileFromObjectWithName(obj) {
 async function storeFiles(files) {
   const client = makeStorageClient();
   const cid = await client.put(files);
-  console.log('stored files with cid:', cid);
+  // console.log('stored files with cid:', cid);
   return cid;
-}
-
-// TODO - use this properly as a sub-flow in this.parseItem()
-const parseTweet = async tweet => {
-  // console.log('new tweet!', tweet)
-  let item = {
-    id: tweet.id,
-    data: tweet,
-    list: getIdListFromTweet(tweet),
-  };
-
-  return item;
-};
-
-const getIdListFromTweet = tweet => {
-  // parse the tweet for IDs from comments and replies and return an array
-
-  return [];
-};
-
-function getUnique(array) {
-  return [...new Set(array)];
-}
-
-function idFromUrl(url, round) {
-  return round + ':' + url;
 }
 
 function getAccessToken() {
