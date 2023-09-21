@@ -6,6 +6,7 @@ const cheerio = require('cheerio');
 var crypto = require('crypto');
 const { Web3Storage, File } = require('web3.storage');
 const Data = require('../../model/data');
+const { namespaceWrapper } = require('../../namespaceWrapper');
 
 /**
  * Twitter
@@ -44,7 +45,7 @@ class Twitter extends Adapter {
   checkSession = async () => {
     if (this.sessionValid) {
       return true;
-    } else if (Date.now() - this.lastSessionCheck > 60000) {
+    } else if (Date.now() - this.lastSessionCheck > 50000) {
       await this.negotiateSession();
       return true;
     } else {
@@ -69,10 +70,10 @@ class Twitter extends Adapter {
       '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
     );
     this.browser = await stats.puppeteer.launch({
-      headless: false,
+      headless: 'new',
       userAgent:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
       executablePath: stats.executablePath,
     });
 
@@ -82,7 +83,7 @@ class Twitter extends Adapter {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     );
     // TODO - Enable console logs in the context of the page and export them for diagnostics here
-    await this.page.setViewport({ width: 1920, height: 25000 });
+    await this.page.setViewport({ width: 1920, height: 1080 });
     await this.twitterLogin();
 
     return true;
@@ -210,12 +211,11 @@ class Twitter extends Adapter {
         // TEST USE
         const cid = await storeFiles([file]);
         // const cid = "cid"
-
         await this.proofs.create({
           id: 'proof:' + round,
           proof_round: round,
           proof_cid: cid,
-        }); 
+        });
 
         console.log('returning proof cid for submission', cid);
         return cid;
@@ -233,105 +233,83 @@ class Twitter extends Adapter {
    * @description - this function should parse the item at the given url and return the parsed item data
    *               according to the query object and for use in either crawl() or validate()
    */
-  parseItem = async (url, query) => {
+  parseItem = async item => {
     if (this.sessionValid == false) {
       await this.negotiateSession();
     }
+    try {
+      const $ = cheerio.load(item);
+      let data = {};
 
-    await this.page.setViewport({ width: 1024, height: 10000 });
+      const articles = $('article[data-testid="tweet"]').toArray();
+      const el = articles[0];
+      const tweetUrl = $('a[href*="/status/"]').attr('href');
+      const tweetId = tweetUrl.split('/').pop();
+      const screen_name = $(el).find('a[tabindex="-1"]').text();
+      const allText = $(el).find('a[role="link"]').text();
+      const user_name = allText.split('@')[0];
+      // console.log('user_name', user_name);
+      const user_url =
+        'https://twitter.com' + $(el).find('a[role="link"]').attr('href');
+      const user_img = $(el).find('img[draggable="true"]').attr('src');
 
-    console.log('PARSE: ' + url, query);
-    await this.page.goto(url);
-    await this.page.waitForTimeout(2000);
+      const tweet_text = $(el)
+        .find('div[data-testid="tweetText"]')
+        .first()
+        .text();
 
-    console.log('PARSE: ' + url);
-    const tweets_id = url.match(/status\/(\d+)/)[1];
-    const html = await this.page.content();
-    const $ = cheerio.load(html);
-    let data = {};
-    var count = 0;
+      const outerMediaElements = $(el).find('div[data-testid="tweetText"] a');
 
-    const articles = $('article[data-testid="tweet"]').toArray();
+      const outer_media_urls = [];
+      const outer_media_short_urls = [];
 
-    const el = articles[0];
-    const screen_name = $(el).find('a[tabindex="-1"]').text();
-    const allText = $(el).find('a[role="link"]').text();
-    const user_name = allText.split('@')[0];
-    console.log('user_name', user_name);
-    const user_url =
-      'https://twitter.com' + $(el).find('a[role="link"]').attr('href');
-    const user_img = $(el).find('img[draggable="true"]').attr('src');
+      outerMediaElements.each(function () {
+        const fullURL = $(this).attr('href');
+        const shortURL = $(this).text().replace(/\s/g, '');
 
-    const tweet_text = $(el)
-      .find('div[data-testid="tweetText"]')
-      .first()
-      .text();
-
-    const outerMediaElements = $(el).find('div[data-testid="tweetText"] a');
-
-    const outer_media_urls = [];
-    const outer_media_short_urls = [];
-
-    outerMediaElements.each(function () {
-      const fullURL = $(this).attr('href');
-      const shortURL = $(this).text().replace(/\s/g, '');
-
-      // Ignore URLs containing "/search?q=" or "twitter.com"
-      if (
-        fullURL &&
-        !fullURL.includes('/search?q=') &&
-        !fullURL.includes('twitter.com') &&
-        !fullURL.includes('/hashtag/')
-      ) {
-        outer_media_urls.push(fullURL);
-        outer_media_short_urls.push(shortURL);
-      }
-    });
-
-    const timeRaw = $(el).find('time').attr('datetime');
-    const time = await this.convertToTimestamp(timeRaw);
-    const tweet_record = $(el).find(
-      'span[data-testid="app-text-transition-container"]',
-    );
-    const commentCount = tweet_record.eq(0).text();
-    const likeCount = tweet_record.eq(1).text();
-    const shareCount = tweet_record.eq(2).text();
-    const viewCount = tweet_record.eq(3).text();
-    if (screen_name && tweet_text) {
-      data = {
-        user_name: user_name,
-        screen_name: screen_name,
-        user_url: user_url,
-        user_img: user_img,
-        tweets_id: tweets_id,
-        tweets_url: url,
-        tweets_content: tweet_text.replace(/\n/g, '<br>'),
-        time_post: time,
-        time_read: Date.now(),
-        comment: commentCount,
-        like: likeCount,
-        share: shareCount,
-        view: viewCount,
-        outer_media_url: outer_media_urls,
-        outer_media_short_url: outer_media_short_urls,
-      };
-    }
-    // await this.page.waitForTimeout(99999999);
-    // TODO  - queue users to be crawled?
-
-    if (query) {
-      // get the comments and other attached tweet items and queue them
-      articles.slice(1).forEach(async el => {
-        const user_name = $(el).find('a[tabindex="-1"]').text();
-        let newQuery = `https://twitter.com/search?q=${encodeURIComponent(
-          user_name,
-        )}%20${query.searchTerm}&src=typed_query`;
-        if (query.isRecursive)
-          this.toCrawl.push(await this.fetchList(newQuery));
+        // Ignore URLs containing "/search?q=" or "twitter.com"
+        if (
+          fullURL &&
+          !fullURL.includes('/search?q=') &&
+          !fullURL.includes('twitter.com') &&
+          !fullURL.includes('/hashtag/')
+        ) {
+          outer_media_urls.push(fullURL);
+          outer_media_short_urls.push(shortURL);
+        }
       });
-    }
 
-    return data;
+      const timeRaw = $(el).find('time').attr('datetime');
+      const time = await this.convertToTimestamp(timeRaw);
+      const tweet_record = $(el).find(
+        'span[data-testid="app-text-transition-container"]',
+      );
+      const commentCount = tweet_record.eq(0).text();
+      const likeCount = tweet_record.eq(1).text();
+      const shareCount = tweet_record.eq(2).text();
+      const viewCount = tweet_record.eq(3).text();
+      if (screen_name && tweet_text) {
+        data = {
+          user_name: user_name,
+          screen_name: screen_name,
+          user_url: user_url,
+          user_img: user_img,
+          tweets_id: tweetId,
+          tweets_content: tweet_text.replace(/\n/g, '<br>'),
+          time_post: time,
+          time_read: Date.now(),
+          comment: commentCount,
+          like: likeCount,
+          share: shareCount,
+          view: viewCount,
+          outer_media_url: outer_media_urls,
+          outer_media_short_url: outer_media_short_urls,
+        };
+      }
+      return data;
+    } catch (e) {
+      console.error(e, 'Continueing to next item');
+    }
   };
 
   convertToTimestamp = async dateString => {
@@ -346,40 +324,13 @@ class Twitter extends Adapter {
    * @description Crawls the queue of known links
    */
   crawl = async query => {
-    this.toCrawl = await this.fetchList(query.query);
-    console.log('round is', query.round, query.updateRound);
-    console.log(`about to crawl ${this.toCrawl.length} items`);
-    this.parsed = [];
-
-    console.log(
-      'test',
-      this.parsed.length < query.limit,
-      this.parsed.length,
-      query.limit,
-    );
-
-    while (this.parsed.length < query.limit && !this.break) {
-      let round = await query.updateRound();
-      const url = this.toCrawl.shift();
-      if (url) {
-        var data = await this.parseItem(url, query);
-        this.parsed[url] = data;
-
-        console.log('got tweet item', data);
-
-        const file = await makeFileFromObjectWithName(data, url);
-        // const cid = await storeFiles([file]);
-        const cid = 'testcid'
-        this.cids.create({
-          id: url,
-          round: round || 0,
-          cid: cid,
-        });
-
-        if (query.recursive === true) {
-          const newLinks = await this.fetchList(url);
-          this.toCrawl = this.toCrawl.concat(newLinks);
-        }
+    while (true) {
+      console.log('valid? ', this.sessionValid);
+      if (this.sessionValid == true) {
+        await this.fetchList(query.query, query.round);
+        await new Promise(resolve => setTimeout(resolve, 300000)); // If the error message is found, wait for 5 minutes, refresh the page, and continue
+      } else {
+        await this.negotiateSession();
       }
     }
   };
@@ -390,43 +341,91 @@ class Twitter extends Adapter {
    * @returns {Promise<string[]>}
    * @description Fetches a list of links from a given url
    */
-  fetchList = async url => {
+  fetchList = async (url, round) => {
     console.log('fetching list for ', url);
 
     // Go to the hashtag page
     await this.page.waitForTimeout(1000);
-    await this.page.setViewport({ width: 1024, height: 7768 });
+    await this.page.setViewport({ width: 1024, height: 4000 });
     await this.page.goto(url);
 
     // Wait an additional 5 seconds until fully loaded before scraping
     await this.page.waitForTimeout(5000);
 
-    // Scrape the tweets
-    const html = await this.page.content();
-    const $ = cheerio.load(html);
+    while (true) {
+      round = await namespaceWrapper.getRound();
+      // Check if the error message is present on the page inside an article element
+      const errorMessage = await this.page.evaluate(() => {
+        const elements = document.querySelectorAll('div[dir="ltr"]');
+        for (let element of elements) {
+          console.log(element.textContent);
+          if (element.textContent === 'Something went wrong. Try reloading.') {
+            return true;
+          }
+        }
+        return false;
+      });
 
-    const links = $('a').toArray();
+      // Scrape the tweets
+      const items = await this.page.evaluate(() => {
+        const elements = document.querySelectorAll('article[aria-labelledby]');
+        return Array.from(elements).map(element => element.outerHTML);
+      });
 
-    console.log(`got ${links.length} links`);
+      for (const item of items) {
+        try {
+          let data = await this.parseItem(item);
+          // console.log(data);
+          if (data.tweets_id) {
+            // Check if id exists in database
+            let checkItem = {
+              id: data.tweets_id,
+            };
+            const existingItem = await this.db.getItem(checkItem);
+            if (!existingItem) {
+              // Store the item in the database
+              const file = await makeFileFromObjectWithName(data);
+              const cid = await storeFiles([file]);
+              // const cid = 'testcid';
+              this.cids.create({
+                id: data.tweets_id,
+                round: round,
+                cid: cid,
+              });
+            }
+          }
+        } catch (e) {
+          console.error('Error: Bad tweets format. Continueing to next item');
+        }
+      }
 
-    // Filter the matching elements with the specified pattern
-    const matchedLinks = links.filter(link => {
-      const href = $(link).attr('href');
-      const regex = /\/status\/\d+[^/]*$/;
-      return regex.test(href);
+      // Scroll the page for next batch of elements
+      await this.scrollPage(this.page);
+
+      // Optional: wait for a moment to allow new elements to load
+      await this.page.waitForTimeout(1000);
+
+      // Refetch the elements after scrolling
+      await this.page.evaluate(() => {
+        return document.querySelectorAll('article[aria-labelledby]');
+      });
+
+      // If the error message is found, wait for 2 minutes, refresh the page, and continue
+      if (errorMessage) {
+        console.log('Rate limit reach, waiting for 5 minutes...');
+        this.sessionValid = false;
+        await this.browser.close(); // Refresh the page
+        break;
+      }
+    }
+    return;
+  };
+
+  scrollPage = async page => {
+    await page.evaluate(() => {
+      window.scrollBy(0, window.innerHeight);
     });
-
-    const linkStrings = [];
-    matchedLinks.forEach(link => {
-      linkStrings.push('https://twitter.com' + $(link).attr('href'));
-    });
-
-    const uniqueLinks = getUnique(linkStrings);
-    uniqueLinks.forEach(link => {
-      console.log('fetchlist link:', link);
-    });
-
-    return uniqueLinks;
+    await page.waitForTimeout(1000); // Adjust the timeout as necessary
   };
 
   /**
@@ -458,45 +457,16 @@ function makeStorageClient() {
   return new Web3Storage({ token: getAccessToken() });
 }
 
-async function makeFileFromObjectWithName(obj, name) {
-  // console.log('making file from', typeof obj, name);
-  obj.url = name;
+async function makeFileFromObjectWithName(obj) {
   const buffer = Buffer.from(JSON.stringify(obj));
-  // console.log('buffer is', buffer);
   return new File([buffer], 'data.json', { type: 'application/json' });
 }
 
 async function storeFiles(files) {
   const client = makeStorageClient();
   const cid = await client.put(files);
-  console.log('stored files with cid:', cid);
+  // console.log('stored files with cid:', cid);
   return cid;
-}
-
-// TODO - use this properly as a sub-flow in this.parseItem()
-const parseTweet = async tweet => {
-  // console.log('new tweet!', tweet)
-  let item = {
-    id: tweet.id,
-    data: tweet,
-    list: getIdListFromTweet(tweet),
-  };
-
-  return item;
-};
-
-const getIdListFromTweet = tweet => {
-  // parse the tweet for IDs from comments and replies and return an array
-
-  return [];
-};
-
-function getUnique(array) {
-  return [...new Set(array)];
-}
-
-function idFromUrl(url, round) {
-  return round + ':' + url;
 }
 
 function getAccessToken() {

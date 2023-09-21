@@ -1,7 +1,7 @@
 # Name and metadata of your task
-task_name: 'Twitter Task v5'
+task_name: 'Twitter Crawler v5'
 author: 'Soma'
-description: 'This will be description of your task'
+description: 'This task volunteers your spare Twitter account to help us archive the #koii hashtag community. Or provide the keyword that you would like get. This is a not-for-profit endeavor, sponsored by the Koii Foundation :). Before start running the task please ensure your volunteer Twitter account has passed the Twitter verification process.'
 repositoryUrl: 'https://github.com/koii-network/task-examples'
 imageUrl: 'imageUrl'
 
@@ -12,20 +12,20 @@ task_executable_network: 'IPFS'
 task_audit_program: 'dist/main.js'
 
 # Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
-round_time: 6000
+round_time: 1200
 
-audit_window: 1000
-submission_window: 1000
+audit_window: 300
+submission_window: 300
 
 # Amounts in KOII
 
-minimum_stake_amount: 0.1
+minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
 total_bounty_amount: 10
 
-bounty_amount_per_round: 0.1
+bounty_amount_per_round: 1
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 3
@@ -39,7 +39,10 @@ space: 1
 requirementsTags:
   - type: TASK_VARIABLE
     value: 'WEB3STORAGE_TOKEN'
-    description: 'Used to upload data to IPFS - get 1GB for free at https://web3.storage/'
+    description: 'To upload the executable to IPFS, you will need a web3 storage key. You can obtain one for yourself by following the tutorial at https://blog.koii.network/Introduce-web3-storage/. This tutorial will guide you on how to get the required web3 storage key for IPFS uploading.'
+  - type: TASK_VARIABLE
+    value: 'KEYWORD'
+    description: 'The keyword to search for in Twitter.'
   - type: TASK_VARIABLE
     value: 'TWITTER_USERNAME'
     description: 'The username of your volunteer Twitter account.'
@@ -56,7 +59,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: ''
+task_id: '9cQSLCR4LrqqqiZjDRveBBngKPbeBPvVTah7NBYgbPvM'
 
 # Provide the description for changes made in new version of task
-migrationDescription: ''
+migrationDescription: 'Release v5 of the Twitter Crawler task. This version adds the ability to specify the keyword to search for in Twitter. Also the task is more stable now.'
