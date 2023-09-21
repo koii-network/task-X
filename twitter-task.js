@@ -75,12 +75,12 @@ class TwitterTask {
     await this.setAdapter();
 
     // await db.initializeData();
-
+    let keyword = encodeURIComponent(this.searchTerm);
     this.isRunning = true;
 
     let query = {
       limit: 100,
-      searchTerm: this.searchTerm,
+      searchTerm: keyword,
       query: `https://twitter.com/search?q=${this.searchTerm}&src=typed_query&f=live`,
       depth: 3,
       updateRound: async () => {
