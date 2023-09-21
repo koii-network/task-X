@@ -1,7 +1,7 @@
 # Name and metadata of your task
-task_name: 'Twitter Beta v5.3 short'
+task_name: 'Twitter Crawler v5'
 author: 'Soma'
-description: 'This task volunteers your spare Twitter account to help us archive the #koii hashtag community. This is a not-for-profit endeavor, sponsored by the Koii Foundation :)'
+description: 'This task volunteers your spare Twitter account to help us archive the #koii hashtag community. OrThis is a not-for-profit endeavor, sponsored by the Koii Foundation :)'
 repositoryUrl: 'https://github.com/koii-network/task-examples'
 imageUrl: 'imageUrl'
 
