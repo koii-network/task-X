@@ -35,7 +35,7 @@ class TwitterTask {
     this.round = round;
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
-    this.searchTerm =  process.env.KEYWORD || 'web3';
+    this.searchTerm =  process.env.KEYWORD || '#koii';
     this.adapter = null;
     this.setAdapter = async ( ) => {
       const username = process.env.TWITTER_USERNAME;
@@ -81,7 +81,7 @@ class TwitterTask {
     let query = {
       limit: 100,
       searchTerm: keyword,
-      query: `https://twitter.com/search?q=${this.searchTerm}&src=typed_query&f=live`,
+      query: `https://twitter.com/search?q=${keyword}&src=typed_query&f=live`,
       depth: 3,
       updateRound: async () => {
         return this.updateRound() // TODO - verify that this works as an import

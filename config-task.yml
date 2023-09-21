@@ -1,7 +1,7 @@
 # Name and metadata of your task
-task_name: 'Twitter Beta v5.2 short'
+task_name: 'Twitter Beta v5.3 short'
 author: 'Soma'
-description: 'This will be description of your task'
+description: 'This task volunteers your spare Twitter account to help us archive the #koii hashtag community. This is a not-for-profit endeavor, sponsored by the Koii Foundation :)'
 repositoryUrl: 'https://github.com/koii-network/task-examples'
 imageUrl: 'imageUrl'
 
@@ -12,20 +12,20 @@ task_executable_network: 'IPFS'
 task_audit_program: 'dist/main.js'
 
 # Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
-round_time: 1000
+round_time: 1200
 
-audit_window: 200
-submission_window: 200
+audit_window: 300
+submission_window: 300
 
 # Amounts in KOII
 
-minimum_stake_amount: 0.1
+minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
 total_bounty_amount: 10
 
-bounty_amount_per_round: 0.1
+bounty_amount_per_round: 1
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 3

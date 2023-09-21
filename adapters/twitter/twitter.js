@@ -395,7 +395,7 @@ class Twitter extends Adapter {
             }
           }
         } catch (e) {
-          console.error(e, 'Continueing to next item');
+          console.error('Error: Bad tweets format. Continueing to next item');
         }
       }
 
