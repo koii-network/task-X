@@ -173,7 +173,7 @@ class CoreLogic {
    * @param {*} round 
    * @returns 
    */
-  async validateNode(submission_value, round) {
+  validateNode = async (submission_value, round) => {
     return await this.twitterTask.validate(submission_value, round);
   }
 
