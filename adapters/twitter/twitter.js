@@ -207,9 +207,13 @@ class Twitter extends Adapter {
         console.log('No cids found for round ' + round);
         return null;
       } else {
-        const file = await makeFileFromObjectWithName(data, 'round:' + round);
+        const listBuffer = Buffer.from(JSON.stringify(data));
+        const listFile = new File([listBuffer], 'data.json', {
+          type: 'application/json',
+        });
         // TEST USE
-        const cid = await storeFiles([file]);
+        const client = makeStorageClient();
+        const cid = await client.put([listFile]);
         // const cid = "cid"
         await this.proofs.create({
           id: 'proof:' + round,
@@ -384,8 +388,8 @@ class Twitter extends Adapter {
             const existingItem = await this.db.getItem(checkItem);
             if (!existingItem) {
               // Store the item in the database
-              const file = await makeFileFromObjectWithName(data);
-              const cid = await storeFiles([file]);
+              const files = await makeFileFromObjectWithName(data, item);
+              const cid = await storeFiles(files);
               // const cid = 'testcid';
               this.cids.create({
                 id: data.tweets_id,
@@ -457,14 +461,23 @@ function makeStorageClient() {
   return new Web3Storage({ token: getAccessToken() });
 }
 
-async function makeFileFromObjectWithName(obj) {
-  const buffer = Buffer.from(JSON.stringify(obj));
-  return new File([buffer], 'data.json', { type: 'application/json' });
+async function makeFileFromObjectWithName(obj, item) {
+  const databuffer = Buffer.from(JSON.stringify(obj));
+  const dataJson = new File([databuffer], 'data.json', {
+    type: 'application/json',
+  });
+
+  const htmlBuffer = Buffer.from(item);
+  const dataHtml = new File([htmlBuffer], 'data.txt', {
+    type: 'text/html;charset=UTF-8',
+  });
+
+  return { dataJson, dataHtml };
 }
 
 async function storeFiles(files) {
   const client = makeStorageClient();
-  const cid = await client.put(files);
+  const cid = await client.put([files.dataJson, files.dataHtml]);
   // console.log('stored files with cid:', cid);
   return cid;
 }

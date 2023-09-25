@@ -1,5 +1,5 @@
 # Name and metadata of your task
-task_name: 'Twitter Crawler v5'
+task_name: 'Twitter Crawler v5.1'
 author: 'Soma'
 description: 'This task volunteers your spare Twitter account to help us archive the #koii hashtag community. Or provide the keyword that you would like get. This is a not-for-profit endeavor, sponsored by the Koii Foundation :). Before start running the task please ensure your volunteer Twitter account has passed the Twitter verification process.'
 repositoryUrl: 'https://github.com/koii-network/task-examples'
@@ -23,7 +23,7 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 1000
+total_bounty_amount: 100
 
 bounty_amount_per_round: 1
 
