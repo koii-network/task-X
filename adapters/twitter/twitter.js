@@ -207,9 +207,13 @@ class Twitter extends Adapter {
         console.log('No cids found for round ' + round);
         return null;
       } else {
-        const file = await makeFileFromObjectWithName(data, 'round:' + round);
+        const listBuffer = Buffer.from(JSON.stringify(data));
+        const listFile = new File([listBuffer], 'data.json', {
+          type: 'application/json',
+        });
         // TEST USE
-        const cid = await storeFiles([file]);
+        const client = makeStorageClient();
+        const cid = await client.put([listFile]);
         // const cid = "cid"
         await this.proofs.create({
           id: 'proof:' + round,
@@ -459,12 +463,16 @@ function makeStorageClient() {
 
 async function makeFileFromObjectWithName(obj, item) {
   const databuffer = Buffer.from(JSON.stringify(obj));
-  const dataJson = new File([databuffer], 'data.json', { type: 'application/json' });
+  const dataJson = new File([databuffer], 'data.json', {
+    type: 'application/json',
+  });
 
   const htmlBuffer = Buffer.from(item);
-  const dataHtml = new File([htmlBuffer], 'data.txt', { type: 'text/html;charset=UTF-8' });
+  const dataHtml = new File([htmlBuffer], 'data.txt', {
+    type: 'text/html;charset=UTF-8',
+  });
 
-  return { dataJson, dataHtml }
+  return { dataJson, dataHtml };
 }
 
 async function storeFiles(files) {
