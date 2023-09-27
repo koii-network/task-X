@@ -70,7 +70,6 @@ class Twitter extends Adapter {
       '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
     );
     this.browser = await stats.puppeteer.launch({
-      headless: 'new',
       userAgent:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
@@ -312,7 +311,7 @@ class Twitter extends Adapter {
       }
       return data;
     } catch (e) {
-      console.error(e, 'Continueing to next item');
+      console.log('Filtering advertisement tweets; continuing to the next item.');
     }
   };
 
@@ -399,7 +398,7 @@ class Twitter extends Adapter {
             }
           }
         } catch (e) {
-          console.error('Error: Bad tweets format. Continueing to next item');
+          console.log('Filtering advertisement tweets; continuing to the next item.');
         }
       }
 
