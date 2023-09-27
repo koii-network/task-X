@@ -26,22 +26,23 @@ This is an implementation of the default data-gatherer class of Koii tasks.
 There are four main components, detailed in the adapter file: `adapters/twitter/twitter.js`
 1. Negotiate Session
 2. Fetch a list
-3. Fetch an item
-4. Fetch a list from an item
+3. crawl an item
+4. Store the item
 
-The repo also contains a host of test files, most importantly `test/test-one-round.js` which details the full flow of one [gradual consensus](https://docs.koii.network/develop/koii-task-101/what-are-tasks/gradual-consensus) round. 
+The repo also contains a host of test files, most importantly `test/test-one-round.js` which details the full flow of one [gradual consensus](https://docs.koii.network/concepts/gradual-consensus/runtime-flow) round. 
 
 Run the test with 
 ```
-yarn
-node test/test-one-round.js
+yarn install or npm install
+yarn test or npm run test
 ```
 
 ## Using The Crawler
 To modify the crawler query, or change how it uses the local database, open `twitter-task.js`.
 
 The `query` object manages the key parts of the crawler.
-```
+
+```javascript
 let searchTerm = "#koii";
 let query = {
     limit: 100, // total number of records to return
