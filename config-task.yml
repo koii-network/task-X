@@ -1,7 +1,7 @@
 # Name and metadata of your task
 task_name: 'Twitter Crawler v5.1'
 author: 'Soma'
-description: 'This task volunteers your spare Twitter account to help us archive the #koii hashtag community. Or provide the keyword that you would like get. This is a not-for-profit endeavor, sponsored by the Koii Foundation :). Before start running the task please ensure your volunteer Twitter account has passed the Twitter verification process.'
+description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag community or any keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed Twitter's verification process.'
 repositoryUrl: 'https://github.com/koii-network/task-examples'
 imageUrl: 'imageUrl'
 
@@ -42,10 +42,10 @@ requirementsTags:
     description: 'To upload the executable to IPFS, you will need a web3 storage key. You can obtain one for yourself by following the tutorial at https://blog.koii.network/Introduce-web3-storage/. This tutorial will guide you on how to get the required web3 storage key for IPFS uploading.'
   - type: TASK_VARIABLE
     value: 'KEYWORD'
-    description: 'The keyword to search for in Twitter.'
+    description: 'Please leave this blank if you want to archive the #koii hashtag community. Otherwise, please specify the keyword you want to search for in Twitter.'
   - type: TASK_VARIABLE
     value: 'TWITTER_USERNAME'
-    description: 'The username of your volunteer Twitter account.'
+    description: 'The username of your volunteer Twitter account. Please ensure your volunteer Twitter account has passed the Twitter verification process.'
   - type: TASK_VARIABLE
     value: 'TWITTER_PASSWORD'
     description: 'The password of your volunteer Twitter account.'
