@@ -27,6 +27,7 @@ class Twitter extends Adapter {
     this.cids = new Data('cids', []);
     this.cids.initializeData();
     this.toCrawl = [];
+    this.searchTerm = [];
     this.parsed = {};
     this.lastSessionCheck = null;
     this.sessionValid = false;
@@ -307,6 +308,7 @@ class Twitter extends Adapter {
           view: viewCount,
           outer_media_url: outer_media_urls,
           outer_media_short_url: outer_media_short_urls,
+          keyword: this.searchTerm
         };
       }
       return data;
@@ -330,6 +332,7 @@ class Twitter extends Adapter {
     while (true) {
       console.log('valid? ', this.sessionValid);
       if (this.sessionValid == true) {
+        this.searchTerm = query.searchTerm;
         await this.fetchList(query.query, query.round);
         await new Promise(resolve => setTimeout(resolve, 300000)); // If the error message is found, wait for 5 minutes, refresh the page, and continue
       } else {
@@ -482,13 +485,5 @@ async function storeFiles(files) {
 }
 
 function getAccessToken() {
-  // If you're just testing, you can paste in a token
-  // and uncomment the following line:
-  // return 'paste-your-token-here'
-
-  // In a real app, it's better to read an access token from an
-  // environement variable or other configuration that's kept outside of
-  // your code base. For this to work, you need to set the
-  // WEB3STORAGE_TOKEN environment variable before you run your code.
   return process.env.WEB3STORAGE_TOKEN;
 }
