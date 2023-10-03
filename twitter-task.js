@@ -4,6 +4,7 @@ const { Web3Storage } = require('web3.storage');
 const Data = require('./model/data');
 const dotenv = require('dotenv');
 const { default: axios } = require('axios');
+const { namespaceWrapper } = require('./namespaceWrapper.js');
 dotenv.config();
 
 /**
@@ -87,9 +88,12 @@ class TwitterTask {
     let keyword;
 
     try {
-      const response = await axios.get(
-        'https://crawltask-test-e4cfb6acc7b6.herokuapp.com/',
-      );
+      const response = await axios.get('http://localhost:3000/keywords', {
+        params: {
+          key: 'GDZ9EGX1wVvELJrAviRVoj9VN1dNXmJYbb4qipczkuJC',
+        },
+      });
+      console.log('keywords from middle server', response.data);
       keyword = response.data;
     } catch (error) {
       console.log(

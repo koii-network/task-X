@@ -3,7 +3,7 @@ const Adapter = require('../../model/adapter');
 const puppeteer = require('puppeteer');
 const PCR = require('puppeteer-chromium-resolver');
 const cheerio = require('cheerio');
-var crypto = require('crypto');
+const axios = require('axios');
 const { Web3Storage, File } = require('web3.storage');
 const Data = require('../../model/data');
 const { namespaceWrapper } = require('../../namespaceWrapper');
@@ -32,6 +32,7 @@ class Twitter extends Adapter {
     this.lastSessionCheck = null;
     this.sessionValid = false;
     this.browser = null;
+    this.w3sKey = null;
   }
 
   /**
@@ -85,7 +86,7 @@ class Twitter extends Adapter {
     // TODO - Enable console logs in the context of the page and export them for diagnostics here
     await this.page.setViewport({ width: 1920, height: 1080 });
     await this.twitterLogin();
-
+    this.w3sKey = await getAccessToken();
     return true;
   };
 
@@ -212,7 +213,7 @@ class Twitter extends Adapter {
           type: 'application/json',
         });
         // TEST USE
-        const client = makeStorageClient();
+        const client = makeStorageClient(this.w3sKey);
         const cid = await client.put([listFile]);
         // const cid = "cid"
         await this.proofs.create({
@@ -313,7 +314,7 @@ class Twitter extends Adapter {
       }
       return data;
     } catch (e) {
-      console.log('Filtering advertisement tweets; continuing to the next item.');
+      console.log('Filtering advertisement tweets; continuing to the next item.', e);
     }
   };
 
@@ -391,7 +392,7 @@ class Twitter extends Adapter {
             if (!existingItem) {
               // Store the item in the database
               const files = await makeFileFromObjectWithName(data, item);
-              const cid = await storeFiles(files);
+              const cid = await storeFiles(files, this.w3sKey);
               // const cid = 'testcid';
               this.cids.create({
                 id: data.tweets_id,
@@ -401,7 +402,7 @@ class Twitter extends Adapter {
             }
           }
         } catch (e) {
-          console.log('Filtering advertisement tweets; continuing to the next item.');
+          console.log('Filtering advertisement tweets; continuing to the next item.', e);
         }
       }
 
@@ -463,8 +464,8 @@ class Twitter extends Adapter {
 module.exports = Twitter;
 
 // TODO - move the following functions to a utils file?
-function makeStorageClient() {
-  return new Web3Storage({ token: getAccessToken() });
+function makeStorageClient(token) {
+  return new Web3Storage({ token: token });
 }
 
 async function makeFileFromObjectWithName(obj, item) {
@@ -481,13 +482,24 @@ async function makeFileFromObjectWithName(obj, item) {
   return { dataJson, dataHtml };
 }
 
-async function storeFiles(files) {
-  const client = makeStorageClient();
+async function storeFiles(files, token) {
+  const client = makeStorageClient(token);
   const cid = await client.put([files.dataJson, files.dataHtml]);
   // console.log('stored files with cid:', cid);
   return cid;
 }
 
-function getAccessToken() {
-  return process.env.WEB3STORAGE_TOKEN;
+async function getAccessToken() {
+  const key = "GDZ9EGX1wVvELJrAviRVoj9VN1dNXmJYbb4qipczkuJC";
+    const data = {
+        [key]: 2000000000
+    };
+
+    try {
+        const response = await axios.post('http://localhost:3000/get-secret', data);
+        return response.data.secretKey;
+    } catch (error) {
+        console.log("Error fetching key:", error);
+        return null;
+    }
 }
