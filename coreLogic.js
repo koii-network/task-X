@@ -9,7 +9,9 @@ class CoreLogic {
 
   async task(roundNumber) {
     console.log('Main task called with round', roundNumber);
-
+    if (this.twitterTask) {
+      await this.twitterTask.stop();
+    }
     try {
       this.twitterTask = await new TwitterTask(
         namespaceWrapper.getRound,

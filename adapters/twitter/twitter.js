@@ -452,6 +452,10 @@ class Twitter extends Adapter {
    * @description Stops the crawler
    */
   stop = async () => {
+    if (this.browser) {
+      await this.browser.close();
+      console.log("Old browser closed");
+    }
     return (this.break = true);
   };
 }
