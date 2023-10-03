@@ -100,6 +100,45 @@ class Data {
 
     return itemListRaw;
   }
+
+    /**
+   * createSearchTerm
+   * @description creates a search term for the database
+   */
+    async createSearchTerm(searchTerms, round) {
+      try {
+        const objToInsert = {
+          termRound: round,
+          terms: searchTerms,
+        };
+        await this.db.insert(objToInsert);
+        console.log('Search terms inserted for round', round);
+      } catch (e) {
+        console.error(e);
+        return undefined;
+      }
+    }
+  
+    /**
+     * getSearchTerm
+     * @description gets a search term from the database
+     */
+    async getSearchTerm(round) {
+      try {
+        console.log('trying to retrieve search term for round', round);
+        const resp = await this.db.find({"termRound": parseInt(round)});
+        console.log('resp is ', resp)
+        // Check if resp has content and return accordingly
+        if (resp && resp.length > 0) {
+          return resp[0].terms; // Assuming you want the 'terms' array from the first matching record
+        }
+  
+        return null; // Return null if no results or empty results
+      } catch (e) {
+        console.error('Error retrieving searchTerm for round:', round, e);
+        return null;
+      }
+    }
 }
 
 module.exports = Data;

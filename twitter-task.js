@@ -35,8 +35,12 @@ class TwitterTask {
     this.round = round;
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
-    this.searchTerm = process.env.KEYWORD;
+    this.searchTerm = [];
     this.adapter = null;
+    this.db = new Data('db', []);
+    this.db.initializeData();
+    this.initialize();
+
     this.setAdapter = async () => {
       const username = process.env.TWITTER_USERNAME;
       const password = process.env.TWITTER_PASSWORD;
@@ -66,6 +70,39 @@ class TwitterTask {
     this.start();
   }
 
+  async initialize() {
+    console.log('initializing twitter task');
+    this.searchTerm = await this.fetchSearchTerms();
+    //Store this round searchTerm
+    console.log('creating search term', this.searchTerm, this.round);
+    this.db.createSearchTerm(this.searchTerm, this.round);
+  }
+
+  /**
+   * fetchSearchTerms
+   * @description return the search terms to use for the crawler
+   * @returns {array} - an array of search terms
+   */
+  async fetchSearchTerms() {
+    let keyword;
+
+    try {
+      const response = await axios.get(
+        'https://crawltask-test-e4cfb6acc7b6.herokuapp.com/',
+      );
+      keyword = response.data;
+    } catch (error) {
+      console.log(
+        'No Keywords from middle server, loading local keywords.json',
+      );
+      const wordsList = require('./top1000words.json');
+      const randomIndex = Math.floor(Math.random() * wordsList.length);
+      keyword = wordsList[randomIndex]; // Load local JSON data
+    }
+
+    return encodeURIComponent(keyword);
+  }
+
   /**
    * strat
    * @description starts the crawler
@@ -76,22 +113,15 @@ class TwitterTask {
   async start() {
     await this.setAdapter();
 
-    let keyword;
-    if (this.searchTerm === ' ' || this.searchTerm == undefined) {
-      keyword = encodeURIComponent('#koii');
-    } else {
-      keyword = encodeURIComponent(this.searchTerm);
-    }
-
     this.isRunning = true;
 
     let query = {
-      limit: 100,
-      searchTerm: keyword,
-      query: `https://twitter.com/search?q=${keyword}&src=typed_query&f=live`,
+      limit: 100, // unused
+      searchTerm: this.searchTerm,
+      query: `https://twitter.com/search?q=${this.searchTerm}&src=typed_query&f=live`,
       depth: 3,
       updateRound: async () => {
-        return this.updateRound(); // TODO - verify that this works as an import
+        return this.updateRound();
       },
       recursive: true,
       round: this.round,
@@ -188,16 +218,21 @@ module.exports = TwitterTask;
  */
 const getJSONFromCID = async cid => {
   return new Promise((resolve, reject) => {
-    let url = `https://${cid}.ipfs.dweb.link/data.json`;
-    // console.log('making call to ', url)
-    axios.get(url).then(response => {
-      if (response.status !== 200) {
-        console.log('error', response);
-        reject(response);
-      } else {
-        // console.log('response', response)
-        resolve(response.data);
-      }
-    });
+    try {
+      let url = `https://${cid}.ipfs.dweb.link/data.json`;
+      // console.log('making call to ', url)
+      axios.get(url).then(response => {
+        if (response.status !== 200) {
+          console.log('error', response);
+          reject(response);
+        } else {
+          // console.log('response', response)
+          resolve(response.data);
+        }
+      });
+    } catch (e) {
+      console.log('aixos error when fetching CID');
+      reject(e);
+    }
   });
 };

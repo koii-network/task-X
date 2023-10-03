@@ -8,24 +8,18 @@ class CoreLogic {
     this.twitterTask = null;
   }
 
-  async task() {
-    // we will work to create a proof that can be submitted to K2 to claim rewards
-    let proof_cid;
-
-    // in order for this proof to withstand scrutiny (see validateNode, below, for audit flow) the proof must be generated from a full round of valid work
-
-    // the following function starts the crawler if not already started, or otherwise fetches a submission CID for a particular round
-    let round = await namespaceWrapper.getRound();
-    if ( !this.twitterTask || !this.twitterTask.isRunning ) {
+  async task(roundNumber) {
+    console.log('Main task called with round', roundNumber);
+    if ( !this.twitterTask.round !== roundNumber || !this.twitterTask.isRunning ) {
       try {
-        this.twitterTask = await new TwitterTask (namespaceWrapper.getRound, round);
-        console.log('started a new crawler at round', round);
+        this.twitterTask = await new TwitterTask (namespaceWrapper.getRound, roundNumber);
+        console.log('started a new crawler at round', roundNumber);
       } catch (e) {
         console.log('error starting crawler', e);
       }
     
     } else {
-      console.log('crawler already running at round', round);
+      console.log('crawler already running at round', roundNumber);
     } 
   }
 
