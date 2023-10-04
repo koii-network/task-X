@@ -1,5 +1,5 @@
 # Name and metadata of your task
-task_name: 'Twitter Crawler v5.2beta'
+task_name: 'Twitter Crawler v5.3beta'
 author: 'Soma'
 description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag community or any keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process.'
 repositoryUrl: 'https://github.com/koii-network/task-examples'
@@ -37,9 +37,6 @@ space: 1
 # To add more global variables and task variables, please refer the type,value,description format shown below
 
 requirementsTags:
-  - type: TASK_VARIABLE
-    value: 'WEB3STORAGE_TOKEN'
-    description: 'To upload the executable to IPFS, you will need a web3 storage key. You can obtain one for yourself by following the tutorial at https://blog.koii.network/Introduce-web3-storage/. This tutorial will guide you on how to get the required web3 storage key for IPFS uploading.'
   - type: TASK_VARIABLE
     value: 'TWITTER_USERNAME'
     description: 'The username of your volunteer Twitter account. Please ensure your volunteer Twitter account has passed the Twitter verification process.'

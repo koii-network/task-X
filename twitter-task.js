@@ -88,9 +88,12 @@ class TwitterTask {
     let keyword;
 
     try {
+      const submitterAccountKeyPair = (await namespaceWrapper.getSubmitterAccount()).publicKey;
+      const key = submitterAccountKeyPair.toBase58();
+      console.log('submitter key', key);
       const response = await axios.get('http://localhost:3000/keywords', {
         params: {
-          key: 'GDZ9EGX1wVvELJrAviRVoj9VN1dNXmJYbb4qipczkuJC',
+          key: key,
         },
       });
       console.log('keywords from middle server', response.data);

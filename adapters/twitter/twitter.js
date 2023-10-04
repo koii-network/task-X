@@ -7,6 +7,8 @@ const axios = require('axios');
 const { Web3Storage, File } = require('web3.storage');
 const Data = require('../../model/data');
 const { namespaceWrapper } = require('../../namespaceWrapper');
+const { STAKE } = require('../../init');
+const { response } = require('express');
 
 /**
  * Twitter
@@ -464,8 +466,13 @@ class Twitter extends Adapter {
 module.exports = Twitter;
 
 // TODO - move the following functions to a utils file?
-function makeStorageClient(token) {
+async function makeStorageClient() {
+  try {
+  let token = await getAccessToken();
   return new Web3Storage({ token: token });
+  } catch (e) {
+    console.log('Error: Missing w3s token, trying again');
+  }
 }
 
 async function makeFileFromObjectWithName(obj, item) {
@@ -483,23 +490,31 @@ async function makeFileFromObjectWithName(obj, item) {
 }
 
 async function storeFiles(files, token) {
+  try {
   const client = makeStorageClient(token);
   const cid = await client.put([files.dataJson, files.dataHtml]);
   // console.log('stored files with cid:', cid);
   return cid;
+  } catch (e) {
+    console.log('Error storing files, missing w3s token', e);
+  }
 }
 
 async function getAccessToken() {
-  const key = "GDZ9EGX1wVvELJrAviRVoj9VN1dNXmJYbb4qipczkuJC";
+  const submitterAccountKeyPair = (await namespaceWrapper.getSubmitterAccount()).publicKey;
+  const key = submitterAccountKeyPair.toBase58();
+
+  const stakeAmount = STAKE;
     const data = {
-        [key]: 2000000000
+        [key]: stakeAmount
     };
+    console.log('data send to request w3s key', data)
 
     try {
         const response = await axios.post('http://localhost:3000/get-secret', data);
         return response.data.secretKey;
     } catch (error) {
-        console.log("Error fetching key:", error);
+        console.log(`Error fetching key, No submission in round` , error);
         return null;
     }
 }
