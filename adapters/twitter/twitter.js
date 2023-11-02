@@ -150,7 +150,7 @@ class Twitter extends Adapter {
 
     // TODO - catch unsuccessful login and retry up to query.maxRetry
     if (!(await this.isPasswordCorrect(this.page, currentURL))) {
-      console.log('Password is incorrect.');
+      console.log('Password is incorrect or email verfication needed.');
       this.sessionValid = false;
     } else if (await this.isEmailVerificationRequired(this.page)) {
       console.log('Email verification required.');
@@ -491,7 +491,7 @@ async function makeFileFromObjectWithName(obj, item) {
 
 async function storeFiles(files, token) {
   try {
-  const client = makeStorageClient(token);
+  const client = await makeStorageClient(token);
   const cid = await client.put([files.dataJson, files.dataHtml]);
   // console.log('stored files with cid:', cid);
   return cid;
@@ -501,20 +501,22 @@ async function storeFiles(files, token) {
 }
 
 async function getAccessToken() {
-  const submitterAccountKeyPair = (await namespaceWrapper.getSubmitterAccount()).publicKey;
-  const key = submitterAccountKeyPair.toBase58();
+  // const submitterAccountKeyPair = (await namespaceWrapper.getSubmitterAccount()).publicKey;
+  // const key = submitterAccountKeyPair.toBase58();
 
-  const stakeAmount = STAKE;
-    const data = {
-        [key]: stakeAmount
-    };
-    console.log('data send to request w3s key', data)
+  // const stakeAmount = STAKE;
+  //   const data = {
+  //       [key]: stakeAmount
+  //   };
+  //   console.log('data send to request w3s key', data)
 
-    try {
-        const response = await axios.post('http://localhost:3000/get-secret', data);
-        return response.data.secretKey;
-    } catch (error) {
-        console.log(`Error fetching key, No submission in round` , error);
-        return null;
-    }
+  //   try {
+  //       const response = await axios.post('http://localhost:3000/get-secret', data);
+  //       return response.data.secretKey;
+  //   } catch (error) {
+  //       console.log(`Error fetching key, No submission in round` , error);
+  //       return null;
+  //   }
+  console.log('getting w3s token', process.env.WEB3STORAGE_TOKEN)
+  return process.env.WEB3STORAGE_TOKEN;
 }
