@@ -215,7 +215,7 @@ class Twitter extends Adapter {
           type: 'application/json',
         });
         // TEST USE
-        const client = makeStorageClient(this.w3sKey);
+        const client = await makeStorageClient(this.w3sKey);
         const cid = await client.put([listFile]);
         // const cid = "cid"
         await this.proofs.create({
