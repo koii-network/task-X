@@ -517,6 +517,6 @@ async function getAccessToken() {
   //       console.log(`Error fetching key, No submission in round` , error);
   //       return null;
   //   }
-  console.log('getting w3s token', process.env.WEB3STORAGE_TOKEN)
+  // console.log('getting w3s token', process.env.WEB3STORAGE_TOKEN)
   return process.env.WEB3STORAGE_TOKEN;
 }
