@@ -1,21 +1,37 @@
 const { namespaceWrapper } = require('./namespaceWrapper');
 const TwitterTask = require('./twitter-task');
+const PCR = require('puppeteer-chromium-resolver');
 const { LAMPORTS_PER_SOL } = require('@_koi/web3.js');
 
 class CoreLogic {
   constructor() {
     this.twitterTask = null;
+    this.browser = null;
   }
 
   async task(roundNumber) {
     console.log('Main task called with round', roundNumber);
-    if (this.twitterTask) {
-      await this.twitterTask.stop();
+    if (this.browser) {
+      console.log('closing the existing browser instance');
+      await this.browser.close().catch(e => console.error('Failed to close the existing browser instance', e));
     }
     try {
+      const options = {};
+      const stats = await PCR(options);
+      console.log(
+        '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
+      );
+      this.browser = await stats.puppeteer.launch({
+        headless: false,
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+        executablePath: stats.executablePath,
+      });
       this.twitterTask = await new TwitterTask(
-        namespaceWrapper.getRound,
         roundNumber,
+        roundNumber,
+        this.browser,
       );
       console.log('started a new crawler at round', roundNumber);
     } catch (e) {

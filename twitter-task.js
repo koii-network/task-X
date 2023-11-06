@@ -32,7 +32,7 @@ dotenv.config();
  */
 
 class TwitterTask {
-  constructor(getRound, round) {
+  constructor(getRound, round, browser) {
     this.round = round;
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
@@ -57,17 +57,9 @@ class TwitterTask {
         password: password,
       };
       this.adapter = new Twitter(credentials, this.db, 3);
-      await this.adapter.negotiateSession();
+      await this.adapter.negotiateSession(browser);
     };
 
-    this.updateRound = async () => {
-      // if it has been more than 1 minute since the last round check, check the round and update this.round
-      if (Date.now() - this.lastRoundCheck > 60000) {
-        this.round = await getRound();
-        this.lastRoundCheck = Date.now();
-      }
-      return this.round;
-    };
     this.start();
   }
 
@@ -88,7 +80,9 @@ class TwitterTask {
     let keyword;
 
     try {
-      const submitterAccountKeyPair = (await namespaceWrapper.getSubmitterAccount()).publicKey;
+      const submitterAccountKeyPair = (
+        await namespaceWrapper.getSubmitterAccount()
+      ).publicKey;
       const key = submitterAccountKeyPair.toBase58();
       console.log('submitter key', key);
       const response = await axios.get('http://localhost:3000/keywords', {
@@ -127,9 +121,7 @@ class TwitterTask {
       searchTerm: this.searchTerm,
       query: `https://twitter.com/search?q=${this.searchTerm}&src=typed_query&f=live`,
       depth: 3,
-      updateRound: async () => {
-        return this.updateRound();
-      },
+      round: this.round,
       recursive: true,
       round: this.round,
     };

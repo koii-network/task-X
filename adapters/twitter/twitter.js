@@ -1,14 +1,10 @@
 // Import required modules
 const Adapter = require('../../model/adapter');
-const puppeteer = require('puppeteer');
-const PCR = require('puppeteer-chromium-resolver');
 const cheerio = require('cheerio');
 const axios = require('axios');
 const { Web3Storage, File } = require('web3.storage');
 const Data = require('../../model/data');
 const { namespaceWrapper } = require('../../namespaceWrapper');
-const { STAKE } = require('../../init');
-const { response } = require('express');
 
 /**
  * Twitter
@@ -35,6 +31,7 @@ class Twitter extends Adapter {
     this.sessionValid = false;
     this.browser = null;
     this.w3sKey = null;
+    this.round = null;
   }
 
   /**
@@ -67,25 +64,10 @@ class Twitter extends Adapter {
    * 4. Set the viewport size
    * 5. Queue twitterLogin()
    */
-  negotiateSession = async () => {
-    const options = {};
-    const stats = await PCR(options);
-    console.log(
-      '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
-    );
-    this.browser = await stats.puppeteer.launch({
-      userAgent:
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
-      executablePath: stats.executablePath,
-    });
-
+  negotiateSession = async (browser) => {
+    this.browser = browser;
     console.log('Step: Open new page');
     this.page = await this.browser.newPage();
-    await this.page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    );
-    // TODO - Enable console logs in the context of the page and export them for diagnostics here
     await this.page.setViewport({ width: 1920, height: 1080 });
     await this.twitterLogin();
     this.w3sKey = await getAccessToken();
@@ -108,6 +90,7 @@ class Twitter extends Adapter {
    * 10. If login was unsuccessful, try again
    */
   twitterLogin = async () => {
+    try {
     console.log('Step: Go to twitter.com');
     // console.log('isBrowser?', this.browser, 'isPage?', this.page);
     await this.page.goto('https://twitter.com');
@@ -151,6 +134,7 @@ class Twitter extends Adapter {
     // TODO - catch unsuccessful login and retry up to query.maxRetry
     if (!(await this.isPasswordCorrect(this.page, currentURL))) {
       console.log('Password is incorrect or email verfication needed.');
+      await this.page.waitForTimeout(2000)
       this.sessionValid = false;
     } else if (await this.isEmailVerificationRequired(this.page)) {
       console.log('Email verification required.');
@@ -168,6 +152,11 @@ class Twitter extends Adapter {
     }
 
     return this.sessionValid;
+  } catch (e) {
+    console.log('Error logging in', e);
+    this.sessionValid = false;
+    return false;
+  }
   };
 
   isPasswordCorrect = async (page, currentURL) => {
@@ -336,6 +325,7 @@ class Twitter extends Adapter {
       console.log('valid? ', this.sessionValid);
       if (this.sessionValid == true) {
         this.searchTerm = query.searchTerm;
+        this.round = query.round;
         await this.fetchList(query.query, query.round);
         await new Promise(resolve => setTimeout(resolve, 300000)); // If the error message is found, wait for 5 minutes, refresh the page, and continue
       } else {
@@ -352,7 +342,6 @@ class Twitter extends Adapter {
    */
   fetchList = async (url, round) => {
     console.log('fetching list for ', url);
-
     // Go to the hashtag page
     await this.page.waitForTimeout(1000);
     await this.page.setViewport({ width: 1024, height: 4000 });
@@ -362,7 +351,6 @@ class Twitter extends Adapter {
     await this.page.waitForTimeout(5000);
 
     while (true) {
-      round = await namespaceWrapper.getRound();
       // Check if the error message is present on the page inside an article element
       const errorMessage = await this.page.evaluate(() => {
         const elements = document.querySelectorAll('div[dir="ltr"]');
@@ -408,6 +396,10 @@ class Twitter extends Adapter {
         }
       }
 
+      console.log("round check", this.round, await namespaceWrapper.getRound())
+      if (this.round !== 10) {
+        break;
+      }
       // Scroll the page for next batch of elements
       await this.scrollPage(this.page);
 
@@ -423,7 +415,6 @@ class Twitter extends Adapter {
       if (errorMessage) {
         console.log('Rate limit reach, waiting for 5 minutes...');
         this.sessionValid = false;
-        await this.browser.close(); // Refresh the page
         break;
       }
     }
