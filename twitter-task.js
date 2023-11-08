@@ -32,7 +32,7 @@ dotenv.config();
  */
 
 class TwitterTask {
-  constructor(getRound, round, browser) {
+  constructor(getRound, round) {
     this.round = round;
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
@@ -57,7 +57,7 @@ class TwitterTask {
         password: password,
       };
       this.adapter = new Twitter(credentials, this.db, 3);
-      await this.adapter.negotiateSession(browser);
+      await this.adapter.negotiateSession();
     };
 
     this.start();

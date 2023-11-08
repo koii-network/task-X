@@ -4,6 +4,7 @@ const cheerio = require('cheerio');
 const axios = require('axios');
 const { Web3Storage, File } = require('web3.storage');
 const Data = require('../../model/data');
+const PCR = require('puppeteer-chromium-resolver');
 const { namespaceWrapper } = require('../../namespaceWrapper');
 
 /**
@@ -64,14 +65,30 @@ class Twitter extends Adapter {
    * 4. Set the viewport size
    * 5. Queue twitterLogin()
    */
-  negotiateSession = async (browser) => {
-    this.browser = browser;
-    console.log('Step: Open new page');
-    this.page = await this.browser.newPage();
-    await this.page.setViewport({ width: 1920, height: 1080 });
-    await this.twitterLogin();
-    this.w3sKey = await getAccessToken();
-    return true;
+  negotiateSession = async () => {
+    try {
+      const options = {};
+      const stats = await PCR(options);
+      console.log(
+        '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
+      );
+      this.browser = await stats.puppeteer.launch({
+        // headless: false,
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+        executablePath: stats.executablePath,
+      });
+      console.log('Step: Open new page');
+      this.page = await this.browser.newPage();
+      await this.page.setViewport({ width: 1920, height: 1080 });
+      await this.twitterLogin();
+      this.w3sKey = await getAccessToken();
+      return true;
+    } catch (e) {
+      console.log('Error negotiating session', e);
+      return false;
+    }
   };
 
   /**
@@ -91,72 +108,72 @@ class Twitter extends Adapter {
    */
   twitterLogin = async () => {
     try {
-    console.log('Step: Go to twitter.com');
-    // console.log('isBrowser?', this.browser, 'isPage?', this.page);
-    await this.page.goto('https://twitter.com');
+      console.log('Step: Go to twitter.com');
+      // console.log('isBrowser?', this.browser, 'isPage?', this.page);
+      await this.page.goto('https://twitter.com');
 
-    console.log('Step: Go to login page');
-    await this.page.goto('https://twitter.com/i/flow/login');
+      console.log('Step: Go to login page');
+      await this.page.goto('https://twitter.com/i/flow/login');
 
-    console.log('Step: Fill in username');
-    console.log(this.credentials.username);
+      console.log('Step: Fill in username');
+      console.log(this.credentials.username);
 
-    await this.page.waitForSelector('input[autocomplete="username"]');
-    await this.page.type(
-      'input[autocomplete="username"]',
-      this.credentials.username,
-    );
-    await this.page.keyboard.press('Enter');
-
-    const twitter_verify = await this.page
-      .waitForSelector('input[data-testid="ocfEnterTextTextInput"]', {
-        timeout: 5000,
-        visible: true,
-      })
-      .then(() => true)
-      .catch(() => false);
-
-    if (twitter_verify) {
+      await this.page.waitForSelector('input[autocomplete="username"]');
       await this.page.type(
-        'input[data-testid="ocfEnterTextTextInput"]',
+        'input[autocomplete="username"]',
         this.credentials.username,
       );
       await this.page.keyboard.press('Enter');
-    }
 
-    console.log('Step: Fill in password');
-    const currentURL = await this.page.url();
-    await this.page.waitForSelector('input[name="password"]');
-    await this.page.type('input[name="password"]', this.credentials.password);
-    console.log('Step: Click login button');
-    await this.page.keyboard.press('Enter');
+      const twitter_verify = await this.page
+        .waitForSelector('input[data-testid="ocfEnterTextTextInput"]', {
+          timeout: 5000,
+          visible: true,
+        })
+        .then(() => true)
+        .catch(() => false);
 
-    // TODO - catch unsuccessful login and retry up to query.maxRetry
-    if (!(await this.isPasswordCorrect(this.page, currentURL))) {
-      console.log('Password is incorrect or email verfication needed.');
-      await this.page.waitForTimeout(2000)
+      if (twitter_verify) {
+        await this.page.type(
+          'input[data-testid="ocfEnterTextTextInput"]',
+          this.credentials.username,
+        );
+        await this.page.keyboard.press('Enter');
+      }
+
+      console.log('Step: Fill in password');
+      const currentURL = await this.page.url();
+      await this.page.waitForSelector('input[name="password"]');
+      await this.page.type('input[name="password"]', this.credentials.password);
+      console.log('Step: Click login button');
+      await this.page.keyboard.press('Enter');
+
+      // TODO - catch unsuccessful login and retry up to query.maxRetry
+      if (!(await this.isPasswordCorrect(this.page, currentURL))) {
+        console.log('Password is incorrect or email verfication needed.');
+        await this.page.waitForTimeout(2000);
+        this.sessionValid = false;
+      } else if (await this.isEmailVerificationRequired(this.page)) {
+        console.log('Email verification required.');
+        this.sessionValid = false;
+        await this.page.waitForTimeout(1000000);
+      } else {
+        console.log('Password is correct.');
+        this.page.waitForNavigation({ waitUntil: 'load' });
+        await this.page.waitForTimeout(1000);
+
+        this.sessionValid = true;
+        this.lastSessionCheck = Date.now();
+
+        console.log('Step: Login successful');
+      }
+
+      return this.sessionValid;
+    } catch (e) {
+      console.log('Error logging in', e);
       this.sessionValid = false;
-    } else if (await this.isEmailVerificationRequired(this.page)) {
-      console.log('Email verification required.');
-      this.sessionValid = false;
-      await this.page.waitForTimeout(1000000);
-    } else {
-      console.log('Password is correct.');
-      this.page.waitForNavigation({ waitUntil: 'load' });
-      await this.page.waitForTimeout(1000);
-
-      this.sessionValid = true;
-      this.lastSessionCheck = Date.now();
-
-      console.log('Step: Login successful');
+      return false;
     }
-
-    return this.sessionValid;
-  } catch (e) {
-    console.log('Error logging in', e);
-    this.sessionValid = false;
-    return false;
-  }
   };
 
   isPasswordCorrect = async (page, currentURL) => {
@@ -300,12 +317,15 @@ class Twitter extends Adapter {
           view: viewCount,
           outer_media_url: outer_media_urls,
           outer_media_short_url: outer_media_short_urls,
-          keyword: this.searchTerm
+          keyword: this.searchTerm,
         };
       }
       return data;
     } catch (e) {
-      console.log('Filtering advertisement tweets; continuing to the next item.', e);
+      console.log(
+        'Filtering advertisement tweets; continuing to the next item.',
+        e,
+      );
     }
   };
 
@@ -341,84 +361,101 @@ class Twitter extends Adapter {
    * @description Fetches a list of links from a given url
    */
   fetchList = async (url, round) => {
-    console.log('fetching list for ', url);
-    // Go to the hashtag page
-    await this.page.waitForTimeout(1000);
-    await this.page.setViewport({ width: 1024, height: 4000 });
-    await this.page.goto(url);
+    try {
+      console.log('fetching list for ', url);
+      // Go to the hashtag page
+      await this.page.waitForTimeout(1000);
+      await this.page.setViewport({ width: 1024, height: 4000 });
+      await this.page.goto(url);
 
-    // Wait an additional 5 seconds until fully loaded before scraping
-    await this.page.waitForTimeout(5000);
+      // Wait an additional 5 seconds until fully loaded before scraping
+      await this.page.waitForTimeout(5000);
 
-    while (true) {
-      // Check if the error message is present on the page inside an article element
-      const errorMessage = await this.page.evaluate(() => {
-        const elements = document.querySelectorAll('div[dir="ltr"]');
-        for (let element of elements) {
-          console.log(element.textContent);
-          if (element.textContent === 'Something went wrong. Try reloading.') {
-            return true;
-          }
-        }
-        return false;
-      });
-
-      // Scrape the tweets
-      const items = await this.page.evaluate(() => {
-        const elements = document.querySelectorAll('article[aria-labelledby]');
-        return Array.from(elements).map(element => element.outerHTML);
-      });
-
-      for (const item of items) {
-        try {
-          let data = await this.parseItem(item);
-          // console.log(data);
-          if (data.tweets_id) {
-            // Check if id exists in database
-            let checkItem = {
-              id: data.tweets_id,
-            };
-            const existingItem = await this.db.getItem(checkItem);
-            if (!existingItem) {
-              // Store the item in the database
-              const files = await makeFileFromObjectWithName(data, item);
-              const cid = await storeFiles(files, this.w3sKey);
-              // const cid = 'testcid';
-              this.cids.create({
-                id: data.tweets_id,
-                round: round,
-                cid: cid,
-              });
+      while (true) {
+        // Check if the error message is present on the page inside an article element
+        const errorMessage = await this.page.evaluate(() => {
+          const elements = document.querySelectorAll('div[dir="ltr"]');
+          for (let element of elements) {
+            console.log(element.textContent);
+            if (
+              element.textContent === 'Something went wrong. Try reloading.'
+            ) {
+              return true;
             }
           }
-        } catch (e) {
-          console.log('Filtering advertisement tweets; continuing to the next item.', e);
+          return false;
+        });
+
+        // Scrape the tweets
+        const items = await this.page.evaluate(() => {
+          const elements = document.querySelectorAll(
+            'article[aria-labelledby]',
+          );
+          return Array.from(elements).map(element => element.outerHTML);
+        });
+
+        for (const item of items) {
+          try {
+            let data = await this.parseItem(item);
+            // console.log(data);
+            if (data.tweets_id) {
+              // Check if id exists in database
+              let checkItem = {
+                id: data.tweets_id,
+              };
+              const existingItem = await this.db.getItem(checkItem);
+              if (!existingItem) {
+                // Store the item in the database
+                const files = await makeFileFromObjectWithName(data, item);
+                const cid = await storeFiles(files, this.w3sKey);
+                // const cid = 'testcid';
+                this.cids.create({
+                  id: data.tweets_id,
+                  round: round,
+                  cid: cid,
+                });
+              }
+            }
+          } catch (e) {
+            console.log(
+              'Filtering advertisement tweets; continuing to the next item.',
+              e,
+            );
+          }
+        }
+
+        console.log(
+          'round check',
+          this.round,
+          await namespaceWrapper.getRound(),
+        );
+        if (this.round !== 10) {
+          break;
+        }
+        // Scroll the page for next batch of elements
+        await this.scrollPage(this.page);
+
+        // Optional: wait for a moment to allow new elements to load
+        await this.page.waitForTimeout(1000);
+
+        // Refetch the elements after scrolling
+        await this.page.evaluate(() => {
+          return document.querySelectorAll('article[aria-labelledby]');
+        });
+
+        // If the error message is found, wait for 2 minutes, refresh the page, and continue
+        if (errorMessage) {
+          console.log('Rate limit reach, waiting for 5 minutes...');
+          this.sessionValid = false;
+          break;
         }
       }
-
-      console.log("round check", this.round, await namespaceWrapper.getRound())
-      if (this.round !== 10) {
-        break;
-      }
-      // Scroll the page for next batch of elements
-      await this.scrollPage(this.page);
-
-      // Optional: wait for a moment to allow new elements to load
-      await this.page.waitForTimeout(1000);
-
-      // Refetch the elements after scrolling
-      await this.page.evaluate(() => {
-        return document.querySelectorAll('article[aria-labelledby]');
-      });
-
-      // If the error message is found, wait for 2 minutes, refresh the page, and continue
-      if (errorMessage) {
-        console.log('Rate limit reach, waiting for 5 minutes...');
-        this.sessionValid = false;
-        break;
-      }
+      return;
+    } catch (e) {
+      console.log('Last round fetching list stop', e);
+      this.sessionValid = false;
+      return;
     }
-    return;
   };
 
   scrollPage = async page => {
@@ -448,7 +485,7 @@ class Twitter extends Adapter {
   stop = async () => {
     if (this.browser) {
       await this.browser.close();
-      console.log("Old browser closed");
+      console.log('Old browser closed');
     }
     return (this.break = true);
   };
@@ -459,8 +496,8 @@ module.exports = Twitter;
 // TODO - move the following functions to a utils file?
 async function makeStorageClient() {
   try {
-  let token = await getAccessToken();
-  return new Web3Storage({ token: token });
+    let token = await getAccessToken();
+    return new Web3Storage({ token: token });
   } catch (e) {
     console.log('Error: Missing w3s token, trying again');
   }
@@ -482,10 +519,10 @@ async function makeFileFromObjectWithName(obj, item) {
 
 async function storeFiles(files, token) {
   try {
-  const client = await makeStorageClient(token);
-  const cid = await client.put([files.dataJson, files.dataHtml]);
-  // console.log('stored files with cid:', cid);
-  return cid;
+    const client = await makeStorageClient(token);
+    const cid = await client.put([files.dataJson, files.dataHtml]);
+    // console.log('stored files with cid:', cid);
+    return cid;
   } catch (e) {
     console.log('Error storing files, missing w3s token', e);
   }
