@@ -67,6 +67,10 @@ class Twitter extends Adapter {
    */
   negotiateSession = async () => {
     try {
+      if (this.browser) {
+        await this.browser.close();
+        console.log('Old browser closed');
+      }
       const options = {};
       const stats = await PCR(options);
       console.log(
@@ -108,17 +112,17 @@ class Twitter extends Adapter {
    */
   twitterLogin = async () => {
     try {
-      console.log('Step: Go to twitter.com');
-      // console.log('isBrowser?', this.browser, 'isPage?', this.page);
-      await this.page.goto('https://twitter.com');
+      // console.log('Step: Go to twitter.com');
+      // // console.log('isBrowser?', this.browser, 'isPage?', this.page);
+      // await this.page.goto('https://twitter.com');
 
       console.log('Step: Go to login page');
-      await this.page.goto('https://twitter.com/i/flow/login');
+      await this.page.goto('https://twitter.com/i/flow/login', { timeout: 60000 });
 
       console.log('Step: Fill in username');
       console.log(this.credentials.username);
 
-      await this.page.waitForSelector('input[autocomplete="username"]');
+      await this.page.waitForSelector('input[autocomplete="username"]', { timeout: 60000 });
       await this.page.type(
         'input[autocomplete="username"]',
         this.credentials.username,
