@@ -410,8 +410,7 @@ class Twitter extends Adapter {
               const existingItem = await this.db.getItem(checkItem);
               if (!existingItem) {
                 // Store the item in the database
-                const files = await makeFileFromObjectWithName(data, item);
-                const cid = await storeFiles(files, this.w3sKey);
+                const cid = await makeFileFromObjectWithName(data, item);
                 // const cid = 'testcid';
                 this.cids.create({
                   id: data.tweets_id,
@@ -501,9 +500,12 @@ module.exports = Twitter;
 async function makeStorageClient() {
   try {
     let token = await getAccessToken();
-    return new Web3Storage({ token: token });
+    return new SpheronClient({
+      token: token,
+      apiUrl: 'https://temp-api-dev.spheron.network',
+    });
   } catch (e) {
-    console.log('Error: Missing w3s token, trying again');
+    console.log('Error: Missing spheron token, trying again');
   }
 }
 
@@ -533,22 +535,5 @@ async function storeFiles(files, token) {
 }
 
 async function getAccessToken() {
-  // const submitterAccountKeyPair = (await namespaceWrapper.getSubmitterAccount()).publicKey;
-  // const key = submitterAccountKeyPair.toBase58();
-
-  // const stakeAmount = STAKE;
-  //   const data = {
-  //       [key]: stakeAmount
-  //   };
-  //   console.log('data send to request w3s key', data)
-
-  //   try {
-  //       const response = await axios.post('http://localhost:3000/get-secret', data);
-  //       return response.data.secretKey;
-  //   } catch (error) {
-  //       console.log(`Error fetching key, No submission in round` , error);
-  //       return null;
-  //   }
-  // console.log('getting w3s token', process.env.WEB3STORAGE_TOKEN)
-  return process.env.WEB3STORAGE_TOKEN;
+  return process.env.SECRET_SPHERON_TOKEN;
 }
