@@ -1,6 +1,7 @@
 // Import required modules
 const Adapter = require('../../model/adapter');
 const cheerio = require('cheerio');
+const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
 const axios = require('axios');
 const { Web3Storage, File } = require('web3.storage');
 const Data = require('../../model/data');
@@ -226,7 +227,19 @@ class Twitter extends Adapter {
         });
         // TEST USE
         const client = await makeStorageClient(this.w3sKey);
-        const cid = await client.put([listFile]);
+        const { cid } = await client.upload(listFile, {
+          protocol: ProtocolEnum.IPFS,
+          name: 'test',
+          onUploadInitiated: uploadId => {
+            console.log(`Upload with id ${uploadId} started...`);
+          },
+          onChunkUploaded: (uploadedSize, totalSize) => {
+            currentlyUploaded += uploadedSize;
+            console.log(`Uploaded ${currentlyUploaded} of ${totalSize} Bytes.`);
+          },
+        });
+      
+        console.log(`CID: ${cid}`);
         // const cid = "cid"
         await this.proofs.create({
           id: 'proof:' + round,
