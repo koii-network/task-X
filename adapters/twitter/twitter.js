@@ -3,10 +3,10 @@ const Adapter = require('../../model/adapter');
 const cheerio = require('cheerio');
 const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
 const axios = require('axios');
-const { Web3Storage, File } = require('web3.storage');
 const Data = require('../../model/data');
 const PCR = require('puppeteer-chromium-resolver');
 const { namespaceWrapper } = require('../../namespaceWrapper');
+const fs = require('fs');
 
 /**
  * Twitter
@@ -118,12 +118,16 @@ class Twitter extends Adapter {
       // await this.page.goto('https://twitter.com');
 
       console.log('Step: Go to login page');
-      await this.page.goto('https://twitter.com/i/flow/login', { timeout: 60000 });
+      await this.page.goto('https://twitter.com/i/flow/login', {
+        timeout: 60000,
+      });
 
       console.log('Step: Fill in username');
       console.log(this.credentials.username);
 
-      await this.page.waitForSelector('input[autocomplete="username"]', { timeout: 60000 });
+      await this.page.waitForSelector('input[autocomplete="username"]', {
+        timeout: 60000,
+      });
       await this.page.type(
         'input[autocomplete="username"]',
         this.credentials.username,
@@ -221,34 +225,38 @@ class Twitter extends Adapter {
         console.log('No cids found for round ' + round);
         return null;
       } else {
-        const listBuffer = Buffer.from(JSON.stringify(data));
-        const listFile = new File([listBuffer], 'data.json', {
-          type: 'application/json',
-        });
-        // TEST USE
+        let proof_cid;
+        let path = `data.json`;
+        let basePath = '';
+        try {
+          basePath = await namespaceWrapper.getBasePath();
+          fs.writeFileSync(`${basePath}/${path}`, JSON.stringify(data));
+        } catch (err) {
+          console.log(err);
+        }
+
         const client = await makeStorageClient(this.w3sKey);
-        const { cid } = await client.upload(listFile, {
+        let spheronData = await client.upload(`${basePath}/${path}`, {
           protocol: ProtocolEnum.IPFS,
-          name: 'test',
+          name: 'data.json',
           onUploadInitiated: uploadId => {
-            console.log(`Upload with id ${uploadId} started...`);
+            // console.log(`Upload with id ${uploadId} started...`);
           },
           onChunkUploaded: (uploadedSize, totalSize) => {
-            currentlyUploaded += uploadedSize;
-            console.log(`Uploaded ${currentlyUploaded} of ${totalSize} Bytes.`);
+            // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
           },
         });
-      
-        console.log(`CID: ${cid}`);
-        // const cid = "cid"
+
+        // console.log(`CID: ${cid}`);
+        proof_cid = spheronData.cid;
         await this.proofs.create({
           id: 'proof:' + round,
           proof_round: round,
-          proof_cid: cid,
+          proof_cid: proof_cid,
         });
 
-        console.log('returning proof cid for submission', cid);
-        return cid;
+        console.log('returning proof cid for submission', proof_cid);
+        return proof_cid;
       }
     } else {
       throw new Error('No proofs database provided');
@@ -423,7 +431,7 @@ class Twitter extends Adapter {
               const existingItem = await this.db.getItem(checkItem);
               if (!existingItem) {
                 // Store the item in the database
-                const cid = await makeFileFromObjectWithName(data, item);
+                const cid = await storeFiles(data, this.w3sKey);
                 // const cid = 'testcid';
                 this.cids.create({
                   id: data.tweets_id,
@@ -509,38 +517,47 @@ class Twitter extends Adapter {
 
 module.exports = Twitter;
 
-// TODO - move the following functions to a utils file?
 async function makeStorageClient() {
   try {
     let token = await getAccessToken();
     return new SpheronClient({
       token: token,
-      apiUrl: 'https://temp-api-dev.spheron.network',
     });
   } catch (e) {
     console.log('Error: Missing spheron token, trying again');
   }
 }
 
-async function makeFileFromObjectWithName(obj, item) {
-  const databuffer = Buffer.from(JSON.stringify(obj));
-  const dataJson = new File([databuffer], 'data.json', {
-    type: 'application/json',
-  });
-
-  const htmlBuffer = Buffer.from(item);
-  const dataHtml = new File([htmlBuffer], 'data.txt', {
-    type: 'text/html;charset=UTF-8',
-  });
-
-  return { dataJson, dataHtml };
-}
-
-async function storeFiles(files, token) {
+async function storeFiles(data, token) {
   try {
+    let cid;
     const client = await makeStorageClient(token);
-    const cid = await client.put([files.dataJson, files.dataHtml]);
-    // console.log('stored files with cid:', cid);
+    let path = `data.json`;
+    let basePath = '';
+    try {
+      basePath = await namespaceWrapper.getBasePath();
+      fs.writeFileSync(`${basePath}/${path}`, JSON.stringify(data));
+    } catch (err) {
+      console.log(err);
+    }
+    
+    try {
+      // console.log(`${basePath}/${path}`)
+      let spheronData = await client.upload(`${basePath}/${path}`, {
+        protocol: ProtocolEnum.IPFS,
+        name: 'data.json',
+        onUploadInitiated: uploadId => {
+          // console.log(`Upload with id ${uploadId} started...`);
+        },
+        onChunkUploaded: (uploadedSize, totalSize) => {
+          // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
+        },
+      });
+      cid = spheronData.cid;
+
+    } catch (err) {
+      console.log('error uploading to IPFS, trying again',err);
+    }
     return cid;
   } catch (e) {
     console.log('Error storing files, missing w3s token', e);

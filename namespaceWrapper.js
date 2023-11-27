@@ -444,6 +444,19 @@ class NamespaceWrapper {
   async getTaskLevelDBPath() {
     return await genericHandler('getTaskLevelDBPath');
   }
+
+  async getBasePath() {
+    if (taskNodeAdministered) {
+      const basePath = (await namespaceWrapper.getTaskLevelDBPath()).replace(
+        '/KOIIDB',
+        '',
+      );
+      return basePath;
+    } else {
+      return '.';
+    }
+
+  }
 }
 
 async function genericHandler(...args) {
