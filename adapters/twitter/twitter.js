@@ -348,8 +348,7 @@ class Twitter extends Adapter {
       return data;
     } catch (e) {
       console.log(
-        'Filtering advertisement tweets; continuing to the next item.',
-        e,
+        'Filtering advertisement tweets; continuing to the next item.'
       );
     }
   };
@@ -442,8 +441,7 @@ class Twitter extends Adapter {
             }
           } catch (e) {
             console.log(
-              'Filtering advertisement tweets; continuing to the next item.',
-              e,
+              'Filtering advertisement tweets; continuing to the next item.'
             );
           }
         }
