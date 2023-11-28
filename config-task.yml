@@ -41,8 +41,7 @@ requirementsTags:
     value: 'TWITTER_USERNAME'
     description: 'The username of your volunteer Twitter account. Please ensure your volunteer Twitter account has passed the Twitter verification process.'
   - type: TASK_VARIABLE
-    value: 'TWITTER_PASSWORD'        taskAccountDataJSON.bounty_amount_per_round /
-        distributionCandidates.length;
+    value: 'TWITTER_PASSWORD'
     description: 'The password of your volunteer Twitter account.'
   - type: TASK_VARIABLE
     value: "Spheron_Storage"
