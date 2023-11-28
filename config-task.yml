@@ -57,7 +57,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'HhkYcMQiURXYR8Pv1EeCXdRisb5aQy2gV8QbqpLyy48B'
+task_id: '3QNYkYwJ1KVWGHPWAT8MApVH1puDwPiYSuy5qWUptGvN'
 
 # Provide the description for changes made in new version of task
 migrationDescription: 'Release v5.3 of the Twitter Crawler task. This version use Spheron to store the data fetched from Twitter. Also the task is more stable and can get more data in fewer minutes.'
