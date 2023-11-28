@@ -171,43 +171,45 @@ class TwitterTask {
   async validate(proofCid) {
     // in order to validate, we need to take the proofCid
     // and go get the results from web3.storage
+    try {
+      let data = await getJSONFromCID(proofCid, 'dataList.json'); // check this
+      // console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data, typeof(data), data[0]);
 
-    let data = await getJSONFromCID(proofCid, 'dataList.json'); // check this
-    // console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data, typeof(data), data[0]);
+      // the data submitted should be an array of additional CIDs for individual tweets, so we'll try to parse it
 
-    // the data submitted should be an array of additional CIDs for individual tweets, so we'll try to parse it
+      let proofThreshold = 4; // an arbitrary number of records to check
+      for (let i = 0; i < proofThreshold; i++) {
+        let randomIndex = Math.floor(Math.random() * data.length);
+        let item = data[randomIndex];
 
-    let proofThreshold = 4; // an arbitrary number of records to check
-
-    for (let i = 0; i < proofThreshold; i++) {
-      let randomIndex = Math.floor(Math.random() * data.length);
-      let item = data[randomIndex];
-      // let result = await getJSONFromCID(item.cid, 'data.json');
-
-      // then, we need to compare the CID result to the actual result on twitter
-      // i.e.
-      console.log('item was', item);
-      if (item.id) {
-        try {
-        console.log('ipfs', item);
-        let ipfsCheck = await this.getJSONofCID(item.cid);
-        console.log('ipfsCheck', ipfsCheck);
-        if (ipfsCheck.id) {
-          console.log('ipfs check passed');
+        // then, we need to compare the CID result to the actual result on twitter
+        // i.e.
+        console.log('item was', item);
+        if (item.id) {
+          try {
+            console.log('ipfs', item);
+            let ipfsCheck = await this.getJSONofCID(item.cid);
+            console.log('ipfsCheck', ipfsCheck);
+            if (ipfsCheck.id) {
+              console.log('ipfs check passed');
+            }
+            return true;
+          } catch (e) {
+            console.log('ipfs check failed', e);
+            return false;
+          }
+        } else {
+          console.log('invalid item id', item.id);
+          return false;
         }
-        return true;
-      } catch (e) {
-        console.log('ipfs check failed', e);
-        return false;
       }
-      } else {
-        console.log('invalid item id', item.id);
-        return false;
-      }
-    }
 
-    // if none of the random checks fail, return true
-    return true;
+      // if none of the random checks fail, return true
+      return true;
+    } catch (e) {
+      console.log('error in validate', e);
+      return false;
+    }
   }
 }
 
@@ -219,23 +221,28 @@ module.exports = TwitterTask;
  * @param {*} cid
  * @returns promise<JSON>
  */
-const getJSONFromCID = async (cid, fileName) => {
-  return new Promise((resolve, reject) => {
+const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+const getJSONFromCID = async (cid, fileName, maxRetries = 3, retryDelay = 3000) => {
+  let url = `https://${cid}.ipfs.dweb.link/${fileName}`;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      let url = `https://${cid}.ipfs.dweb.link/${fileName}`;
-      // console.log('making call to ', url)
-      axios.get(url).then(response => {
-        if (response.status !== 200) {
-          console.log('error', response);
-          reject(response);
-        } else {
-          // console.log('response', response)
-          resolve(response.data);
-        }
-      });
-    } catch (e) {
-      console.log('aixos error when fetching CID');
-      reject(e);
+      const response = await axios.get(url);
+      if (response.status === 200) {
+        return response.data;
+      } else {
+        console.log(`Attempt ${attempt}: Received status ${response.status}`);
+      }
+    } catch (error) {
+      console.log(`Attempt ${attempt} failed: ${error.message}`);
+      if (attempt < maxRetries) {
+        console.log(`Waiting for ${retryDelay / 1000} seconds before retrying...`);
+        await sleep(retryDelay);
+      } else {
+        return false; // Rethrow the last error
+      }
     }
-  });
+  }
 };
