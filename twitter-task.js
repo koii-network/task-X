@@ -159,7 +159,7 @@ class TwitterTask {
    * @returns
    */
   async getJSONofCID(cid) {
-    return await getJSONFromCID(cid);
+    return await getJSONFromCID(cid, 'data.json');
   }
 
   /**
@@ -182,13 +182,13 @@ class TwitterTask {
     for (let i = 0; i < proofThreshold; i++) {
       let randomIndex = Math.floor(Math.random() * data.length);
       let item = data[randomIndex];
-      let result = await getJSONFromCID(item.cid, 'data.json');
+      // let result = await getJSONFromCID(item.cid, 'data.json');
 
       // then, we need to compare the CID result to the actual result on twitter
       // i.e.
       console.log('item was', item);
       if (item.id) {
-        // TODO - revise this check to make sure it handles issues with type conversions
+        try {
         console.log('ipfs', item);
         let ipfsCheck = await this.getJSONofCID(item.cid);
         console.log('ipfsCheck', ipfsCheck);
@@ -196,6 +196,10 @@ class TwitterTask {
           console.log('ipfs check passed');
         }
         return true;
+      } catch (e) {
+        console.log('ipfs check failed', e);
+        return false;
+      }
       } else {
         console.log('invalid item id', item.id);
         return false;
