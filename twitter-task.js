@@ -172,7 +172,7 @@ class TwitterTask {
     // in order to validate, we need to take the proofCid
     // and go get the results from web3.storage
 
-    let data = await getJSONFromCID(proofCid); // check this
+    let data = await getJSONFromCID(proofCid, 'dataList.json'); // check this
     // console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data, typeof(data), data[0]);
 
     // the data submitted should be an array of additional CIDs for individual tweets, so we'll try to parse it
@@ -182,7 +182,7 @@ class TwitterTask {
     for (let i = 0; i < proofThreshold; i++) {
       let randomIndex = Math.floor(Math.random() * data.length);
       let item = data[randomIndex];
-      let result = await getJSONFromCID(item.cid);
+      let result = await getJSONFromCID(item.cid, 'data.json');
 
       // then, we need to compare the CID result to the actual result on twitter
       // i.e.
@@ -215,10 +215,10 @@ module.exports = TwitterTask;
  * @param {*} cid
  * @returns promise<JSON>
  */
-const getJSONFromCID = async cid => {
+const getJSONFromCID = async (cid, fileName) => {
   return new Promise((resolve, reject) => {
     try {
-      let url = `https://${cid}.ipfs.dweb.link/data.json`;
+      let url = `https://${cid}.ipfs.dweb.link/${fileName}`;
       // console.log('making call to ', url)
       axios.get(url).then(response => {
         if (response.status !== 200) {

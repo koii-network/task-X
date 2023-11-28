@@ -226,7 +226,7 @@ class Twitter extends Adapter {
         return null;
       } else {
         let proof_cid;
-        let path = `data.json`;
+        let path = `dataList.json`;
         let basePath = '';
         try {
           basePath = await namespaceWrapper.getBasePath();
@@ -238,7 +238,7 @@ class Twitter extends Adapter {
         const client = await makeStorageClient(this.w3sKey);
         let spheronData = await client.upload(`${basePath}/${path}`, {
           protocol: ProtocolEnum.IPFS,
-          name: 'data.json',
+          name: 'dataList.json',
           onUploadInitiated: uploadId => {
             // console.log(`Upload with id ${uploadId} started...`);
           },
@@ -451,7 +451,7 @@ class Twitter extends Adapter {
           this.round,
           await namespaceWrapper.getRound(),
         );
-        if (this.round !== 10) {
+        if (this.round !== (await namespaceWrapper.getRound())) {
           break;
         }
         // Scroll the page for next batch of elements
@@ -563,5 +563,5 @@ async function storeFiles(data, token) {
 }
 
 async function getAccessToken() {
-  return process.env.SECRET_SPHERON_TOKEN;
+  return process.env.Spheron_Storage;
 }
