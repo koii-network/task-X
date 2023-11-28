@@ -45,7 +45,7 @@ requirementsTags:
     description: 'The password of your volunteer Twitter account.'
   - type: TASK_VARIABLE
     value: "Spheron_Storage"
-    description: "Used to store the data. Do not have the key? Click the get key button to get one."
+    description: "Used to store the data. Spheron offers secure, decentralized data storage using blockchain technology for enhanced reliability and transparent data management. Do not have the key? Click the Get Key button to get one."
     retrievalInfo: "https://faucet-api.koii.network/api/get-spheron-storage-key;GET;SYSTEM_WALLET_PUBLIC_KEY"
   - type: CPU
     value: '4-core'
