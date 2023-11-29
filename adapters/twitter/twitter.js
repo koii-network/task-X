@@ -34,6 +34,7 @@ class Twitter extends Adapter {
     this.browser = null;
     this.w3sKey = null;
     this.round = null;
+    this.maxRetry = maxRetry;
   }
 
   /**
@@ -112,6 +113,8 @@ class Twitter extends Adapter {
    * 10. If login was unsuccessful, try again
    */
   twitterLogin = async () => {
+    let currentAttempt = 0;
+    while (currentAttempt < this.maxRetry) {
     try {
       console.log('Step: Go to login page');
       await this.page.goto('https://twitter.com/i/flow/login', {
@@ -169,7 +172,6 @@ class Twitter extends Adapter {
       console.log('Step: Click login button');
       await this.page.keyboard.press('Enter');
 
-      // TODO - catch unsuccessful login and retry up to query.maxRetry
       if (!(await this.isPasswordCorrect(this.page, currentURL))) {
         console.log('Password is incorrect or email verfication needed.');
         await this.page.waitForTimeout(2000);
@@ -178,25 +180,31 @@ class Twitter extends Adapter {
       } else if (await this.isEmailVerificationRequired(this.page)) {
         console.log('Email verification required.');
         this.sessionValid = false;
-        await this.page.waitForTimeout(1000000);
+        await this.page.waitForTimeout(10000);
         process.exit(1);
       } else {
         console.log('Password is correct.');
         this.page.waitForNavigation({ waitUntil: 'load' });
-        await this.page.waitForTimeout(1000);
+        await this.page.waitForTimeout(10000);
 
         this.sessionValid = true;
         this.lastSessionCheck = Date.now();
 
         console.log('Step: Login successful');
-      }
 
+      }
       return this.sessionValid;
+      
     } catch (e) {
-      console.log('Error logging in', e);
-      this.sessionValid = false;
-      return false;
+      console.log(`Error logging in, retrying ${this.maxRetry + 1 } of ${this.maxRetry}`, e);
+      currentAttempt++;
+
+      if (currentAttempt === this.maxRetry) {
+      console.log('Max retry reached, exiting');
+      process.exit(1);
+      }
     }
+  }
   };
 
   isPasswordCorrect = async (page, currentURL) => {
