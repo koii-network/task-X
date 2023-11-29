@@ -116,6 +116,7 @@ class Twitter extends Adapter {
     let currentAttempt = 0;
     while (currentAttempt < this.maxRetry) {
     try {
+      console.log(currentAttempt, this.maxRetry);
       console.log('Step: Go to login page');
       await this.page.goto('https://twitter.com/i/flow/login', {
         timeout: 60000,
