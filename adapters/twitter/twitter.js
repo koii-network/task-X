@@ -78,7 +78,7 @@ class Twitter extends Adapter {
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
       );
       this.browser = await stats.puppeteer.launch({
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
@@ -113,21 +113,20 @@ class Twitter extends Adapter {
    */
   twitterLogin = async () => {
     try {
-      // console.log('Step: Go to twitter.com');
-      // // console.log('isBrowser?', this.browser, 'isPage?', this.page);
-      // await this.page.goto('https://twitter.com');
 
       console.log('Step: Go to login page');
       await this.page.goto('https://twitter.com/i/flow/login', {
         timeout: 60000,
       });
 
-      console.log('Step: Fill in username');
-      console.log(this.credentials.username);
 
       await this.page.waitForSelector('input[autocomplete="username"]', {
         timeout: 60000,
       });
+
+      console.log('Step: Fill in username');
+      console.log(this.credentials.username);
+
       await this.page.type(
         'input[autocomplete="username"]',
         this.credentials.username,
@@ -162,10 +161,12 @@ class Twitter extends Adapter {
         console.log('Password is incorrect or email verfication needed.');
         await this.page.waitForTimeout(2000);
         this.sessionValid = false;
+        process.exit(1);
       } else if (await this.isEmailVerificationRequired(this.page)) {
         console.log('Email verification required.');
         this.sessionValid = false;
         await this.page.waitForTimeout(1000000);
+        process.exit(1);
       } else {
         console.log('Password is correct.');
         this.page.waitForNavigation({ waitUntil: 'load' });
