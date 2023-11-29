@@ -9,14 +9,15 @@
     "start": "node index.js",
     "webpack": "webpack",
     "webpack:prod": "webpack --mode production",
-    "webpack:deploy" : "yarn webpack:prod && yarn deploy",
+    "webpack:deploy": "yarn webpack:prod && yarn deploy",
     "deploy": "create-task-cli",
-    "whammy" : "yarn webpack:deploy"
+    "whammy": "yarn webpack:deploy"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@_koi/web3.js": "^0.0.6",
+    "@spheron/storage": "^2.0.4",
     "axios": "^1.3.6",
     "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.0.3",

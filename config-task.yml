@@ -1,5 +1,5 @@
 # Name and metadata of your task
-task_name: 'Twitter Crawler v5.3beta'
+task_name: 'Twitter Crawler v5.3'
 author: 'Soma'
 description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag community or any keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process.'
 repositoryUrl: 'https://github.com/koii-network/task-examples'
@@ -23,9 +23,9 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 10
+total_bounty_amount: 1000
 
-bounty_amount_per_round: 0.01
+bounty_amount_per_round: 10
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 3
@@ -44,8 +44,9 @@ requirementsTags:
     value: 'TWITTER_PASSWORD'
     description: 'The password of your volunteer Twitter account.'
   - type: TASK_VARIABLE
-    value: 'WEB3STORAGE_TOKEN'
-    description: 'To upload the executable to IPFS, you will need a web3 storage key. You can obtain one for yourself by following the tutorial at https://blog.koii.network/Introduce-web3-storage/. This tutorial will guide you on how to get the required web3 storage key for IPFS uploading.'
+    value: "Spheron_Storage"
+    description: "Used to store the data. Spheron offers secure, decentralized data storage using blockchain technology for enhanced reliability and transparent data management. Do not have the key? Click the Get Key button to get one."
+    retrievalInfo: "https://faucet-api.koii.network/api/get-spheron-storage-key;GET;SYSTEM_WALLET_PUBLIC_KEY"
   - type: CPU
     value: '4-core'
   - type: RAM
@@ -56,7 +57,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '9cQSLCR4LrqqqiZjDRveBBngKPbeBPvVTah7NBYgbPvM'
+task_id: 'AjULs8dDZvZkxa22Hq8GMMK9jD2h4NvDz6vEDbTPfXRH'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Release v5 of the Twitter Crawler task. This version adds the ability to specify the keyword to search for in Twitter. Also the task is more stable now.'
+migrationDescription: 'Release v5.3 of the Twitter Crawler task. This version use Spheron to store the data fetched from Twitter. Fix the bug sometimes user cannot receive reward. Also the task is more stable and can get more data in fewer minutes.'
