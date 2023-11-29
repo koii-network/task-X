@@ -113,12 +113,10 @@ class Twitter extends Adapter {
    */
   twitterLogin = async () => {
     try {
-
       console.log('Step: Go to login page');
       await this.page.goto('https://twitter.com/i/flow/login', {
         timeout: 60000,
       });
-
 
       await this.page.waitForSelector('input[autocomplete="username"]', {
         timeout: 60000,
@@ -142,16 +140,31 @@ class Twitter extends Adapter {
         .catch(() => false);
 
       if (twitter_verify) {
+        const verifyURL = await this.page.url();
+        console.log('Twitter verify needed, trying phone number');
+        console.log('Step: Fill in phone number');
         await this.page.type(
           'input[data-testid="ocfEnterTextTextInput"]',
-          this.credentials.username,
+          this.credentials.phone,
         );
         await this.page.keyboard.press('Enter');
+      
+        if (!(await this.isPasswordCorrect(this.page, verifyURL))) {
+          console.log('Phone number is incorrect or email verfication needed.');
+          await this.page.waitForTimeout(2000);
+          this.sessionValid = false;
+          process.exit(1);
+        } else if (await this.isEmailVerificationRequired(this.page)) {
+          console.log('Email verification required.');
+          this.sessionValid = false;
+          await this.page.waitForTimeout(1000000);
+          process.exit(1);
+        }
       }
 
-      console.log('Step: Fill in password');
       const currentURL = await this.page.url();
       await this.page.waitForSelector('input[name="password"]');
+      console.log('Step: Fill in password');
       await this.page.type('input[name="password"]', this.credentials.password);
       console.log('Step: Click login button');
       await this.page.keyboard.press('Enter');
@@ -349,7 +362,7 @@ class Twitter extends Adapter {
       return data;
     } catch (e) {
       console.log(
-        'Filtering advertisement tweets; continuing to the next item.'
+        'Filtering advertisement tweets; continuing to the next item.',
       );
     }
   };
@@ -442,7 +455,7 @@ class Twitter extends Adapter {
             }
           } catch (e) {
             console.log(
-              'Filtering advertisement tweets; continuing to the next item.'
+              'Filtering advertisement tweets; continuing to the next item.',
             );
           }
         }
@@ -539,7 +552,7 @@ async function storeFiles(data, token) {
     } catch (err) {
       console.log(err);
     }
-    
+
     try {
       // console.log(`${basePath}/${path}`)
       let spheronData = await client.upload(`${basePath}/${path}`, {
@@ -553,9 +566,8 @@ async function storeFiles(data, token) {
         },
       });
       cid = spheronData.cid;
-
     } catch (err) {
-      console.log('error uploading to IPFS, trying again',err);
+      console.log('error uploading to IPFS, trying again', err);
     }
     return cid;
   } catch (e) {
