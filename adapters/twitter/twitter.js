@@ -79,7 +79,7 @@ class Twitter extends Adapter {
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
       );
       this.browser = await stats.puppeteer.launch({
-        headless: false,
+        // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
@@ -115,97 +115,130 @@ class Twitter extends Adapter {
   twitterLogin = async () => {
     let currentAttempt = 0;
     while (currentAttempt < this.maxRetry) {
-    try {
-      console.log(currentAttempt, this.maxRetry);
-      console.log('Step: Go to login page');
-      await this.page.goto('https://twitter.com/i/flow/login', {
-        timeout: 60000,
-      });
+      try {
+        console.log(currentAttempt, this.maxRetry);
+        console.log('Step: Go to login page');
+        await this.page.goto('https://twitter.com/i/flow/login', {
+          timeout: 60000,
+        });
 
-      await this.page.waitForSelector('input[autocomplete="username"]', {
-        timeout: 60000,
-      });
+        console.log('Waiting for login page to load');
 
-      console.log('Step: Fill in username');
-      console.log(this.credentials.username);
+        await this.page.waitForSelector('input', {
+          timeout: 60000,
+        });
 
-      await this.page.type(
-        'input[autocomplete="username"]',
-        this.credentials.username,
-      );
-      await this.page.keyboard.press('Enter');
+        // Select the div element by its aria-labelledby attribute
+        const usernameHTML = await this.page.$eval('input', el => el.outerHTML);
 
-      const twitter_verify = await this.page
-        .waitForSelector('input[data-testid="ocfEnterTextTextInput"]', {
-          timeout: 5000,
-          visible: true,
-        })
-        .then(() => true)
-        .catch(() => false);
+        // Use fs module to write the HTML to a file
+        fs.writeFile('usernamePage.html', usernameHTML, function (err) {
+          if (err) throw err;
+          console.log('Saved!');
+        });
 
-      if (twitter_verify) {
-        const verifyURL = await this.page.url();
-        console.log('Twitter verify needed, trying phone number');
-        console.log('Step: Fill in phone number');
+        await this.page.waitForSelector('input[name="text"]', {
+          timeout: 60000,
+        });
+
+        console.log('Step: Fill in username');
+        console.log(this.credentials.username);
+
         await this.page.type(
-          'input[data-testid="ocfEnterTextTextInput"]',
-          this.credentials.phone,
+          'input[name="text"]',
+          this.credentials.username,
         );
         await this.page.keyboard.press('Enter');
-      
-        if (!(await this.isPasswordCorrect(this.page, verifyURL))) {
-          console.log('Phone number is incorrect or email verfication needed.');
+
+        const twitter_verify = await this.page
+          .waitForSelector('input[data-testid="ocfEnterTextTextInput"]', {
+            timeout: 5000,
+            visible: true,
+          })
+          .then(() => true)
+          .catch(() => false);
+
+        if (twitter_verify) {
+          const verifyURL = await this.page.url();
+          console.log('Twitter verify needed, trying phone number');
+          console.log('Step: Fill in phone number');
+          await this.page.type(
+            'input[data-testid="ocfEnterTextTextInput"]',
+            this.credentials.phone,
+          );
+          await this.page.keyboard.press('Enter');
+
+          if (!(await this.isPasswordCorrect(this.page, verifyURL))) {
+            console.log(
+              'Phone number is incorrect or email verfication needed.',
+            );
+            await this.page.waitForTimeout(2000);
+            this.sessionValid = false;
+            process.exit(1);
+          } else if (await this.isEmailVerificationRequired(this.page)) {
+            console.log('Email verification required.');
+            this.sessionValid = false;
+            await this.page.waitForTimeout(1000000);
+            process.exit(1);
+          }
+        }
+
+        const currentURL = await this.page.url();
+
+        // Select the div element by its aria-labelledby attribute
+        const passwordHTML = await this.page.$$eval('input', elements =>
+          elements.map(el => el.outerHTML).join('\n'),
+        );
+
+        // Use fs module to write the HTML to a file
+        fs.writeFile('passwordHTML.html', passwordHTML, function (err) {
+          if (err) throw err;
+          console.log('Saved!');
+        });
+
+        await this.page.waitForSelector('input[name="password"]');
+        console.log('Step: Fill in password');
+        await this.page.type(
+          'input[name="password"]',
+          this.credentials.password,
+        );
+        console.log('Step: Click login button');
+        await this.page.keyboard.press('Enter');
+
+        if (!(await this.isPasswordCorrect(this.page, currentURL))) {
+          console.log('Password is incorrect or email verfication needed.');
           await this.page.waitForTimeout(2000);
           this.sessionValid = false;
           process.exit(1);
         } else if (await this.isEmailVerificationRequired(this.page)) {
           console.log('Email verification required.');
           this.sessionValid = false;
-          await this.page.waitForTimeout(1000000);
+          await this.page.waitForTimeout(10000);
+          process.exit(1);
+        } else {
+          console.log('Password is correct.');
+          this.page.waitForNavigation({ waitUntil: 'load' });
+          await this.page.waitForTimeout(10000);
+
+          this.sessionValid = true;
+          this.lastSessionCheck = Date.now();
+
+          console.log('Step: Login successful');
+        }
+        return this.sessionValid;
+      } catch (e) {
+        console.log(
+          `Error logging in, retrying ${this.maxRetry + 1} of ${this.maxRetry}`,
+          e,
+        );
+        currentAttempt++;
+
+        if (currentAttempt === this.maxRetry) {
+          console.log('Max retry reached, exiting');
           process.exit(1);
         }
       }
-
-      const currentURL = await this.page.url();
-      await this.page.waitForSelector('input[name="password"]');
-      console.log('Step: Fill in password');
-      await this.page.type('input[name="password"]', this.credentials.password);
-      console.log('Step: Click login button');
-      await this.page.keyboard.press('Enter');
-
-      if (!(await this.isPasswordCorrect(this.page, currentURL))) {
-        console.log('Password is incorrect or email verfication needed.');
-        await this.page.waitForTimeout(2000);
-        this.sessionValid = false;
-        process.exit(1);
-      } else if (await this.isEmailVerificationRequired(this.page)) {
-        console.log('Email verification required.');
-        this.sessionValid = false;
-        await this.page.waitForTimeout(10000);
-        process.exit(1);
-      } else {
-        console.log('Password is correct.');
-        this.page.waitForNavigation({ waitUntil: 'load' });
-        await this.page.waitForTimeout(10000);
-
-        this.sessionValid = true;
-        this.lastSessionCheck = Date.now();
-
-        console.log('Step: Login successful');
-
-      }
-      return this.sessionValid;
-      
-    } catch (e) {
-      console.log(`Error logging in, retrying ${this.maxRetry + 1 } of ${this.maxRetry}`, e);
-      currentAttempt++;
-
-      if (currentAttempt === this.maxRetry) {
-      console.log('Max retry reached, exiting');
-      process.exit(1);
-      }
     }
-  }
   };
 
   isPasswordCorrect = async (page, currentURL) => {
