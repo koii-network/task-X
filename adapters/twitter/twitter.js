@@ -228,7 +228,7 @@ class Twitter extends Adapter {
         return this.sessionValid;
       } catch (e) {
         console.log(
-          `Error logging in, retrying ${this.maxRetry + 1} of ${this.maxRetry}`,
+          `Error logging in, retrying ${currentAttempt + 1} of ${this.maxRetry}`,
           e,
         );
         currentAttempt++;
