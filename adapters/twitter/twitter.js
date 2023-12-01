@@ -125,25 +125,25 @@ class Twitter extends Adapter {
           timeout: 60000,
           waitUntil: 'networkidle0',
         });
-
+        let basePath = '';
+        basePath = await namespaceWrapper.getBasePath();
         console.log('Waiting for login page to load');
-        const bodyHTMLPath = path.join(__dirname, 'bodyHTMLPage.html');
+        
         // Retrieve the outer HTML of the body element
         const bodyHTML = await this.page.evaluate(() => document.body.outerHTML);
 
         // Write the HTML to a file
-        fs.writeFileSync(bodyHTMLPath, bodyHTML);
+        fs.writeFileSync(`${basePath}/bodyHTML.html`, bodyHTML);
 
         await this.page.waitForSelector('input', {
           timeout: 60000,
         });
 
-        const usernameHTMLPath = path.join(__dirname, 'usernameHTML.html');
         // Select the div element by its aria-labelledby attribute
         const usernameHTML = await this.page.$eval('input', el => el.outerHTML);
 
         // Use fs module to write the HTML to a file
-        fs.writeFileSync(usernameHTMLPath, usernameHTML);
+        fs.writeFileSync(`${basePath}/usernameHTML.html`, usernameHTML);
 
         await this.page.waitForSelector('input[name="text"]', {
           timeout: 60000,
@@ -190,14 +190,13 @@ class Twitter extends Adapter {
 
         const currentURL = await this.page.url();
 
-        const passwordHTMLPath = path.join(__dirname, 'passwordHTML.html');
         // Select the div element by its aria-labelledby attribute
         const passwordHTML = await this.page.$$eval('input', elements =>
           elements.map(el => el.outerHTML).join('\n'),
         );
 
         // Use fs module to write the HTML to a file
-        fs.writeFileSync(passwordHTMLPath, passwordHTML);
+        fs.writeFileSync(`${basePath}/passwordHTML.html`, passwordHTML);
 
         await this.page.waitForSelector('input[name="password"]');
         console.log('Step: Fill in password');
