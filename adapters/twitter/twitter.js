@@ -87,6 +87,9 @@ class Twitter extends Adapter {
       });
       console.log('Step: Open new page');
       this.page = await this.browser.newPage();
+      await this.page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      );
       await this.page.setViewport({ width: 1920, height: 1080 });
       await this.twitterLogin();
       this.w3sKey = await getAccessToken();
@@ -124,28 +127,23 @@ class Twitter extends Adapter {
         });
 
         console.log('Waiting for login page to load');
-
+        const bodyHTMLPath = path.join(__dirname, 'bodyHTMLPage.html');
         // Retrieve the outer HTML of the body element
         const bodyHTML = await this.page.evaluate(() => document.body.outerHTML);
 
         // Write the HTML to a file
-        fs.writeFileSync('bodyContent.html', bodyHTML, function (err) {
-          if (err) throw err;
-          console.log('Saved!');
-        });
+        fs.writeFileSync(bodyHTMLPath, bodyHTML);
 
         await this.page.waitForSelector('input', {
           timeout: 60000,
         });
 
+        const usernameHTMLPath = path.join(__dirname, 'usernameHTML.html');
         // Select the div element by its aria-labelledby attribute
         const usernameHTML = await this.page.$eval('input', el => el.outerHTML);
 
         // Use fs module to write the HTML to a file
-        fs.writeFileSync('usernamePage.html', usernameHTML, function (err) {
-          if (err) throw err;
-          console.log('Saved!');
-        });
+        fs.writeFileSync(usernameHTMLPath, usernameHTML);
 
         await this.page.waitForSelector('input[name="text"]', {
           timeout: 60000,
@@ -192,16 +190,14 @@ class Twitter extends Adapter {
 
         const currentURL = await this.page.url();
 
+        const passwordHTMLPath = path.join(__dirname, 'passwordHTML.html');
         // Select the div element by its aria-labelledby attribute
         const passwordHTML = await this.page.$$eval('input', elements =>
           elements.map(el => el.outerHTML).join('\n'),
         );
 
         // Use fs module to write the HTML to a file
-        fs.writeFileSync('passwordHTML.html', passwordHTML, function (err) {
-          if (err) throw err;
-          console.log('Saved!');
-        });
+        fs.writeFileSync(passwordHTMLPath, passwordHTML);
 
         await this.page.waitForSelector('input[name="password"]');
         console.log('Step: Fill in password');
