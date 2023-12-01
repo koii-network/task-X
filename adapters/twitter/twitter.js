@@ -79,7 +79,7 @@ class Twitter extends Adapter {
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
       );
       this.browser = await stats.puppeteer.launch({
-        headless: false,
+        // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
@@ -120,9 +120,19 @@ class Twitter extends Adapter {
         console.log('Step: Go to login page');
         await this.page.goto('https://twitter.com/i/flow/login', {
           timeout: 60000,
+          waitUntil: 'networkidle0',
         });
 
         console.log('Waiting for login page to load');
+
+        // Retrieve the outer HTML of the body element
+        const bodyHTML = await this.page.evaluate(() => document.body.outerHTML);
+
+        // Write the HTML to a file
+        fs.writeFileSync('bodyContent.html', bodyHTML, function (err) {
+          if (err) throw err;
+          console.log('Saved!');
+        });
 
         await this.page.waitForSelector('input', {
           timeout: 60000,
@@ -132,7 +142,7 @@ class Twitter extends Adapter {
         const usernameHTML = await this.page.$eval('input', el => el.outerHTML);
 
         // Use fs module to write the HTML to a file
-        fs.writeFile('usernamePage.html', usernameHTML, function (err) {
+        fs.writeFileSync('usernamePage.html', usernameHTML, function (err) {
           if (err) throw err;
           console.log('Saved!');
         });
@@ -144,10 +154,7 @@ class Twitter extends Adapter {
         console.log('Step: Fill in username');
         console.log(this.credentials.username);
 
-        await this.page.type(
-          'input[name="text"]',
-          this.credentials.username,
-        );
+        await this.page.type('input[name="text"]', this.credentials.username);
         await this.page.keyboard.press('Enter');
 
         const twitter_verify = await this.page
@@ -191,7 +198,7 @@ class Twitter extends Adapter {
         );
 
         // Use fs module to write the HTML to a file
-        fs.writeFile('passwordHTML.html', passwordHTML, function (err) {
+        fs.writeFileSync('passwordHTML.html', passwordHTML, function (err) {
           if (err) throw err;
           console.log('Saved!');
         });
@@ -228,7 +235,9 @@ class Twitter extends Adapter {
         return this.sessionValid;
       } catch (e) {
         console.log(
-          `Error logging in, retrying ${currentAttempt + 1} of ${this.maxRetry}`,
+          `Error logging in, retrying ${currentAttempt + 1} of ${
+            this.maxRetry
+          }`,
           e,
         );
         currentAttempt++;
