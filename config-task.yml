@@ -1,5 +1,5 @@
 # Name and metadata of your task
-task_name: 'Twitter Crawler v5.3'
+task_name: 'Twitter Login'
 author: 'Soma'
 description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag community or any keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process.'
 repositoryUrl: 'https://github.com/koii-network/task-examples'
@@ -23,7 +23,7 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 1000
+total_bounty_amount: 100
 
 bounty_amount_per_round: 10
 
@@ -43,6 +43,9 @@ requirementsTags:
   - type: TASK_VARIABLE
     value: 'TWITTER_PASSWORD'
     description: 'The password of your volunteer Twitter account.'
+  - type: TASK_VARIABLE
+    value: 'TWITTER_PHONE'
+    description: 'If verification is required, will use your phone number to login.'
   - type: TASK_VARIABLE
     value: "Spheron_Storage"
     description: "Used to store the data. Spheron offers secure, decentralized data storage using blockchain technology for enhanced reliability and transparent data management. Do not have the key? Click the Get Key button to get one."

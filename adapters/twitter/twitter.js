@@ -34,6 +34,7 @@ class Twitter extends Adapter {
     this.browser = null;
     this.w3sKey = null;
     this.round = null;
+    this.maxRetry = maxRetry;
   }
 
   /**
@@ -86,6 +87,9 @@ class Twitter extends Adapter {
       });
       console.log('Step: Open new page');
       this.page = await this.browser.newPage();
+      await this.page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      );
       await this.page.setViewport({ width: 1920, height: 1080 });
       await this.twitterLogin();
       this.w3sKey = await getAccessToken();
@@ -112,76 +116,132 @@ class Twitter extends Adapter {
    * 10. If login was unsuccessful, try again
    */
   twitterLogin = async () => {
-    try {
-      // console.log('Step: Go to twitter.com');
-      // // console.log('isBrowser?', this.browser, 'isPage?', this.page);
-      // await this.page.goto('https://twitter.com');
+    let currentAttempt = 0;
+    while (currentAttempt < this.maxRetry) {
+      try {
+        console.log(currentAttempt, this.maxRetry);
+        console.log('Step: Go to login page');
+        await this.page.goto('https://twitter.com/i/flow/login', {
+          timeout: 60000,
+          waitUntil: 'networkidle0',
+        });
+        let basePath = '';
+        basePath = await namespaceWrapper.getBasePath();
+        console.log('Waiting for login page to load');
+        
+        // Retrieve the outer HTML of the body element
+        const bodyHTML = await this.page.evaluate(() => document.body.outerHTML);
 
-      console.log('Step: Go to login page');
-      await this.page.goto('https://twitter.com/i/flow/login', {
-        timeout: 60000,
-      });
+        // Write the HTML to a file
+        fs.writeFileSync(`${basePath}/bodyHTML.html`, bodyHTML);
 
-      console.log('Step: Fill in username');
-      console.log(this.credentials.username);
+        await this.page.waitForSelector('input', {
+          timeout: 60000,
+        });
 
-      await this.page.waitForSelector('input[autocomplete="username"]', {
-        timeout: 60000,
-      });
-      await this.page.type(
-        'input[autocomplete="username"]',
-        this.credentials.username,
-      );
-      await this.page.keyboard.press('Enter');
+        // Select the div element by its aria-labelledby attribute
+        const usernameHTML = await this.page.$eval('input', el => el.outerHTML);
 
-      const twitter_verify = await this.page
-        .waitForSelector('input[data-testid="ocfEnterTextTextInput"]', {
-          timeout: 5000,
-          visible: true,
-        })
-        .then(() => true)
-        .catch(() => false);
+        // Use fs module to write the HTML to a file
+        fs.writeFileSync(`${basePath}/usernameHTML.html`, usernameHTML);
 
-      if (twitter_verify) {
-        await this.page.type(
-          'input[data-testid="ocfEnterTextTextInput"]',
-          this.credentials.username,
-        );
+        await this.page.waitForSelector('input[name="text"]', {
+          timeout: 60000,
+        });
+
+        console.log('Step: Fill in username');
+        console.log(this.credentials.username);
+
+        await this.page.type('input[name="text"]', this.credentials.username);
         await this.page.keyboard.press('Enter');
+
+        const twitter_verify = await this.page
+          .waitForSelector('input[data-testid="ocfEnterTextTextInput"]', {
+            timeout: 5000,
+            visible: true,
+          })
+          .then(() => true)
+          .catch(() => false);
+
+        if (twitter_verify) {
+          const verifyURL = await this.page.url();
+          console.log('Twitter verify needed, trying phone number');
+          console.log('Step: Fill in phone number');
+          await this.page.type(
+            'input[data-testid="ocfEnterTextTextInput"]',
+            this.credentials.phone,
+          );
+          await this.page.keyboard.press('Enter');
+
+          if (!(await this.isPasswordCorrect(this.page, verifyURL))) {
+            console.log(
+              'Phone number is incorrect or email verfication needed.',
+            );
+            await this.page.waitForTimeout(2000);
+            this.sessionValid = false;
+            process.exit(1);
+          } else if (await this.isEmailVerificationRequired(this.page)) {
+            console.log('Email verification required.');
+            this.sessionValid = false;
+            await this.page.waitForTimeout(1000000);
+            process.exit(1);
+          }
+        }
+
+        const currentURL = await this.page.url();
+
+        // Select the div element by its aria-labelledby attribute
+        const passwordHTML = await this.page.$$eval('input', elements =>
+          elements.map(el => el.outerHTML).join('\n'),
+        );
+
+        // Use fs module to write the HTML to a file
+        fs.writeFileSync(`${basePath}/passwordHTML.html`, passwordHTML);
+
+        await this.page.waitForSelector('input[name="password"]');
+        console.log('Step: Fill in password');
+        await this.page.type(
+          'input[name="password"]',
+          this.credentials.password,
+        );
+        console.log('Step: Click login button');
+        await this.page.keyboard.press('Enter');
+
+        if (!(await this.isPasswordCorrect(this.page, currentURL))) {
+          console.log('Password is incorrect or email verfication needed.');
+          await this.page.waitForTimeout(2000);
+          this.sessionValid = false;
+          process.exit(1);
+        } else if (await this.isEmailVerificationRequired(this.page)) {
+          console.log('Email verification required.');
+          this.sessionValid = false;
+          await this.page.waitForTimeout(10000);
+          process.exit(1);
+        } else {
+          console.log('Password is correct.');
+          this.page.waitForNavigation({ waitUntil: 'load' });
+          await this.page.waitForTimeout(10000);
+
+          this.sessionValid = true;
+          this.lastSessionCheck = Date.now();
+
+          console.log('Step: Login successful');
+        }
+        return this.sessionValid;
+      } catch (e) {
+        console.log(
+          `Error logging in, retrying ${currentAttempt + 1} of ${
+            this.maxRetry
+          }`,
+          e,
+        );
+        currentAttempt++;
+
+        if (currentAttempt === this.maxRetry) {
+          console.log('Max retry reached, exiting');
+          process.exit(1);
+        }
       }
-
-      console.log('Step: Fill in password');
-      const currentURL = await this.page.url();
-      await this.page.waitForSelector('input[name="password"]');
-      await this.page.type('input[name="password"]', this.credentials.password);
-      console.log('Step: Click login button');
-      await this.page.keyboard.press('Enter');
-
-      // TODO - catch unsuccessful login and retry up to query.maxRetry
-      if (!(await this.isPasswordCorrect(this.page, currentURL))) {
-        console.log('Password is incorrect or email verfication needed.');
-        await this.page.waitForTimeout(2000);
-        this.sessionValid = false;
-      } else if (await this.isEmailVerificationRequired(this.page)) {
-        console.log('Email verification required.');
-        this.sessionValid = false;
-        await this.page.waitForTimeout(1000000);
-      } else {
-        console.log('Password is correct.');
-        this.page.waitForNavigation({ waitUntil: 'load' });
-        await this.page.waitForTimeout(1000);
-
-        this.sessionValid = true;
-        this.lastSessionCheck = Date.now();
-
-        console.log('Step: Login successful');
-      }
-
-      return this.sessionValid;
-    } catch (e) {
-      console.log('Error logging in', e);
-      this.sessionValid = false;
-      return false;
     }
   };
 
@@ -348,7 +408,7 @@ class Twitter extends Adapter {
       return data;
     } catch (e) {
       console.log(
-        'Filtering advertisement tweets; continuing to the next item.'
+        'Filtering advertisement tweets; continuing to the next item.',
       );
     }
   };
@@ -441,7 +501,7 @@ class Twitter extends Adapter {
             }
           } catch (e) {
             console.log(
-              'Filtering advertisement tweets; continuing to the next item.'
+              'Filtering advertisement tweets; continuing to the next item.',
             );
           }
         }
@@ -538,7 +598,7 @@ async function storeFiles(data, token) {
     } catch (err) {
       console.log(err);
     }
-    
+
     try {
       // console.log(`${basePath}/${path}`)
       let spheronData = await client.upload(`${basePath}/${path}`, {
@@ -552,9 +612,8 @@ async function storeFiles(data, token) {
         },
       });
       cid = spheronData.cid;
-
     } catch (err) {
-      console.log('error uploading to IPFS, trying again',err);
+      console.log('error uploading to IPFS, trying again', err);
     }
     return cid;
   } catch (e) {
