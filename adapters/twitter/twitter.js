@@ -79,7 +79,7 @@ class Twitter extends Adapter {
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
       );
       this.browser = await stats.puppeteer.launch({
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
@@ -179,7 +179,7 @@ class Twitter extends Adapter {
             console.log(
               'Phone number is incorrect or email verfication needed.',
             );
-            await this.page.waitForTimeout(2000);
+            await this.page.waitForTimeout(8000);
             this.sessionValid = false;
             process.exit(1);
           } else if (await this.isEmailVerificationRequired(this.page)) {
@@ -211,7 +211,7 @@ class Twitter extends Adapter {
 
         if (!(await this.isPasswordCorrect(this.page, currentURL))) {
           console.log('Password is incorrect or email verfication needed.');
-          await this.page.waitForTimeout(2000);
+          await this.page.waitForTimeout(5000);
           this.sessionValid = false;
           process.exit(1);
         } else if (await this.isEmailVerificationRequired(this.page)) {
@@ -248,7 +248,7 @@ class Twitter extends Adapter {
   };
 
   isPasswordCorrect = async (page, currentURL) => {
-    await this.page.waitForTimeout(2000);
+    await this.page.waitForTimeout(8000);
 
     const newURL = await this.page.url();
     if (newURL === currentURL) {
@@ -259,7 +259,7 @@ class Twitter extends Adapter {
 
   isEmailVerificationRequired = async page => {
     // Wait for some time to allow the page to load the required elements
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
 
     // Check if the specific text is present on the page
     const textContent = await this.page.evaluate(
@@ -450,7 +450,7 @@ class Twitter extends Adapter {
     try {
       console.log('fetching list for ', url);
       // Go to the hashtag page
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForTimeout(5000);
       await this.page.setViewport({ width: 1024, height: 4000 });
       await this.page.goto(url);
 
@@ -518,13 +518,14 @@ class Twitter extends Adapter {
           // );
           if (this.round !== (await namespaceWrapper.getRound())) {
             console.log('round changed, closed old browser');
+            this.browser.close();
             break;
           }
           // Scroll the page for next batch of elements
           await this.scrollPage(this.page);
 
           // Optional: wait for a moment to allow new elements to load
-          await this.page.waitForTimeout(1000);
+          await this.page.waitForTimeout(5000);
 
           // Refetch the elements after scrolling
           await this.page.evaluate(() => {
@@ -552,7 +553,7 @@ class Twitter extends Adapter {
     await page.evaluate(() => {
       window.scrollBy(0, window.innerHeight);
     });
-    await page.waitForTimeout(1000); // Adjust the timeout as necessary
+    await page.waitForTimeout(5000); // Adjust the timeout as necessary
   };
 
   /**
