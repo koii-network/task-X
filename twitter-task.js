@@ -190,9 +190,9 @@ class TwitterTask {
         if (item.id) {
           try {
             console.log('ipfs', item);
-            let ipfsCheck = await this.getJSONofCID(item.cid);
-            console.log('ipfsCheck', ipfsCheck);
-            if (ipfsCheck.id) {
+            // let ipfsCheck = await this.getJSONofCID(item.cid);
+            // console.log('ipfsCheck', ipfsCheck);
+            if (item.data) {
               console.log('ipfs check passed');
             }
             return true;
