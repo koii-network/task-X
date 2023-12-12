@@ -79,7 +79,7 @@ class Twitter extends Adapter {
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
       );
       this.browser = await stats.puppeteer.launch({
-        headless: false,
+        // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
@@ -427,17 +427,14 @@ class Twitter extends Adapter {
    * @description Crawls the queue of known links
    */
   crawl = async query => {
-    while (true) {
       console.log('valid? ', this.sessionValid);
       if (this.sessionValid == true) {
         this.searchTerm = query.searchTerm;
         this.round = query.round;
         await this.fetchList(query.query, query.round);
-        await new Promise(resolve => setTimeout(resolve, 300000)); // If the error message is found, wait for 5 minutes, refresh the page, and continue
       } else {
         await this.negotiateSession();
       }
-    }
   };
 
   /**
@@ -498,7 +495,6 @@ class Twitter extends Adapter {
                 this.cids.create({
                   id: data.tweets_id,
                   round: round,
-                  // cid: cid,
                   data: data,
                 });
               }
@@ -511,11 +507,6 @@ class Twitter extends Adapter {
         }
 
         try {
-          // console.log(
-          //   'round check',
-          //   this.round,
-          //   await namespaceWrapper.getRound(),
-          // );
           if (this.round !== (await namespaceWrapper.getRound())) {
             console.log('round changed, closed old browser');
             this.browser.close();
@@ -536,15 +527,14 @@ class Twitter extends Adapter {
         }
         // If the error message is found, wait for 2 minutes, refresh the page, and continue
         if (errorMessage) {
-          console.log('Rate limit reach, waiting for 5 minutes...');
-          this.sessionValid = false;
+          console.log('Rate limit reach, waiting for next round...');
+          this.browser.close();
           break;
         }
       }
       return;
     } catch (e) {
-      console.log('Last round fetching list stop', e);
-      this.sessionValid = false;
+      console.log('Last round fetching list stop');
       return;
     }
   };
