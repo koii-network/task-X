@@ -1,5 +1,5 @@
 # Name and metadata of your task
-task_name: 'Twitter Login'
+task_name: 'Twitter Testing'
 author: 'Soma'
 description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag community or any keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process.'
 repositoryUrl: 'https://github.com/koii-network/task-examples'
@@ -25,7 +25,7 @@ minimum_stake_amount: 1.9
 # total bounty is not accepted in case of update task
 total_bounty_amount: 100
 
-bounty_amount_per_round: 10
+bounty_amount_per_round: 1
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 3
@@ -60,7 +60,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'AjULs8dDZvZkxa22Hq8GMMK9jD2h4NvDz6vEDbTPfXRH'
+task_id: 'AzhkiCwtSSGB1pXmVSaHeTuFp14aYYprLCGzoWDpgLU3'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Release v5.3 of the Twitter Crawler task. This version use Spheron to store the data fetched from Twitter. Fix the bug sometimes user cannot receive reward. Also the task is more stable and can get more data in fewer minutes.'
+migrationDescription: 'Release v5.3 of the Twitter Crawler task. This version use Spheron to store the data fetched from Twitter. Stable the Spheron upload process.'

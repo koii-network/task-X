@@ -88,7 +88,7 @@ class Twitter extends Adapter {
       console.log('Step: Open new page');
       this.page = await this.browser.newPage();
       await this.page.setUserAgent(
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       );
       await this.page.setViewport({ width: 1920, height: 1080 });
       await this.twitterLogin();
@@ -128,9 +128,11 @@ class Twitter extends Adapter {
         let basePath = '';
         basePath = await namespaceWrapper.getBasePath();
         console.log('Waiting for login page to load');
-        
+
         // Retrieve the outer HTML of the body element
-        const bodyHTML = await this.page.evaluate(() => document.body.outerHTML);
+        const bodyHTML = await this.page.evaluate(
+          () => document.body.outerHTML,
+        );
 
         // Write the HTML to a file
         fs.writeFileSync(`${basePath}/bodyHTML.html`, bodyHTML);
@@ -177,7 +179,7 @@ class Twitter extends Adapter {
             console.log(
               'Phone number is incorrect or email verfication needed.',
             );
-            await this.page.waitForTimeout(2000);
+            await this.page.waitForTimeout(8000);
             this.sessionValid = false;
             process.exit(1);
           } else if (await this.isEmailVerificationRequired(this.page)) {
@@ -209,7 +211,7 @@ class Twitter extends Adapter {
 
         if (!(await this.isPasswordCorrect(this.page, currentURL))) {
           console.log('Password is incorrect or email verfication needed.');
-          await this.page.waitForTimeout(2000);
+          await this.page.waitForTimeout(5000);
           this.sessionValid = false;
           process.exit(1);
         } else if (await this.isEmailVerificationRequired(this.page)) {
@@ -246,7 +248,7 @@ class Twitter extends Adapter {
   };
 
   isPasswordCorrect = async (page, currentURL) => {
-    await this.page.waitForTimeout(2000);
+    await this.page.waitForTimeout(8000);
 
     const newURL = await this.page.url();
     if (newURL === currentURL) {
@@ -257,7 +259,7 @@ class Twitter extends Adapter {
 
   isEmailVerificationRequired = async page => {
     // Wait for some time to allow the page to load the required elements
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
 
     // Check if the specific text is present on the page
     const textContent = await this.page.evaluate(
@@ -279,7 +281,7 @@ class Twitter extends Adapter {
     if (this.proofs) {
       // we need to upload proofs for that round and then store the cid
       const data = await this.cids.getList({ round: round });
-      console.log(`got cids list for round ${round}`, data);
+      console.log(`got cids list for round ${round}`);
 
       if (data && data.length === 0) {
         console.log('No cids found for round ' + round);
@@ -425,17 +427,14 @@ class Twitter extends Adapter {
    * @description Crawls the queue of known links
    */
   crawl = async query => {
-    while (true) {
       console.log('valid? ', this.sessionValid);
       if (this.sessionValid == true) {
         this.searchTerm = query.searchTerm;
         this.round = query.round;
         await this.fetchList(query.query, query.round);
-        await new Promise(resolve => setTimeout(resolve, 300000)); // If the error message is found, wait for 5 minutes, refresh the page, and continue
       } else {
         await this.negotiateSession();
       }
-    }
   };
 
   /**
@@ -448,7 +447,7 @@ class Twitter extends Adapter {
     try {
       console.log('fetching list for ', url);
       // Go to the hashtag page
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForTimeout(5000);
       await this.page.setViewport({ width: 1024, height: 4000 });
       await this.page.goto(url);
 
@@ -479,6 +478,7 @@ class Twitter extends Adapter {
         });
 
         for (const item of items) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Adds a 1-second delay
           try {
             let data = await this.parseItem(item);
             // console.log(data);
@@ -490,12 +490,12 @@ class Twitter extends Adapter {
               const existingItem = await this.db.getItem(checkItem);
               if (!existingItem) {
                 // Store the item in the database
-                const cid = await storeFiles(data, this.w3sKey);
+                // const cid = await storeFiles(data, this.w3sKey);
                 // const cid = 'testcid';
                 this.cids.create({
                   id: data.tweets_id,
                   round: round,
-                  cid: cid,
+                  data: data,
                 });
               }
             }
@@ -506,36 +506,35 @@ class Twitter extends Adapter {
           }
         }
 
-        console.log(
-          'round check',
-          this.round,
-          await namespaceWrapper.getRound(),
-        );
-        if (this.round !== (await namespaceWrapper.getRound())) {
-          break;
+        try {
+          if (this.round !== (await namespaceWrapper.getRound())) {
+            console.log('round changed, closed old browser');
+            this.browser.close();
+            break;
+          }
+          // Scroll the page for next batch of elements
+          await this.scrollPage(this.page);
+
+          // Optional: wait for a moment to allow new elements to load
+          await this.page.waitForTimeout(5000);
+
+          // Refetch the elements after scrolling
+          await this.page.evaluate(() => {
+            return document.querySelectorAll('article[aria-labelledby]');
+          });
+        } catch (e) {
+          console.log('round check error', e);
         }
-        // Scroll the page for next batch of elements
-        await this.scrollPage(this.page);
-
-        // Optional: wait for a moment to allow new elements to load
-        await this.page.waitForTimeout(1000);
-
-        // Refetch the elements after scrolling
-        await this.page.evaluate(() => {
-          return document.querySelectorAll('article[aria-labelledby]');
-        });
-
         // If the error message is found, wait for 2 minutes, refresh the page, and continue
         if (errorMessage) {
-          console.log('Rate limit reach, waiting for 5 minutes...');
-          this.sessionValid = false;
+          console.log('Rate limit reach, waiting for next round...');
+          this.browser.close();
           break;
         }
       }
       return;
     } catch (e) {
-      console.log('Last round fetching list stop', e);
-      this.sessionValid = false;
+      console.log('Last round fetching list stop');
       return;
     }
   };
@@ -544,7 +543,7 @@ class Twitter extends Adapter {
     await page.evaluate(() => {
       window.scrollBy(0, window.innerHeight);
     });
-    await page.waitForTimeout(1000); // Adjust the timeout as necessary
+    await page.waitForTimeout(5000); // Adjust the timeout as necessary
   };
 
   /**
