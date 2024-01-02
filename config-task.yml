@@ -1,8 +1,8 @@
 # Name and metadata of your task
-task_name: 'Twitter Testing'
+task_name: '#koii Twitter Archive'
 author: 'Soma'
 description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag community or any keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process.'
-repositoryUrl: 'https://github.com/koii-network/task-examples'
+repositoryUrl: 'https://github.com/koii-network/X-scraper'
 imageUrl: 'imageUrl'
 
 # network value can be DEVELOPMENT , ARWEAVE or IPFS, Recommended IPFS when deploying to testnet as the cli automatically takes care of uploading the executable with the help of web3.js key
@@ -60,7 +60,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'AzhkiCwtSSGB1pXmVSaHeTuFp14aYYprLCGzoWDpgLU3'
+task_id: '3LPjVj7qjma9b3P55rywsD9Xrwpa2CV7jqGMiEVptLkG'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Release v5.3 of the Twitter Crawler task. This version use Spheron to store the data fetched from Twitter. Stable the Spheron upload process.'
+migrationDescription: 'Release v5.4 of the Twitter Crawler task. This version use Spheron to store the data fetched from Twitter. Stable the Spheron upload process. The task is now more stable'
