@@ -95,12 +95,7 @@ class TwitterTask {
       console.log('keywords from middle server', response.data);
       keyword = response.data;
     } catch (error) {
-      console.log(
-        'No Keywords from middle server, loading local keywords.json',
-      );
-      const wordsList = require('./top1000words.json');
-      const randomIndex = Math.floor(Math.random() * wordsList.length);
-      keyword = wordsList[randomIndex]; // Load local JSON data
+      keyword = '#koii'; // Load local JSON data
     }
 
     return encodeURIComponent(keyword);
