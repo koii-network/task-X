@@ -1,7 +1,7 @@
 # Name and metadata of your task
 task_name: '#koii Twitter Archive'
 author: 'Soma'
-description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag community or any keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process.'
+description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag community or any keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process. Rewards are calculated based on the amount of time your node remains online. The longer you stay online, the greater the reward you will receive. The base bounty per round is 100 KOII, which will be divided among users who have made submissions in the last round.'
 repositoryUrl: 'https://github.com/koii-network/X-scraper'
 imageUrl: 'imageUrl'
 
@@ -60,7 +60,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '3LPjVj7qjma9b3P55rywsD9Xrwpa2CV7jqGMiEVptLkG'
+task_id: '2txKK8uQ3awxyyhz4sTLxK2aG6YnMwnP3oycq49zEgxm'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Release v5.4 of the Twitter Crawler task. This version use Spheron to store the data fetched from Twitter. Stable the Spheron upload process. The task is now more stable'
+migrationDescription: 'Release new version of the Twitter Crawler task. This version includes a new feature that crawl keyword #koii.'

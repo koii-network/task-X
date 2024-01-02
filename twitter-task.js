@@ -95,7 +95,12 @@ class TwitterTask {
       console.log('keywords from middle server', response.data);
       keyword = response.data;
     } catch (error) {
-      keyword = '#koii'; // Load local JSON data
+      console.log(
+        'No Keywords from middle server, loading local keywords.json',
+      );
+      const wordsList = require('./top1000words.json');
+      const randomIndex = Math.floor(Math.random() * wordsList.length);
+      keyword = wordsList[randomIndex]; // Load local JSON data
     }
 
     return encodeURIComponent(keyword);
@@ -185,9 +190,9 @@ class TwitterTask {
         if (item.id) {
           try {
             console.log('ipfs', item);
-            // let ipfsCheck = await this.getJSONofCID(item.cid);
-            // console.log('ipfsCheck', ipfsCheck);
-            if (item.data) {
+            let ipfsCheck = await this.getJSONofCID(item.cid);
+            console.log('ipfsCheck', ipfsCheck);
+            if (ipfsCheck.id) {
               console.log('ipfs check passed');
             }
             return true;
