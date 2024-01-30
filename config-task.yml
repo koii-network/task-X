@@ -1,7 +1,7 @@
 # Name and metadata of your task
-task_name: '#koii Twitter Archive'
+task_name: 'Archive Twitter'
 author: 'Soma'
-description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag community or any keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process. Rewards are calculated based on the amount of time your node remains online. The longer you stay online, the greater the reward you will receive. The base bounty per round is 100 KOII, which will be divided among users who have made submissions in the last round.'
+description: 'We invite you to volunteer your spare Twitter account to help us archive Twitter by the keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process. Rewards are calculated based on the amount of time your node remains online. The longer you stay online, the greater the reward you will receive. The base bounty per round is 100 KOII, which will be divided among users who have made submissions in the last round.'
 repositoryUrl: 'https://github.com/koii-network/X-scraper'
 imageUrl: 'imageUrl'
 
@@ -23,9 +23,9 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 100
+total_bounty_amount: 2000000
 
-bounty_amount_per_round: 1
+bounty_amount_per_round: 100
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 3
@@ -47,6 +47,9 @@ requirementsTags:
     value: 'TWITTER_PHONE'
     description: 'If verification is required, will use your phone number to login.'
   - type: TASK_VARIABLE
+    value: 'KEYWORD'
+    description: 'Enter the keyword you want to crawl. For example, koii.'
+  - type: TASK_VARIABLE
     value: "Spheron_Storage"
     description: "Used to store the data. Spheron offers secure, decentralized data storage using blockchain technology for enhanced reliability and transparent data management. Do not have the key? Click the Get Key button to get one."
     retrievalInfo: "https://faucet-api.koii.network/api/get-spheron-storage-key;GET;SYSTEM_WALLET_PUBLIC_KEY"
@@ -60,7 +63,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '2txKK8uQ3awxyyhz4sTLxK2aG6YnMwnP3oycq49zEgxm'
+task_id: ''
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Release new version of the Twitter Crawler task. This version includes a new feature that crawl keyword #koii.'
+migrationDescription: ''

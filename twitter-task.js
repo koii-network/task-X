@@ -82,21 +82,15 @@ class TwitterTask {
     let keyword;
 
     try {
-      const submitterAccountKeyPair = (
-        await namespaceWrapper.getSubmitterAccount()
-      ).publicKey;
-      const key = submitterAccountKeyPair.toBase58();
-      console.log('submitter key', key);
-      const response = await axios.get('http://localhost:3000/keywords', {
-        params: {
-          key: key,
-        },
-      });
-      console.log('keywords from middle server', response.data);
-      keyword = response.data;
+      if (!process.env.KEYWORD) {
+        throw new Error(
+          'Environment variable KEYWORD is not set',
+        );
+      }
+      keyword = process.env.KEYWORD;
     } catch (error) {
       console.log(
-        'No Keywords from middle server, loading local keywords.json',
+        'Keywords reading failed, loading local keywords.json',
       );
       const wordsList = require('./top1000words.json');
       const randomIndex = Math.floor(Math.random() * wordsList.length);
@@ -223,11 +217,16 @@ module.exports = TwitterTask;
  * @param {*} cid
  * @returns promise<JSON>
  */
-const sleep = (ms) => {
+const sleep = ms => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-const getJSONFromCID = async (cid, fileName, maxRetries = 3, retryDelay = 3000) => {
+const getJSONFromCID = async (
+  cid,
+  fileName,
+  maxRetries = 3,
+  retryDelay = 3000,
+) => {
   let url = `https://${cid}.ipfs.dweb.link/${fileName}`;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -240,7 +239,9 @@ const getJSONFromCID = async (cid, fileName, maxRetries = 3, retryDelay = 3000) 
     } catch (error) {
       console.log(`Attempt ${attempt} failed: ${error.message}`);
       if (attempt < maxRetries) {
-        console.log(`Waiting for ${retryDelay / 1000} seconds before retrying...`);
+        console.log(
+          `Waiting for ${retryDelay / 1000} seconds before retrying...`,
+        );
         await sleep(retryDelay);
       } else {
         return false; // Rethrow the last error
