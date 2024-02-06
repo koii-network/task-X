@@ -63,6 +63,48 @@ class Data {
   }
 
   /**
+   * createCookie
+   * @param {*} item
+   * @returns {void}
+   * @description creates a cookie in the database
+   */
+  async createCookie(item) {
+    try {
+      await this.db.insert(item);
+      // console.log('Cookie inserted', item);
+    } catch (e) {
+      console.error(e);
+      return undefined;
+    }
+  }
+
+  async getCookie() {
+    try {
+      const resp = await this.db.find({ id: 'cookies' });
+      if (resp.length !== 0) {
+        // console.log('Cookie retrieved', resp.data);
+        return resp[0].data;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  }
+
+  async updateCookie(item) {
+    try {
+      // console.log('updating cookie', item);
+      await this.db.update({ id: 'cookies' }, { $set: item }, {});
+      console.log('Cookie updated' );
+    } catch (e) {
+      console.error(e);
+      return undefined;
+    }
+  }
+
+  /**
    * getItem
    * @param {*} item
    * @returns

@@ -79,7 +79,7 @@ class Twitter extends Adapter {
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
       );
       this.browser = await stats.puppeteer.launch({
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
@@ -117,7 +117,12 @@ class Twitter extends Adapter {
    */
   twitterLogin = async () => {
     let currentAttempt = 0;
-    while (currentAttempt < this.maxRetry) {
+    const cookieLoginSuccess = await this.tryLoginWithCookies();
+    if (cookieLoginSuccess) {
+      this.sessionValid = true;
+      return this.sessionValid;
+    }
+    while (currentAttempt < this.maxRetry && !this.sessionValid) {
       try {
         console.log(currentAttempt, this.maxRetry);
         console.log('Step: Go to login page');
@@ -228,6 +233,12 @@ class Twitter extends Adapter {
           this.lastSessionCheck = Date.now();
 
           console.log('Step: Login successful');
+
+          // Extract cookies
+          const cookies = await this.page.cookies();
+          // console.log('cookies', cookies);
+          // Save cookies to database
+          await this.saveCookiesToDB(cookies);
         }
         return this.sessionValid;
       } catch (e) {
@@ -244,6 +255,54 @@ class Twitter extends Adapter {
           process.exit(1);
         }
       }
+    }
+  };
+
+  tryLoginWithCookies = async () => {
+    const cookies = await this.db.getCookie();
+    // console.log('cookies', cookies);
+    if (cookies !== null) {
+      await this.page.setCookie(...cookies);
+
+      await this.page.goto('https://twitter.com/home');
+
+      await this.page.waitForTimeout(5000);
+
+      // Replace the selector with a Twitter-specific element that indicates a logged-in state
+      // This is just an example; you'll need to determine the correct selector for your case
+      const isLoggedIn =
+        (await this.page.url()) !==
+        'https://twitter.com/i/flow/login?redirect_after_login=%2Fhome';
+
+      if (isLoggedIn) {
+        console.log('Logged in using existing cookies');
+        console.log('Updating last session check');
+        const cookies = await this.page.cookies();
+        this.saveCookiesToDB(cookies);
+        this.sessionValid = true;
+        // Optionally, refresh or validate cookies here
+      } else {
+        console.log('No valid cookies found, proceeding with manual login');
+        this.sessionValid = false;
+      }
+      return this.sessionValid;
+    } else {
+      console.log('No cookies found');
+      return false;
+    }
+  };
+
+  saveCookiesToDB = async cookies => {
+    try {
+      const data = await this.db.getCookie();
+      // console.log('data', data);
+      if (data) {
+        await this.db.updateCookie({ id: 'cookies', data: cookies });
+      } else {
+        await this.db.createCookie({ id: 'cookies', data: cookies });
+      }
+    } catch (e) {
+      console.log('Error saving cookies to database', e);
     }
   };
 
@@ -427,14 +486,14 @@ class Twitter extends Adapter {
    * @description Crawls the queue of known links
    */
   crawl = async query => {
-      console.log('valid? ', this.sessionValid);
-      if (this.sessionValid == true) {
-        this.searchTerm = query.searchTerm;
-        this.round = query.round;
-        await this.fetchList(query.query, query.round);
-      } else {
-        await this.negotiateSession();
-      }
+    console.log('valid? ', this.sessionValid);
+    if (this.sessionValid == true) {
+      this.searchTerm = query.searchTerm;
+      this.round = query.round;
+      await this.fetchList(query.query, query.round);
+    } else {
+      await this.negotiateSession();
+    }
   };
 
   /**
