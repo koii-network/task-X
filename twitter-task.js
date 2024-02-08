@@ -92,7 +92,7 @@ class TwitterTask {
           key: key,
         },
       });
-      console.log('keywords from middle server', response.data);
+      // console.log('keywords from middle server', response.data);
       keyword = response.data;
     } catch (error) {
       console.log(
@@ -186,10 +186,10 @@ class TwitterTask {
 
         // then, we need to compare the CID result to the actual result on twitter
         // i.e.
-        console.log('item was', item);
+        // console.log('item was', item);
         if (item.id) {
           try {
-            console.log('ipfs', item);
+            // console.log('ipfs', item);
             let ipfsCheck = await this.getJSONofCID(item.cid);
             console.log('ipfsCheck', ipfsCheck);
             if (ipfsCheck.id) {

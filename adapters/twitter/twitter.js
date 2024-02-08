@@ -79,7 +79,7 @@ class Twitter extends Adapter {
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
       );
       this.browser = await stats.puppeteer.launch({
-        headless: false,
+        // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
