@@ -1,5 +1,4 @@
 const Twitter = require('./adaptors/twitter/twitter.js');
-const Data = require('./model/data');
 const dotenv = require('dotenv');
 const { default: axios } = require('axios');
 const { namespaceWrapper } = require('./namespaceWrapper.js');
@@ -31,7 +30,6 @@ dotenv.config();
 
 class TwitterTask {
   constructor(round) {
-    this.round = round;
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
     this.searchTerm = [];
@@ -219,11 +217,16 @@ module.exports = TwitterTask;
  * @param {*} cid
  * @returns promise<JSON>
  */
-const sleep = (ms) => {
+const sleep = ms => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-const getJSONFromCID = async (cid, fileName, maxRetries = 3, retryDelay = 3000) => {
+const getJSONFromCID = async (
+  cid,
+  fileName,
+  maxRetries = 3,
+  retryDelay = 3000,
+) => {
   let url = `https://${cid}.ipfs.w3s.link/${fileName}`;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -231,12 +234,16 @@ const getJSONFromCID = async (cid, fileName, maxRetries = 3, retryDelay = 3000) 
       if (response.status === 200) {
         return response.data;
       } else {
-        console.log(`Attempt loading IPFS ${attempt}: Received status ${response.status}`);
+        console.log(
+          `Attempt loading IPFS ${attempt}: Received status ${response.status}`,
+        );
       }
     } catch (error) {
       console.log(`Attempt loading IPFS ${attempt} failed: ${error.message}`);
       if (attempt < maxRetries) {
-        console.log(`Waiting for ${retryDelay / 1000} seconds before retrying...`);
+        console.log(
+          `Waiting for ${retryDelay / 1000} seconds before retrying...`,
+        );
         await sleep(retryDelay);
       } else {
         return false; // Rethrow the last error
