@@ -27,7 +27,8 @@ class NamespaceWrapper {
         this.#db = Datastore.create(`../namespace/${TASK_ID}/KOIILevelDB.db`);
       })
     }else{
-      this.#db = Datastore.create('./localKOIIDB.db');
+      console.log("initializing local data")
+      this.#db = Datastore.create('./localData/localKOIIDB.db');
       console.log("DB Initialized")
     }
   }

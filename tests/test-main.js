@@ -1,7 +1,6 @@
 const dotenv = require('dotenv');
 require('dotenv').config();
-const TwitterTask = require('../twitter-task');
-const { coreLogic } = require('../coreLogic');
+const { coreLogic } = require('../src/coreLogic');
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

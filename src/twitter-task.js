@@ -1,6 +1,5 @@
-const Twitter = require('./adapters/twitter/twitter.js');
+const Twitter = require('./adaptors/twitter/twitter.js');
 const db = require('./helpers/db');
-const { Web3Storage } = require('web3.storage');
 const Data = require('./model/data');
 const dotenv = require('dotenv');
 const { default: axios } = require('axios');
@@ -98,7 +97,7 @@ class TwitterTask {
       console.log(
         'No Keywords from middle server, loading local keywords.json',
       );
-      const wordsList = require('./top1000words.json');
+      const wordsList = require('./testData/top1000words.json');
       const randomIndex = Math.floor(Math.random() * wordsList.length);
       keyword = wordsList[randomIndex]; // Load local JSON data
     }

@@ -140,7 +140,7 @@ class Twitter extends Adapter {
         );
 
         // Write the HTML to a file
-        fs.writeFileSync(`${basePath}/bodyHTML.html`, bodyHTML);
+        fs.writeFileSync(`${basePath}/localData/bodyHTML.html`, bodyHTML);
 
         await this.page.waitForSelector('input', {
           timeout: 60000,
@@ -150,7 +150,7 @@ class Twitter extends Adapter {
         const usernameHTML = await this.page.$eval('input', el => el.outerHTML);
 
         // Use fs module to write the HTML to a file
-        fs.writeFileSync(`${basePath}/usernameHTML.html`, usernameHTML);
+        fs.writeFileSync(`${basePath}/localData/usernameHTML.html`, usernameHTML);
 
         await this.page.waitForSelector('input[name="text"]', {
           timeout: 60000,
@@ -203,7 +203,7 @@ class Twitter extends Adapter {
         );
 
         // Use fs module to write the HTML to a file
-        fs.writeFileSync(`${basePath}/passwordHTML.html`, passwordHTML);
+        fs.writeFileSync(`${basePath}/localData/passwordHTML.html`, passwordHTML);
 
         await this.page.waitForSelector('input[name="password"]');
         console.log('Step: Fill in password');

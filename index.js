@@ -1,9 +1,9 @@
-const { coreLogic } = require('./coreLogic');
-const { app } = require('./init');
+const { coreLogic } = require('./src/coreLogic');
+const { app } = require('./src/init');
 const {
   namespaceWrapper,
   taskNodeAdministered,
-} = require('./namespaceWrapper');
+} = require('./src/namespaceWrapper');
 
 
 /**
