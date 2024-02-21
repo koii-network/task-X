@@ -1,5 +1,4 @@
 const Twitter = require('./adaptors/twitter/twitter.js');
-const db = require('./helpers/db');
 const Data = require('./model/data');
 const dotenv = require('dotenv');
 const { default: axios } = require('axios');
@@ -31,7 +30,7 @@ dotenv.config();
  */
 
 class TwitterTask {
-  constructor(getRound, round) {
+  constructor(round) {
     this.round = round;
     this.lastRoundCheck = Date.now();
     this.isRunning = false;

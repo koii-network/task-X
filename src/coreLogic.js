@@ -1,19 +1,24 @@
+/**
+ * CoreLogic is the basic task setup it can be used for other tasks:
+ * Must:
+ * - constructor takes in roundNumber
+ * - implements methods:
+ *     - getRoundCID(roundNumber) 
+ *     - validate(submission_value, round)
+ */
 const { namespaceWrapper } = require('./namespaceWrapper');
-const TwitterTask = require('./twitter-task');
-const { LAMPORTS_PER_SOL } = require('@_koi/web3.js');
+// Import correct task file here:
+const Task = require('./twitter-task'); 
 
 class CoreLogic {
   constructor() {
-    this.twitterTask = null;
+    this.coreTask = null;
   }
 
   async task(roundNumber) {
     console.log('Main task called with round', roundNumber);
     try {
-      this.twitterTask = await new TwitterTask(
-        roundNumber,
-        roundNumber,
-      );
+      this.coreTask = await new Task(roundNumber); 
       console.log('started a new crawler at round', roundNumber);
     } catch (e) {
       console.log('error starting crawler', e);
@@ -30,7 +35,7 @@ class CoreLogic {
   async fetchSubmission(roundNumber) {
     console.log('fetchSubmission called');
 
-    const cid = await this.twitterTask.getRoundCID(roundNumber);
+    const cid = await this.coreTask.getRoundCID(roundNumber);
 
     console.log('about to make submission with CID: ', cid);
 
@@ -188,7 +193,7 @@ class CoreLogic {
    * @returns
    */
   validateNode = async (submission_value, round) => {
-    return await this.twitterTask.validate(submission_value, round);
+    return await this.coreTask.validate(submission_value, round);
   };
 
   /**
