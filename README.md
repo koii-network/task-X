@@ -29,7 +29,7 @@ There are four main components, detailed in the adapter file: `adapters/twitter/
 3. crawl an item
 4. Store the item
 
-The repo also contains a host of test files, most importantly `test/test-one-round.js` which details the full flow of one [gradual consensus](https://docs.koii.network/concepts/gradual-consensus/runtime-flow) round. 
+The repo also contains a test file: `test/test-one-round.js` which details the full flow of one [gradual consensus](https://docs.koii.network/concepts/gradual-consensus/runtime-flow) round. 
 
 Run the test with 
 ```
@@ -38,7 +38,7 @@ yarn test or npm run test
 ```
 
 ## Using The Crawler
-To modify the crawler query, or change how it uses the local database, open `twitter-task.js`.
+To modify the crawler query, or change how it uses the local database, open `task.js`.
 
 The `query` object manages the key parts of the crawler.
 
