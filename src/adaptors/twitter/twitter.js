@@ -1,18 +1,18 @@
 // Import required modules
-const Crawler = require('../crawler/crawler');
+const CrawlerAdaptor = require('../crawler/crawler');
 const cheerio = require('cheerio');
 const { namespaceWrapper } = require('../../namespaceWrapper');
 const fs = require('fs');
 
 /**
- * Twitter
+ * TwitterAdaptor
  * @class
- * @extends Crawler
+ * @extends CrawlerAdaptor
  * @description
  * Provides a crawler interface for the data gatherer nodes to use to interact with twitter
  */
 
-class Twitter extends Crawler {
+class TwitterAdaptor extends CrawlerAdaptor {
   constructor(credentials, maxRetry) {
     super(credentials, maxRetry);
     this.toCrawl = [];
@@ -478,4 +478,4 @@ class Twitter extends Crawler {
   };
 }
 
-module.exports = Twitter;
+module.exports = TwitterAdaptor;

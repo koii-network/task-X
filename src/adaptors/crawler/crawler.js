@@ -15,7 +15,7 @@ const fs = require('fs');
  * Extends the adaptor to include db and puppeter intialization
  */
 
-class Crawler extends Adapter {
+class CrawlerAdaptor extends Adapter {
   constructor(credentials, maxRetry) {
     super(credentials, maxRetry);
     this.credentials = credentials;
@@ -193,7 +193,7 @@ class Crawler extends Adapter {
   };
 }
 
-module.exports = Crawler;
+module.exports = CrawlerAdaptor;
 
 async function makeStorageClient() {
   try {

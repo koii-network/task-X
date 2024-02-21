@@ -1,4 +1,4 @@
-const Twitter = require('./adaptors/twitter/twitter.js');
+const TwitterAdaptor = require('./adaptors/twitter/twitter.js');
 const dotenv = require('dotenv');
 const { default: axios } = require('axios');
 const { namespaceWrapper } = require('./namespaceWrapper.js');
@@ -50,7 +50,7 @@ class TwitterTask {
         password: password,
         phone: phone,
       };
-      this.adapter = new Twitter(credentials, 3);
+      this.adapter = new TwitterAdaptor(credentials, 3);
       await this.adapter.negotiateSession();
     };
 
@@ -99,7 +99,7 @@ class TwitterTask {
   }
 
   /**
-   * strat
+   * start
    * @description starts the crawler
    *
    * @returns {void}
