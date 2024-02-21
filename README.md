@@ -67,3 +67,10 @@ npx @_koii/create-task-cli@latest #uploads your task executable to IPFS and star
 ```
 
 For a longer demo and more information please see https://blog.koii.network/How-to-deploy-a-koii-task-in-less-than-5mins/
+
+# To modify
+To modify the files you should change are:
+- src/adaptors/twitter/twitter.js 
+    This file extends the crawler adaptor and is specific to twitter
+- src/task.js
+    This file requires the TwitterAdaptor from the above file, gives twitter specific task steps and is required by coreLogic
