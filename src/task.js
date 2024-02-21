@@ -22,8 +22,6 @@ dotenv.config();
  * @param {number} round - the current round
  * @param {string} searchTerm - the search term to use for the crawler
  * @param {string} adapter - the adapter to use for the crawler
- * @param {string} db - the database to use for the crawler
- *
  * @returns {TwitterTask} - a TwitterTask object
  *
  */
@@ -35,7 +33,7 @@ class TwitterTask {
     this.searchTerm = [];
     this.adapter = null;
     this.initialize();
-
+    this.round = round;
     this.setAdapter = async () => {
       const username = process.env.TWITTER_USERNAME;
       const password = process.env.TWITTER_PASSWORD;
@@ -137,7 +135,8 @@ class TwitterTask {
   }
 
   /**
-   * getRoundCID
+   * getRoundCID 
+   * !!! IMPORTANT - Required in coreTask !!!
    * @param {*} roundID
    * @returns
    */
@@ -160,6 +159,7 @@ class TwitterTask {
 
   /**
    * validate
+   * !!! IMPORTANT - Required in coreTask !!!
    * @description validates a round of results from another node against the Twitter API
    * @param {*} proofCid
    * @returns

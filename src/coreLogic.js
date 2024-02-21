@@ -1,6 +1,6 @@
 /**
  * CoreLogic is the basic task setup it can be used for other tasks:
- * Must:
+ * Task must:
  * - constructor takes in roundNumber
  * - implements methods:
  *     - getRoundCID(roundNumber) 
