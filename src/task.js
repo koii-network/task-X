@@ -27,12 +27,12 @@ dotenv.config();
 
 class TwitterTask {
   constructor(round) {
+    this.round = round;
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
-    this.searchTerm = [];
+    this.searchTerm = []; // this is also in adaptor?
     this.adapter = null;
     this.initialize();
-    this.round = round;
     this.setAdapter = async () => {
       const username = process.env.TWITTER_USERNAME;
       const password = process.env.TWITTER_PASSWORD;
@@ -64,6 +64,7 @@ class TwitterTask {
     this.adapter.db.createSearchTerm(this.searchTerm, this.round);
   }
 
+  // TODO : could probably be moved into crawler adaptor
   /**
    * fetchSearchTerms
    * @description return the search terms to use for the crawler
@@ -199,16 +200,14 @@ class TwitterTask {
 
 module.exports = TwitterTask;
 
+// Helpers..
+
 /**
  * getJSONFromCID
  * @description gets the JSON from a CID
  * @param {*} cid
  * @returns promise<JSON>
  */
-const sleep = ms => {
-  return new Promise(resolve => setTimeout(resolve, ms));
-};
-
 const getJSONFromCID = async (
   cid,
   fileName,
@@ -238,4 +237,8 @@ const getJSONFromCID = async (
       }
     }
   }
+};
+
+const sleep = ms => {
+  return new Promise(resolve => setTimeout(resolve, ms));
 };
