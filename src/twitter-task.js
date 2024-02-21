@@ -36,8 +36,6 @@ class TwitterTask {
     this.isRunning = false;
     this.searchTerm = [];
     this.adapter = null;
-    this.db = new Data('db', []);
-    this.db.initializeData();
     this.initialize();
 
     this.setAdapter = async () => {
@@ -56,7 +54,7 @@ class TwitterTask {
         password: password,
         phone: phone,
       };
-      this.adapter = new Twitter(credentials, this.db, 3);
+      this.adapter = new Twitter(credentials, 3);
       await this.adapter.negotiateSession();
     };
 

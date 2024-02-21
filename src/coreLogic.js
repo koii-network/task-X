@@ -7,7 +7,7 @@
  *     - validate(submission_value, round)
  */
 const { namespaceWrapper } = require('./namespaceWrapper');
-// Import correct task file here:
+// Require correct task file here:
 const Task = require('./twitter-task'); 
 
 class CoreLogic {

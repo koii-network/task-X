@@ -2,7 +2,7 @@
 const Adapter = require('../../model/adapter');
 const cheerio = require('cheerio');
 const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
-const axios = require('axios');
+// const axios = require('axios');
 const Data = require('../../model/data');
 const PCR = require('puppeteer-chromium-resolver');
 const { namespaceWrapper } = require('../../namespaceWrapper');
@@ -17,7 +17,7 @@ const fs = require('fs');
  */
 
 class Twitter extends Adapter {
-  constructor(credentials, db, maxRetry) {
+  constructor(credentials, maxRetry) {
     super(credentials, maxRetry);
     this.credentials = credentials;
     this.db = new Data('db', []);
