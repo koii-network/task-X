@@ -66,7 +66,7 @@ class TwitterTask {
     this.searchTerm = await this.fetchSearchTerms();
     //Store this round searchTerm
     console.log('creating search term', this.searchTerm, this.round);
-    this.db.createSearchTerm(this.searchTerm, this.round);
+    this.adapter.db.createSearchTerm(this.searchTerm, this.round);
   }
 
   /**
