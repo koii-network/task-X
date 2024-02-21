@@ -179,6 +179,7 @@ class CrawlerAdaptor extends Adapter {
     await page.waitForTimeout(5000); // Adjust the timeout as necessary
   };
 
+  // TODO : nice little function isn't even called... 
   /**
    * stop
    * @returns {Promise<boolean>}

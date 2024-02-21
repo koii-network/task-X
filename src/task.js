@@ -16,7 +16,6 @@ dotenv.config();
  *              @crawl crawls Twitter and populates the database
  *              @validate verifies the submissions of other nodes
  *              @getRoundCID returns the submission for a given round
- *              @stop stops the crawler
  *
  * @param {function} getRound - a function that returns the current round
  * @param {number} round - the current round
@@ -121,17 +120,6 @@ class TwitterTask {
     };
 
     this.adapter.crawl(query); // let it ride
-  }
-
-  /**
-   * stop
-   * @description stops the crawler
-   *
-   * @returns {void}
-   */
-  async stop() {
-    this.isRunning = false;
-    this.adapter.stop();
   }
 
   /**
