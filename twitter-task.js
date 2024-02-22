@@ -92,7 +92,7 @@ class TwitterTask {
           key: key,
         },
       });
-      console.log('keywords from middle server', response.data);
+      // console.log('keywords from middle server', response.data);
       keyword = response.data;
     } catch (error) {
       console.log(
@@ -186,10 +186,10 @@ class TwitterTask {
 
         // then, we need to compare the CID result to the actual result on twitter
         // i.e.
-        console.log('item was', item);
+        // console.log('item was', item);
         if (item.id) {
           try {
-            console.log('ipfs', item);
+            // console.log('ipfs', item);
             let ipfsCheck = await this.getJSONofCID(item.cid);
             console.log('ipfsCheck', ipfsCheck);
             if (ipfsCheck.id) {
@@ -228,17 +228,17 @@ const sleep = (ms) => {
 };
 
 const getJSONFromCID = async (cid, fileName, maxRetries = 3, retryDelay = 3000) => {
-  let url = `https://${cid}.ipfs.dweb.link/${fileName}`;
+  let url = `https://${cid}.ipfs.w3s.link/${fileName}`;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await axios.get(url);
       if (response.status === 200) {
         return response.data;
       } else {
-        console.log(`Attempt ${attempt}: Received status ${response.status}`);
+        console.log(`Attempt loading IPFS ${attempt}: Received status ${response.status}`);
       }
     } catch (error) {
-      console.log(`Attempt ${attempt} failed: ${error.message}`);
+      console.log(`Attempt loading IPFS ${attempt} failed: ${error.message}`);
       if (attempt < maxRetries) {
         console.log(`Waiting for ${retryDelay / 1000} seconds before retrying...`);
         await sleep(retryDelay);

@@ -275,10 +275,10 @@ class NamespaceWrapper {
     console.log('******/  IN VOTING /******');
     const taskAccountDataJSON = await this.getTaskState();
 
-    console.log(
-      'Fetching the submissions of N - 1 round',
-      taskAccountDataJSON.submissions[round],
-    );
+    // console.log(
+    //   'Fetching the submissions of N - 1 round',
+    //   taskAccountDataJSON.submissions[round],
+    // );
     const submissions = taskAccountDataJSON.submissions[round];
     if (submissions == null) {
       console.log('No submisssions found in N-1 round');
@@ -287,24 +287,24 @@ class NamespaceWrapper {
       const keys = Object.keys(submissions);
       const values = Object.values(submissions);
       const size = values.length;
-      console.log('Submissions from last round: ', keys, values, size);
+      // console.log('Submissions from last round: ', keys, values, size);
       let isValid;
       const submitterAccountKeyPair = await this.getSubmitterAccount();
       const submitterPubkey = submitterAccountKeyPair.publicKey.toBase58();
       for (let i = 0; i < size; i++) {
         let candidatePublicKey = keys[i];
-        console.log('FOR CANDIDATE KEY', candidatePublicKey);
+        // console.log('FOR CANDIDATE KEY', candidatePublicKey);
         let candidateKeyPairPublicKey = new PublicKey(keys[i]);
         if (candidatePublicKey == submitterPubkey) {
           console.log('YOU CANNOT VOTE ON YOUR OWN SUBMISSIONS');
         } else {
           try {
-            console.log(
-              'SUBMISSION VALUE TO CHECK',
-              values[i].submission_value,
-            );
+            // console.log(
+            //   'SUBMISSION VALUE TO CHECK',
+            //   values[i].submission_value,
+            // );
             isValid = await validate(values[i].submission_value, round);
-            console.log(`Voting ${isValid} to ${candidatePublicKey}`);
+            // console.log(`Voting ${isValid} to ${candidatePublicKey}`);
 
             if (isValid) {
               // check for the submissions_audit_trigger , if it exists then vote true on that otherwise do nothing
@@ -351,10 +351,10 @@ class NamespaceWrapper {
     // await this.checkVoteStatus();
     console.log('******/  IN VOTING OF DISTRIBUTION LIST /******');
     const taskAccountDataJSON = await this.getTaskState();
-    console.log(
-      'Fetching the Distribution submissions of N - 2 round',
-      taskAccountDataJSON.distribution_rewards_submission[round],
-    );
+    // console.log(
+    //   'Fetching the Distribution submissions of N - 2 round',
+    //   taskAccountDataJSON.distribution_rewards_submission[round],
+    // );
     const submissions =
       taskAccountDataJSON.distribution_rewards_submission[round];
     if (submissions == null) {
@@ -364,19 +364,19 @@ class NamespaceWrapper {
       const keys = Object.keys(submissions);
       const values = Object.values(submissions);
       const size = values.length;
-      console.log(
-        'Distribution Submissions from last round: ',
-        keys,
-        values,
-        size,
-      );
+      // console.log(
+      //   'Distribution Submissions from last round: ',
+      //   keys,
+      //   values,
+      //   size,
+      // );
       let isValid;
       const submitterAccountKeyPair = await this.getSubmitterAccount();
       const submitterPubkey = submitterAccountKeyPair.publicKey.toBase58();
 
       for (let i = 0; i < size; i++) {
         let candidatePublicKey = keys[i];
-        console.log('FOR CANDIDATE KEY', candidatePublicKey);
+        // console.log('FOR CANDIDATE KEY', candidatePublicKey);
         let candidateKeyPairPublicKey = new PublicKey(keys[i]);
         if (candidatePublicKey == submitterPubkey) {
           console.log('YOU CANNOT VOTE ON YOUR OWN DISTRIBUTION SUBMISSIONS');
@@ -390,16 +390,16 @@ class NamespaceWrapper {
               values[i].submission_value,
               round,
             );
-            console.log(`Voting ${isValid} to ${candidatePublicKey}`);
+            // console.log(`Voting ${isValid} to ${candidatePublicKey}`);
 
             if (isValid) {
               // check for the submissions_audit_trigger , if it exists then vote true on that otherwise do nothing
               const distributions_audit_trigger =
                 taskAccountDataJSON.distributions_audit_trigger[round];
-              console.log(
-                'SUBMIT DISTRIBUTION AUDIT TRIGGER',
-                distributions_audit_trigger,
-              );
+              // console.log(
+              //   'SUBMIT DISTRIBUTION AUDIT TRIGGER',
+              //   distributions_audit_trigger,
+              // );
               // console.log(
               //   "CANDIDATE PUBKEY CHECK IN AUDIT TRIGGER",
               //   distributions_audit_trigger[candidatePublicKey]
