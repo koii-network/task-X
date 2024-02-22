@@ -3,9 +3,9 @@
  * @description This file contains the namespace wrapper class
  *             which is used to interact with the namespace
  *             and the task node
- * 
+ *
  *             Note: Generally, it is not necessary to modify this file
- *  
+ *
  * @version 1.0.0
  */
 
@@ -19,29 +19,30 @@ class NamespaceWrapper {
   #db;
 
   constructor() {
-    if(taskNodeAdministered){
-      this.getTaskLevelDBPath().then((path)=>{
-        this.#db = Datastore.create(path);
-      }).catch((err)=>{
-        console.error(err)
-        this.#db = Datastore.create(`../namespace/${TASK_ID}/KOIILevelDB.db`);
-      })
-    }else{
+    if (taskNodeAdministered) {
+      this.getTaskLevelDBPath()
+        .then(path => {
+          this.#db = Datastore.create(path);
+        })
+        .catch(err => {
+          console.error(err);
+          this.#db = Datastore.create(`../namespace/${TASK_ID}/KOIILevelDB.db`);
+        });
+    } else {
       this.#db = Datastore.create('./localKOIIDB.db');
-      console.log("DB Initialized")
+      console.log('DB Initialized');
     }
   }
 
-  async getDb(){
-
-    if(this.#db)return this.#db
-    try{
-      const path = await this.getTaskLevelDBPath()
+  async getDb() {
+    if (this.#db) return this.#db;
+    try {
+      const path = await this.getTaskLevelDBPath();
       this.#db = Datastore.create(path);
-    }catch(e){
+    } catch (e) {
       this.#db = Datastore.create(`../namespace/${TASK_ID}/KOIILevelDB.db`);
     }
-    return this.#db
+    return this.#db;
   }
   /**
    * Namespace wrapper of storeGetAsync
@@ -69,7 +70,11 @@ class NamespaceWrapper {
   async storeSet(key, value) {
     try {
       await this.initializeDB();
-      await this.#db.update({ key: key }, { [key]: value, key }, { upsert: true })
+      await this.#db.update(
+        { key: key },
+        { [key]: value, key },
+        { upsert: true },
+      );
     } catch (e) {
       console.error(e);
       return undefined;
@@ -287,23 +292,34 @@ class NamespaceWrapper {
       const keys = Object.keys(submissions);
       const values = Object.values(submissions);
       const size = values.length;
+      const numberOfChecks = Math.min(5, size);
+
+      let uniqueIndices = new Set();
+
+      // Populate uniqueIndices with unique random numbers
+      while (uniqueIndices.size < numberOfChecks) {
+        const randomIndex = Math.floor(Math.random() * size);
+        uniqueIndices.add(randomIndex);
+      }
+
       // console.log('Submissions from last round: ', keys, values, size);
       let isValid;
       const submitterAccountKeyPair = await this.getSubmitterAccount();
       const submitterPubkey = submitterAccountKeyPair.publicKey.toBase58();
-      for (let i = 0; i < size; i++) {
-        let candidatePublicKey = keys[i];
+      for (let index of uniqueIndices) {
+
+        let candidatePublicKey = keys[index];
         // console.log('FOR CANDIDATE KEY', candidatePublicKey);
-        let candidateKeyPairPublicKey = new PublicKey(keys[i]);
+        let candidateKeyPairPublicKey = new PublicKey(keys[index]);
         if (candidatePublicKey == submitterPubkey) {
           console.log('YOU CANNOT VOTE ON YOUR OWN SUBMISSIONS');
         } else {
           try {
-            // console.log(
-            //   'SUBMISSION VALUE TO CHECK',
-            //   values[i].submission_value,
-            // );
-            isValid = await validate(values[i].submission_value, round);
+            console.log(
+              'SUBMISSION VALUE TO CHECK',
+              values[index].submission_value,
+            );
+            isValid = await validate(values[index].submission_value, round);
             // console.log(`Voting ${isValid} to ${candidatePublicKey}`);
 
             if (isValid) {
@@ -455,7 +471,6 @@ class NamespaceWrapper {
     } else {
       return '.';
     }
-
   }
 }
 
