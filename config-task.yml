@@ -1,5 +1,5 @@
 # Name and metadata of your task
-task_name: 'Twitter Beta v0.2'
+task_name: '#koii Twitter Archive'
 author: 'Soma'
 description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag community or any keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process. Rewards are calculated based on the amount of time your node remains online. The longer you stay online, the greater the reward you will receive. The base bounty per round is 100 KOII, which will be divided among users who have made submissions in the last round.'
 repositoryUrl: 'https://github.com/koii-network/X-scraper'
@@ -12,10 +12,10 @@ task_executable_network: 'IPFS'
 task_audit_program: 'dist/main.js'
 
 # Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
-round_time: 1500
+round_time: 2000
 
-audit_window: 350
-submission_window: 350
+audit_window: 400
+submission_window: 400
 
 # Amounts in KOII
 
@@ -25,13 +25,13 @@ minimum_stake_amount: 1.9
 # total bounty is not accepted in case of update task
 total_bounty_amount: 100
 
-bounty_amount_per_round: 1
+bounty_amount_per_round: 100
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
-allowed_failed_distributions: 3
+allowed_failed_distributions: 5
 
 #Space in MBs for the account size, that holds the task data
-space: 1
+space: 10
 
 # Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
 # To add more global variables and task variables, please refer the type,value,description format shown below
