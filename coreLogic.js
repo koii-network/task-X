@@ -29,12 +29,19 @@ class CoreLogic {
    */
   async fetchSubmission(roundNumber) {
     console.log('fetchSubmission called');
-
-    const cid = await this.twitterTask.getRoundCID(roundNumber);
-
-    console.log('about to make submission with CID: ', cid);
-
-    return cid;
+    try {
+      const cid = await this.twitterTask.getRoundCID(roundNumber);
+      if(cid){
+        console.log('about to make submission with CID: ', cid);
+        return cid;
+      }
+      else {
+        console.log('No submission call made as return cid is null');
+      }
+    } catch (error) {
+      console.error('No submission call made as return cid is null', error);
+      throw error;
+    }
   }
 
   /**
