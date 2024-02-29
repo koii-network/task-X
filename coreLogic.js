@@ -10,10 +10,7 @@ class CoreLogic {
   async task(roundNumber) {
     console.log('Main task called with round', roundNumber);
     try {
-      this.twitterTask = await new TwitterTask(
-        roundNumber,
-        roundNumber,
-      );
+      this.twitterTask = await new TwitterTask(roundNumber, roundNumber);
       console.log('started a new crawler at round', roundNumber);
     } catch (e) {
       console.log('error starting crawler', e);
@@ -31,11 +28,10 @@ class CoreLogic {
     console.log('fetchSubmission called');
     try {
       const cid = await this.twitterTask.getRoundCID(roundNumber);
-      if(cid){
+      if (cid) {
         console.log('about to make submission with CID: ', cid);
         return cid;
-      }
-      else {
+      } else {
         console.log('No submission call made as return cid is null');
       }
     } catch (error) {
@@ -138,7 +134,7 @@ class CoreLogic {
 
       const reward = Math.floor(
         taskAccountDataJSON.bounty_amount_per_round /
-        distributionCandidates.length,
+          distributionCandidates.length,
       );
       // console.log('REWARD RECEIVED BY EACH NODE', reward);
       for (let i = 0; i < distributionCandidates.length; i++) {
