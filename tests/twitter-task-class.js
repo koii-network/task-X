@@ -16,7 +16,7 @@ const run = async () => {
                 twitterTask = await new TwitterTask (async() => {
                     return x;
                 });
-                console.log('started a new crawler at round', x);
+                console.log('started a new searcher at round', x);
                 
             } else {
                 const cid = await twitterTask.getRoundCID(x-1);

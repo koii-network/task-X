@@ -1,4 +1,4 @@
-# Twitter Crawler
+# Twitter Searcher
 
 **Not for illegal use**
 
@@ -12,7 +12,7 @@ Examples of bad use:
  - stealing data (i.e. selling large scale analytics)
  - infringing on personal privacy (i.e. "stalking")
 
-Please consult with a legal professional before engaging in any form of web-crawling or data-gathering activities.
+Please consult with a legal professional before engaging in any form of web-searching or data-gathering activities.
 
 ## Koii Tasks
 
@@ -26,7 +26,7 @@ This is an implementation of the default data-gatherer class of Koii tasks.
 There are four main components, detailed in the adapter file: `adapters/twitter/twitter.js`
 1. Negotiate Session
 2. Fetch a list
-3. crawl an item
+3. search for an item
 4. Store the item
 
 The repo also contains a host of test files, most importantly `test/test-one-round.js` which details the full flow of one [gradual consensus](https://docs.koii.network/concepts/gradual-consensus/runtime-flow) round. 
@@ -37,10 +37,10 @@ yarn install or npm install
 yarn test or npm run test
 ```
 
-## Using The Crawler
-To modify the crawler query, or change how it uses the local database, open `twitter-task.js`.
+## Using The Searcher
+To modify the searcher query, or change how it uses the local database, open `twitter-task.js`.
 
-The `query` object manages the key parts of the crawler.
+The `query` object manages the key parts of the searcher.
 
 ```javascript
 let searchTerm = "#koii";

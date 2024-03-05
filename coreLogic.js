@@ -11,9 +11,9 @@ class CoreLogic {
     console.log('Main task called with round', roundNumber);
     try {
       this.twitterTask = await new TwitterTask(roundNumber, roundNumber);
-      console.log('started a new crawler at round', roundNumber);
+      console.log('started a new searcher at round', roundNumber);
     } catch (e) {
-      console.log('error starting crawler', e);
+      console.log('error starting searcher', e);
     }
   }
 

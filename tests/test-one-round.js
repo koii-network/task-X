@@ -15,7 +15,7 @@ async function executeTasks() {
 
         await sleep(delay);
 
-        console.log('stopping crawler at round', round);
+        console.log('stopping searcher at round', round);
     }
 }
 

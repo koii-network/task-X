@@ -13,7 +13,7 @@ const fs = require('fs');
  * @class
  * @extends Adapter
  * @description
- * Provides a crawler interface for the data gatherer nodes to use to interact with twitter
+ * Provides a searcher interface for the data gatherer nodes to use to interact with twitter
  */
 
 class Twitter extends Adapter {
@@ -26,7 +26,7 @@ class Twitter extends Adapter {
     this.proofs.initializeData();
     this.cids = new Data('cids', []);
     this.cids.initializeData();
-    this.toCrawl = [];
+    this.toSearch = [];
     this.searchTerm = [];
     this.parsed = {};
     this.lastSessionCheck = null;
@@ -390,7 +390,7 @@ class Twitter extends Adapter {
    * @param {object} query - the query object to use for parsing
    * @returns {object} - the parsed item
    * @description - this function should parse the item at the given url and return the parsed item data
-   *               according to the query object and for use in either crawl() or validate()
+   *               according to the query object and for use in either search() or validate()
    */
   parseItem = async item => {
     if (this.sessionValid == false) {
@@ -480,12 +480,12 @@ class Twitter extends Adapter {
   };
 
   /**
-   * crawl
+   * search
    * @param {string} query
    * @returns {Promise<string[]>}
-   * @description Crawls the queue of known links
+   * @description searchs the queue of known links
    */
-  crawl = async query => {
+  search = async query => {
     console.log('valid? ', this.sessionValid);
     if (this.sessionValid == true) {
       this.searchTerm = query.searchTerm;
@@ -620,7 +620,7 @@ class Twitter extends Adapter {
   /**
    * stop
    * @returns {Promise<boolean>}
-   * @description Stops the crawler
+   * @description Stops the searcher
    */
   stop = async () => {
     if (this.browser) {
