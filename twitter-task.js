@@ -8,24 +8,24 @@ const { namespaceWrapper } = require('./namespaceWrapper.js');
 dotenv.config();
 
 /**
- * TwitterTask is a class that handles the Twitter crawler and validator
+ * TwitterTask is a class that handles the Twitter searcher and validator
  *
- * @description TwitterTask is a class that handles the Twitter crawler and validator
- *              In this task, the crawler asynchronously populates a database, which is later
+ * @description TwitterTask is a class that handles the Twitter searcher and validator
+ *              In this task, the searcher asynchronously populates a database, which is later
  *              read by the validator. The validator then uses the database to prepare a submission CID
  *              for the current round, and submits that for rewards.
  *
  *              Four main functions control this process:
- *              @crawl crawls Twitter and populates the database
+ *              @search searchs Twitter and populates the database
  *              @validate verifies the submissions of other nodes
  *              @getRoundCID returns the submission for a given round
- *              @stop stops the crawler
+ *              @stop stops the searcher
  *
  * @param {function} getRound - a function that returns the current round
  * @param {number} round - the current round
- * @param {string} searchTerm - the search term to use for the crawler
- * @param {string} adapter - the adapter to use for the crawler
- * @param {string} db - the database to use for the crawler
+ * @param {string} searchTerm - the search term to use for the searcher
+ * @param {string} adapter - the adapter to use for the searcher
+ * @param {string} db - the database to use for the searcher
  *
  * @returns {TwitterTask} - a TwitterTask object
  *
@@ -75,7 +75,7 @@ class TwitterTask {
 
   /**
    * fetchSearchTerms
-   * @description return the search terms to use for the crawler
+   * @description return the search terms to use for the searcher
    * @returns {array} - an array of search terms
    */
   async fetchSearchTerms() {
@@ -108,7 +108,7 @@ class TwitterTask {
 
   /**
    * strat
-   * @description starts the crawler
+   * @description starts the searcher
    *
    * @returns {void}
    *
@@ -128,12 +128,12 @@ class TwitterTask {
       round: this.round,
     };
 
-    this.adapter.crawl(query); // let it ride
+    this.adapter.search(query); // let it ride
   }
 
   /**
    * stop
-   * @description stops the crawler
+   * @description stops the searcher
    *
    * @returns {void}
    */
