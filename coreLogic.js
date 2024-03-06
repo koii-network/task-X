@@ -28,15 +28,10 @@ class CoreLogic {
     console.log('fetchSubmission called');
     try {
       const cid = await this.twitterTask.getRoundCID(roundNumber);
-      if (cid) {
-        console.log('about to make submission with CID: ', cid);
-        return cid;
-      } else {
-        console.log('No submission call made as return cid is null');
-      }
-    } catch (error) {
-      console.error('No submission call made as return cid is null', error);
-      throw error;
+      console.log('VALUE', cid);
+      return cid;
+    } catch (err) {
+      console.log('ERROR IN FETCHING SUBMISSION', err);
     }
   }
 
@@ -287,12 +282,16 @@ class CoreLogic {
         'current slot while calling submit',
       );
       const submission = await this.fetchSubmission(roundNumber);
-      console.log('SUBMISSION', submission);
-      await namespaceWrapper.checkSubmissionAndUpdateRound(
-        submission,
-        roundNumber,
-      );
-      console.log('after the submission call');
+      if (submission) {
+        console.log('SUBMISSION', submission);
+        await namespaceWrapper.checkSubmissionAndUpdateRound(
+          submission,
+          roundNumber,
+        );
+        console.log('after the submission call');
+      } else {
+        console.log('no submission call made as submission is null');
+      }
     } catch (error) {
       console.log('error in submission', error);
     }

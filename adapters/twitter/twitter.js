@@ -357,9 +357,10 @@ class Twitter extends Adapter {
         }
 
         const client = await makeStorageClient(this.w3sKey);
-        let spheronData = await client.upload(`${basePath}/${path}`, {
+
+        const { cid } = await client.upload(`${basePath}/${path}`, {
           protocol: ProtocolEnum.IPFS,
-          name: 'dataList.json',
+          name: 'upload_data',
           onUploadInitiated: uploadId => {
             // console.log(`Upload with id ${uploadId} started...`);
           },
@@ -369,15 +370,16 @@ class Twitter extends Adapter {
         });
 
         // console.log(`CID: ${cid}`);
-        proof_cid = spheronData.cid;
         await this.proofs.create({
           id: 'proof:' + round,
           proof_round: round,
           proof_cid: proof_cid,
         });
 
-        console.log('returning proof cid for submission', proof_cid);
-        return proof_cid;
+        if (cid !== 'default') {
+          console.log('returning proof cid for submission', cid);
+          return cid;
+        }
       }
     } else {
       throw new Error('No proofs database provided');

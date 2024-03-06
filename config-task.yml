@@ -48,7 +48,7 @@ requirementsTags:
     description: 'If verification is required, will use your phone number to login.'
   - type: TASK_VARIABLE
     value: 'KEYWORD'
-    description: 'Enter the keyword you want to crawl. For example, koii.'
+    description: 'Enter the keyword you want to search. For example, apple.'
   - type: TASK_VARIABLE
     value: "Spheron_Storage"
     description: "Used to store the data. Spheron offers secure, decentralized data storage using blockchain technology for enhanced reliability and transparent data management. Do not have the key? Click the Get Key button to get one."
@@ -63,7 +63,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: ''
+task_id: 'Hcpv6q57mcG9fGca9xMoivMuCVNWZd9atxRQfcde6Edb'
 
 # Provide the description for changes made in new version of task
-migrationDescription: ''
+migrationDescription: 'This version updates the bounty amount per round. Improved the task submission and distribution behavior.'
