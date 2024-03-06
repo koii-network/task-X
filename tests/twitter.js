@@ -41,7 +41,7 @@ const run = async () => {
 
     await adapter.negotiateSession(); 
     
-    await adapter.crawl(query);
+    await adapter.search(query);
     // const tweetIds = await adapter.fetchList(query.query);
     // console.log(tweetIds);
     

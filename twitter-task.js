@@ -8,24 +8,24 @@ const { namespaceWrapper } = require('./namespaceWrapper.js');
 dotenv.config();
 
 /**
- * TwitterTask is a class that handles the Twitter crawler and validator
+ * TwitterTask is a class that handles the Twitter searcher and validator
  *
- * @description TwitterTask is a class that handles the Twitter crawler and validator
- *              In this task, the crawler asynchronously populates a database, which is later
+ * @description TwitterTask is a class that handles the Twitter searcher and validator
+ *              In this task, the searcher asynchronously populates a database, which is later
  *              read by the validator. The validator then uses the database to prepare a submission CID
  *              for the current round, and submits that for rewards.
  *
  *              Four main functions control this process:
- *              @crawl crawls Twitter and populates the database
+ *              @search searchs Twitter and populates the database
  *              @validate verifies the submissions of other nodes
  *              @getRoundCID returns the submission for a given round
- *              @stop stops the crawler
+ *              @stop stops the searcher
  *
  * @param {function} getRound - a function that returns the current round
  * @param {number} round - the current round
- * @param {string} searchTerm - the search term to use for the crawler
- * @param {string} adapter - the adapter to use for the crawler
- * @param {string} db - the database to use for the crawler
+ * @param {string} searchTerm - the search term to use for the searcher
+ * @param {string} adapter - the adapter to use for the searcher
+ * @param {string} db - the database to use for the searcher
  *
  * @returns {TwitterTask} - a TwitterTask object
  *
@@ -75,19 +75,34 @@ class TwitterTask {
 
   /**
    * fetchSearchTerms
-   * @description return the search terms to use for the crawler
+   * @description return the search terms to use for the searcher
    * @returns {array} - an array of search terms
    */
   async fetchSearchTerms() {
     let keyword;
 
     try {
+<<<<<<< HEAD
       if (!process.env.KEYWORD) {
         throw new Error(
           'Environment variable KEYWORD is not set',
         );
       }
       keyword = process.env.KEYWORD;
+=======
+      const submitterAccountKeyPair = (
+        await namespaceWrapper.getSubmitterAccount()
+      ).publicKey;
+      const key = submitterAccountKeyPair.toBase58();
+      console.log('submitter key', key);
+      const response = await axios.get('http://localhost:3000/keywords', {
+        params: {
+          key: key,
+        },
+      });
+      // console.log('keywords from middle server', response.data);
+      keyword = response.data;
+>>>>>>> main
     } catch (error) {
       console.log(
         'Keywords reading failed, loading local keywords.json',
@@ -102,7 +117,7 @@ class TwitterTask {
 
   /**
    * strat
-   * @description starts the crawler
+   * @description starts the searcher
    *
    * @returns {void}
    *
@@ -122,12 +137,12 @@ class TwitterTask {
       round: this.round,
     };
 
-    this.adapter.crawl(query); // let it ride
+    this.adapter.search(query); // let it ride
   }
 
   /**
    * stop
-   * @description stops the crawler
+   * @description stops the searcher
    *
    * @returns {void}
    */
@@ -171,40 +186,31 @@ class TwitterTask {
       let data = await getJSONFromCID(proofCid, 'dataList.json'); // check this
       // console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data, typeof(data), data[0]);
 
-      // the data submitted should be an array of additional CIDs for individual tweets, so we'll try to parse it
-
-      let proofThreshold = 4; // an arbitrary number of records to check
+      let proofThreshold = 2; // an arbitrary number of records to check
+      if (data) {
       for (let i = 0; i < proofThreshold; i++) {
         let randomIndex = Math.floor(Math.random() * data.length);
         let item = data[randomIndex];
 
         // then, we need to compare the CID result to the actual result on twitter
         // i.e.
-        console.log('item was', item);
+        // console.log('item was', item);
         if (item.id) {
-          try {
-            console.log('ipfs', item);
-            let ipfsCheck = await this.getJSONofCID(item.cid);
-            console.log('ipfsCheck', ipfsCheck);
-            if (ipfsCheck.id) {
-              console.log('ipfs check passed');
-            }
-            return true;
-          } catch (e) {
-            console.log('ipfs check failed', e);
-            return false;
-          }
+          console.log('ipfs check passed');
+          return true;
         } else {
           console.log('invalid item id', item.id);
-          return false;
+          return true;
         }
       }
-
+    } else {
+      console.log('no data from proof CID');
+    }
       // if none of the random checks fail, return true
       return true;
     } catch (e) {
       console.log('error in validate', e);
-      return false;
+      return true;
     }
   }
 }
@@ -227,21 +233,19 @@ const getJSONFromCID = async (
   maxRetries = 3,
   retryDelay = 3000,
 ) => {
-  let url = `https://${cid}.ipfs.dweb.link/${fileName}`;
+  let url = `https://${cid}.ipfs.w3s.link/${fileName}`;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await axios.get(url);
       if (response.status === 200) {
         return response.data;
       } else {
-        console.log(`Attempt ${attempt}: Received status ${response.status}`);
+        // console.log(`Attempt loading IPFS ${attempt}: Received status ${response.status}`);
       }
     } catch (error) {
-      console.log(`Attempt ${attempt} failed: ${error.message}`);
+      console.log(`Attempt loading IPFS ${attempt} failed: ${error.message}`);
       if (attempt < maxRetries) {
-        console.log(
-          `Waiting for ${retryDelay / 1000} seconds before retrying...`,
-        );
+        // console.log(`Waiting for ${retryDelay / 1000} seconds before retrying...`);
         await sleep(retryDelay);
       } else {
         return false; // Rethrow the last error

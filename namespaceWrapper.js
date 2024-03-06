@@ -3,9 +3,9 @@
  * @description This file contains the namespace wrapper class
  *             which is used to interact with the namespace
  *             and the task node
- * 
+ *
  *             Note: Generally, it is not necessary to modify this file
- *  
+ *
  * @version 1.0.0
  */
 
@@ -19,29 +19,30 @@ class NamespaceWrapper {
   #db;
 
   constructor() {
-    if(taskNodeAdministered){
-      this.getTaskLevelDBPath().then((path)=>{
-        this.#db = Datastore.create(path);
-      }).catch((err)=>{
-        console.error(err)
-        this.#db = Datastore.create(`../namespace/${TASK_ID}/KOIILevelDB.db`);
-      })
-    }else{
+    if (taskNodeAdministered) {
+      this.getTaskLevelDBPath()
+        .then(path => {
+          this.#db = Datastore.create(path);
+        })
+        .catch(err => {
+          console.error(err);
+          this.#db = Datastore.create(`../namespace/${TASK_ID}/KOIILevelDB.db`);
+        });
+    } else {
       this.#db = Datastore.create('./localKOIIDB.db');
-      console.log("DB Initialized")
+      console.log('DB Initialized');
     }
   }
 
-  async getDb(){
-
-    if(this.#db)return this.#db
-    try{
-      const path = await this.getTaskLevelDBPath()
+  async getDb() {
+    if (this.#db) return this.#db;
+    try {
+      const path = await this.getTaskLevelDBPath();
       this.#db = Datastore.create(path);
-    }catch(e){
+    } catch (e) {
       this.#db = Datastore.create(`../namespace/${TASK_ID}/KOIILevelDB.db`);
     }
-    return this.#db
+    return this.#db;
   }
   /**
    * Namespace wrapper of storeGetAsync
@@ -69,7 +70,11 @@ class NamespaceWrapper {
   async storeSet(key, value) {
     try {
       await this.initializeDB();
-      await this.#db.update({ key: key }, { [key]: value, key }, { upsert: true })
+      await this.#db.update(
+        { key: key },
+        { [key]: value, key },
+        { upsert: true },
+      );
     } catch (e) {
       console.error(e);
       return undefined;
@@ -275,10 +280,10 @@ class NamespaceWrapper {
     console.log('******/  IN VOTING /******');
     const taskAccountDataJSON = await this.getTaskState();
 
-    console.log(
-      'Fetching the submissions of N - 1 round',
-      taskAccountDataJSON.submissions[round],
-    );
+    // console.log(
+    //   'Fetching the submissions of N - 1 round',
+    //   taskAccountDataJSON.submissions[round],
+    // );
     const submissions = taskAccountDataJSON.submissions[round];
     if (submissions == null) {
       console.log('No submisssions found in N-1 round');
@@ -287,24 +292,35 @@ class NamespaceWrapper {
       const keys = Object.keys(submissions);
       const values = Object.values(submissions);
       const size = values.length;
-      console.log('Submissions from last round: ', keys, values, size);
+      const numberOfChecks = Math.min(5, size);
+
+      let uniqueIndices = new Set();
+
+      // Populate uniqueIndices with unique random numbers
+      while (uniqueIndices.size < numberOfChecks) {
+        const randomIndex = Math.floor(Math.random() * size);
+        uniqueIndices.add(randomIndex);
+      }
+
+      // console.log('Submissions from last round: ', keys, values, size);
       let isValid;
       const submitterAccountKeyPair = await this.getSubmitterAccount();
       const submitterPubkey = submitterAccountKeyPair.publicKey.toBase58();
-      for (let i = 0; i < size; i++) {
-        let candidatePublicKey = keys[i];
-        console.log('FOR CANDIDATE KEY', candidatePublicKey);
-        let candidateKeyPairPublicKey = new PublicKey(keys[i]);
+      for (let index of uniqueIndices) {
+
+        let candidatePublicKey = keys[index];
+        // console.log('FOR CANDIDATE KEY', candidatePublicKey);
+        let candidateKeyPairPublicKey = new PublicKey(keys[index]);
         if (candidatePublicKey == submitterPubkey) {
           console.log('YOU CANNOT VOTE ON YOUR OWN SUBMISSIONS');
         } else {
           try {
             console.log(
               'SUBMISSION VALUE TO CHECK',
-              values[i].submission_value,
+              values[index].submission_value,
             );
-            isValid = await validate(values[i].submission_value, round);
-            console.log(`Voting ${isValid} to ${candidatePublicKey}`);
+            isValid = await validate(values[index].submission_value, round);
+            // console.log(`Voting ${isValid} to ${candidatePublicKey}`);
 
             if (isValid) {
               // check for the submissions_audit_trigger , if it exists then vote true on that otherwise do nothing
@@ -351,10 +367,10 @@ class NamespaceWrapper {
     // await this.checkVoteStatus();
     console.log('******/  IN VOTING OF DISTRIBUTION LIST /******');
     const taskAccountDataJSON = await this.getTaskState();
-    console.log(
-      'Fetching the Distribution submissions of N - 2 round',
-      taskAccountDataJSON.distribution_rewards_submission[round],
-    );
+    // console.log(
+    //   'Fetching the Distribution submissions of N - 2 round',
+    //   taskAccountDataJSON.distribution_rewards_submission[round],
+    // );
     const submissions =
       taskAccountDataJSON.distribution_rewards_submission[round];
     if (submissions == null) {
@@ -364,19 +380,19 @@ class NamespaceWrapper {
       const keys = Object.keys(submissions);
       const values = Object.values(submissions);
       const size = values.length;
-      console.log(
-        'Distribution Submissions from last round: ',
-        keys,
-        values,
-        size,
-      );
+      // console.log(
+      //   'Distribution Submissions from last round: ',
+      //   keys,
+      //   values,
+      //   size,
+      // );
       let isValid;
       const submitterAccountKeyPair = await this.getSubmitterAccount();
       const submitterPubkey = submitterAccountKeyPair.publicKey.toBase58();
 
       for (let i = 0; i < size; i++) {
         let candidatePublicKey = keys[i];
-        console.log('FOR CANDIDATE KEY', candidatePublicKey);
+        // console.log('FOR CANDIDATE KEY', candidatePublicKey);
         let candidateKeyPairPublicKey = new PublicKey(keys[i]);
         if (candidatePublicKey == submitterPubkey) {
           console.log('YOU CANNOT VOTE ON YOUR OWN DISTRIBUTION SUBMISSIONS');
@@ -390,16 +406,16 @@ class NamespaceWrapper {
               values[i].submission_value,
               round,
             );
-            console.log(`Voting ${isValid} to ${candidatePublicKey}`);
+            // console.log(`Voting ${isValid} to ${candidatePublicKey}`);
 
             if (isValid) {
               // check for the submissions_audit_trigger , if it exists then vote true on that otherwise do nothing
               const distributions_audit_trigger =
                 taskAccountDataJSON.distributions_audit_trigger[round];
-              console.log(
-                'SUBMIT DISTRIBUTION AUDIT TRIGGER',
-                distributions_audit_trigger,
-              );
+              // console.log(
+              //   'SUBMIT DISTRIBUTION AUDIT TRIGGER',
+              //   distributions_audit_trigger,
+              // );
               // console.log(
               //   "CANDIDATE PUBKEY CHECK IN AUDIT TRIGGER",
               //   distributions_audit_trigger[candidatePublicKey]
@@ -455,7 +471,6 @@ class NamespaceWrapper {
     } else {
       return '.';
     }
-
   }
 }
 

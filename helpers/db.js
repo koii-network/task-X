@@ -2,8 +2,8 @@ const { namespaceWrapper } = require('../namespaceWrapper');
 const Data = require('../model/data');
 
 /**
- * namespaceWrapper is a class that handles the Twitter crawler and validator
- * we use it here to create a database for the Twitter crawler
+ * namespaceWrapper is a class that handles the Twitter searcher and validator
+ * we use it here to create a database for the Twitter searcher
  * which is then used in the TwitterTask class
  * see twitter-task.js in the root folder for more.
  */

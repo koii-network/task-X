@@ -10,13 +10,10 @@ class CoreLogic {
   async task(roundNumber) {
     console.log('Main task called with round', roundNumber);
     try {
-      this.twitterTask = await new TwitterTask(
-        roundNumber,
-        roundNumber,
-      );
-      console.log('started a new crawler at round', roundNumber);
+      this.twitterTask = await new TwitterTask(roundNumber, roundNumber);
+      console.log('started a new searcher at round', roundNumber);
     } catch (e) {
-      console.log('error starting crawler', e);
+      console.log('error starting searcher', e);
     }
   }
 
@@ -29,12 +26,18 @@ class CoreLogic {
    */
   async fetchSubmission(roundNumber) {
     console.log('fetchSubmission called');
-
-    const cid = await this.twitterTask.getRoundCID(roundNumber);
-
-    console.log('about to make submission with CID: ', cid);
-
-    return cid;
+    try {
+      const cid = await this.twitterTask.getRoundCID(roundNumber);
+      if (cid) {
+        console.log('about to make submission with CID: ', cid);
+        return cid;
+      } else {
+        console.log('No submission call made as return cid is null');
+      }
+    } catch (error) {
+      console.error('No submission call made as return cid is null', error);
+      throw error;
+    }
   }
 
   /**
@@ -55,7 +58,7 @@ class CoreLogic {
   async generateDistributionList(round, _dummyTaskState) {
     try {
       console.log('GenerateDistributionList called');
-      console.log('I am selected node');
+      // console.log('I am selected node');
 
       // Write the logic to generate the distribution list here by introducing the rules of your choice
 
@@ -75,7 +78,7 @@ class CoreLogic {
         const keys = Object.keys(submissions);
         const values = Object.values(submissions);
         const size = values.length;
-        console.log('Submissions from last round: ', keys, values, size);
+        // console.log('Submissions from last round: ', keys, values, size);
 
         // Logic for slashing the stake of the candidate who has been audited and found to be false
         for (let i = 0; i < size; i++) {
@@ -84,10 +87,10 @@ class CoreLogic {
             submissions_audit_trigger &&
             submissions_audit_trigger[candidatePublicKey]
           ) {
-            console.log(
-              'distributions_audit_trigger votes ',
-              submissions_audit_trigger[candidatePublicKey].votes,
-            );
+            // console.log(
+            //   'distributions_audit_trigger votes ',
+            //   submissions_audit_trigger[candidatePublicKey].votes,
+            // );
             const votes = submissions_audit_trigger[candidatePublicKey].votes;
             if (votes.length === 0) {
               // slash 70% of the stake as still the audit is triggered but no votes are casted
@@ -97,7 +100,7 @@ class CoreLogic {
               const candidateStake = stake_list[candidatePublicKey];
               const slashedStake = candidateStake * 0.7;
               distributionList[candidatePublicKey] = -slashedStake;
-              console.log('Candidate Stake', candidateStake);
+              // console.log('Candidate Stake', candidateStake);
             } else {
               let numOfVotes = 0;
               for (let index = 0; index < votes.length; index++) {
@@ -113,7 +116,7 @@ class CoreLogic {
                 const candidateStake = stake_list[candidatePublicKey];
                 const slashedStake = candidateStake * 0.7;
                 distributionList[candidatePublicKey] = -slashedStake;
-                console.log('Candidate Stake', candidateStake);
+                // console.log('Candidate Stake', candidateStake);
               }
 
               if (numOfVotes > 0) {
@@ -131,9 +134,9 @@ class CoreLogic {
 
       const reward = Math.floor(
         taskAccountDataJSON.bounty_amount_per_round /
-        distributionCandidates.length,
+          distributionCandidates.length,
       );
-      console.log('REWARD RECEIVED BY EACH NODE', reward);
+      // console.log('REWARD RECEIVED BY EACH NODE', reward);
       for (let i = 0; i < distributionCandidates.length; i++) {
         distributionList[distributionCandidates[i]] = reward;
       }
@@ -165,7 +168,7 @@ class CoreLogic {
         distributionList,
         round,
       );
-      console.log('DECIDER', decider);
+      // console.log('DECIDER', decider);
 
       if (decider) {
         const response =
@@ -278,7 +281,7 @@ class CoreLogic {
   async submitTask(roundNumber) {
     console.log('submitTask called with round', roundNumber);
     try {
-      console.log('inside try');
+      // console.log('inside try');
       console.log(
         await namespaceWrapper.getSlot(),
         'current slot while calling submit',
