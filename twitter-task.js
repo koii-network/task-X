@@ -82,27 +82,12 @@ class TwitterTask {
     let keyword;
 
     try {
-<<<<<<< HEAD
       if (!process.env.KEYWORD) {
         throw new Error(
           'Environment variable KEYWORD is not set',
         );
       }
       keyword = process.env.KEYWORD;
-=======
-      const submitterAccountKeyPair = (
-        await namespaceWrapper.getSubmitterAccount()
-      ).publicKey;
-      const key = submitterAccountKeyPair.toBase58();
-      console.log('submitter key', key);
-      const response = await axios.get('http://localhost:3000/keywords', {
-        params: {
-          key: key,
-        },
-      });
-      // console.log('keywords from middle server', response.data);
-      keyword = response.data;
->>>>>>> main
     } catch (error) {
       console.log(
         'Keywords reading failed, loading local keywords.json',
