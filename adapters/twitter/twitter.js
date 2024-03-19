@@ -360,7 +360,7 @@ class Twitter extends Adapter {
 
         const { cid } = await client.upload(`${basePath}/${path}`, {
           protocol: ProtocolEnum.IPFS,
-          name: 'upload_data',
+          name: 'taskData',
           onUploadInitiated: uploadId => {
             // console.log(`Upload with id ${uploadId} started...`);
           },
@@ -663,7 +663,7 @@ async function storeFiles(data, token) {
       // console.log(`${basePath}/${path}`)
       let spheronData = await client.upload(`${basePath}/${path}`, {
         protocol: ProtocolEnum.IPFS,
-        name: 'data.json',
+        name: 'taskData',
         onUploadInitiated: uploadId => {
           // console.log(`Upload with id ${uploadId} started...`);
         },
