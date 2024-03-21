@@ -60,7 +60,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '9cdhfH8QaMVra5WVDNnM1sDaXBAZe4V1UkcePXbQh7Cy'
+task_id: '6G9KbwXbqNSnDTvxFyKq29pkv3QaLEJy4f42sR4FVDA4'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Release new version of the Twitter Crawler task. This version update bounty amount per round to 1000 KOII.'
+migrationDescription: 'Release new version of the Twitter Crawler task. '
