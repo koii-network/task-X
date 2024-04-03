@@ -82,7 +82,6 @@ const _server = app.listen(EXPRESS_PORT, () => {
 
 module.exports = {
   app,
-  NODE_MODE,
   TASK_ID,
   MAIN_ACCOUNT_PUBKEY,
   SECRET_KEY,
