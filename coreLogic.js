@@ -202,7 +202,13 @@ class CoreLogic {
    * @returns
    */
   validateNode = async (submission_value, round) => {
-    return await this.twitterTask.validate(submission_value, round);
+    let vote;
+    if (this.twitterTask !== null) {
+    vote = await this.twitterTask.validate(submission_value, round);
+    } else {
+      vote = true;
+    }
+    return vote; 
   };
 
   /**
