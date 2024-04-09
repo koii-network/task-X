@@ -218,7 +218,7 @@ const getJSONFromCID = async (
   maxRetries = 3,
   retryDelay = 3000,
 ) => {
-  let url = `https://${cid}.ipfs.w3s.link/${fileName}`;
+  const url = `https://${cid}.ipfs.sphn.link/${fileName}`;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await axios.get(url);
