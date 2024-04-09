@@ -589,24 +589,35 @@ class NamespaceWrapper {
       const keys = Object.keys(submissions);
       const values = Object.values(submissions);
       const size = values.length;
-      console.log('Submissions from last round: ', keys, values, size);
+        // console.log('Submissions from last round: ', keys, values, size);
+        const numberOfChecks = Math.min(5, size);
+
+        let uniqueIndices = new Set();
+  
+        // Populate uniqueIndices with unique random numbers
+        while (uniqueIndices.size < numberOfChecks) {
+          const randomIndex = Math.floor(Math.random() * size);
+          uniqueIndices.add(randomIndex);
+        }
+  
       let isValid;
       const submitterAccountKeyPair = await this.getSubmitterAccount();
       const submitterPubkey = submitterAccountKeyPair.publicKey.toBase58();
-      for (let i = 0; i < size; i++) {
-        let candidatePublicKey = keys[i];
-        console.log('FOR CANDIDATE KEY', candidatePublicKey);
-        let candidateKeyPairPublicKey = new PublicKey(keys[i]);
+      for (let index of uniqueIndices) {
+
+        let candidatePublicKey = keys[index];
+        // console.log('FOR CANDIDATE KEY', candidatePublicKey);
+        let candidateKeyPairPublicKey = new PublicKey(keys[index]);
         if (candidatePublicKey == submitterPubkey) {
           console.log('YOU CANNOT VOTE ON YOUR OWN SUBMISSIONS');
         } else {
           try {
             console.log(
               'SUBMISSION VALUE TO CHECK',
-              values[i].submission_value,
+              values[index].submission_value,
             );
-            isValid = await validate(values[i].submission_value, round);
-            console.log(`Voting ${isValid} to ${candidatePublicKey}`);
+            isValid = await validate(values[index].submission_value, round);
+            // console.log(`Voting ${isValid} to ${candidatePublicKey}`);
 
             if (isValid) {
               // check for the submissions_audit_trigger , if it exists then vote true on that otherwise do nothing
