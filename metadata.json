@@ -2,9 +2,9 @@
   "author": "Soma",
   "description": "We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process. Rewards are calculated based on the amount of time your node remains online. The longer you stay online, the greater the reward you will receive. The base bounty per round is 1000 KOII, which will be divided among users who have made submissions in the last round.",
   "repositoryUrl": "https://github.com/koii-network/task-X",
-  "createdAt": 1711043302826,
+  "createdAt": 1712171804545,
   "migrationDescription": "Release new version of the Twitter Crawler task. ",
-  "imageUrl": "imageUrl",
+  "imageUrl": "https://bafybeienjq6idlhd7zwpdoqj2pdzjbomntfcg76dr5in5qeqkw2zczrrfi.ipfs.sphn.link/x-task.png",
   "requirementsTags": [
     {
       "type": "TASK_VARIABLE",

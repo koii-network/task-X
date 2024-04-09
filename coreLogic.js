@@ -156,7 +156,7 @@ class CoreLogic {
    * @returns
    * @memberof Node
    */
-  async submitDistributionList(round) {
+  submitDistributionList = async round => {
     // This function just upload your generated dustribution List and do the transaction for that
 
     console.log('SubmitDistributionList called');
@@ -180,6 +180,17 @@ class CoreLogic {
     }
   }
 
+  async selectAndGenerateDistributionList(
+    round,
+    isPreviousRoundFailed = false,
+  ) {
+    await namespaceWrapper.selectAndGenerateDistributionList(
+      this.submitDistributionList,
+      round,
+      isPreviousRoundFailed,
+    );
+  }
+
   /**
    * validateNode
    * @description This function is called auditSubmission() to validate the submission value
@@ -191,7 +202,13 @@ class CoreLogic {
    * @returns
    */
   validateNode = async (submission_value, round) => {
-    return await this.twitterTask.validate(submission_value, round);
+    let vote;
+    if (this.twitterTask !== null) {
+    vote = await this.twitterTask.validate(submission_value, round);
+    } else {
+      vote = true;
+    }
+    return vote; 
   };
 
   /**

@@ -3,7 +3,7 @@ task_name: '#koii Twitter Archive'
 author: 'Soma'
 description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process. Rewards are calculated based on the amount of time your node remains online. The longer you stay online, the greater the reward you will receive. The base bounty per round is 1000 KOII, which will be divided among users who have made submissions in the last round.'
 repositoryUrl: 'https://github.com/koii-network/task-X'
-imageUrl: 'imageUrl'
+imageUrl: 'https://bafybeienjq6idlhd7zwpdoqj2pdzjbomntfcg76dr5in5qeqkw2zczrrfi.ipfs.sphn.link/x-task.png'
 
 # network value can be DEVELOPMENT , ARWEAVE or IPFS, Recommended IPFS when deploying to testnet as the cli automatically takes care of uploading the executable with the help of web3.js key
 task_executable_network: 'IPFS'
@@ -23,15 +23,15 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 1000
+total_bounty_amount: 100000
 
-bounty_amount_per_round: 100
+bounty_amount_per_round: 1000
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
-allowed_failed_distributions: 5
+allowed_failed_distributions: 3
 
 #Space in MBs for the account size, that holds the task data
-space: 10
+space: 5
 
 # Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
 # To add more global variables and task variables, please refer the type,value,description format shown below
@@ -60,7 +60,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '6G9KbwXbqNSnDTvxFyKq29pkv3QaLEJy4f42sR4FVDA4'
+task_id: 'HjbUrc3j65uidFrguP4aXP9E3YtvgKCzivz68tm1wL51'
 
 # Provide the description for changes made in new version of task
 migrationDescription: 'Release new version of the Twitter Crawler task. '
