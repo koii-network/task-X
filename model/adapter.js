@@ -105,7 +105,7 @@ class Adapter {
     }
 
     parseMany = async (search, totalNumber, batchsize, delay) => {
-        if (!delay) delay = 0;
+        if (!delay) delay = 3000;
         if (!totalNumber) {
             // run until the search runs out
             // dispatch the parseOne function in batches of a fixed size with a delay between batches
@@ -118,7 +118,7 @@ class Adapter {
                 let item = await this.parseOne(search);
                 result.push(item);
                 // TODO sleep is undefined  
-                await sleep(delay);
+                await this.sleep(delay);
             }
             
         } else {
@@ -126,6 +126,10 @@ class Adapter {
         }
 
     }
+
+    sleep = async ms => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      };
 
 
     
