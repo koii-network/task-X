@@ -60,7 +60,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'HjbUrc3j65uidFrguP4aXP9E3YtvgKCzivz68tm1wL51'
+task_id: 'BKDtJCQHso4i5AxQMMYriB9nWg1oXg85Et8v9XSBuxrT'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Release new version of the Twitter Crawler task. '
+migrationDescription: 'Release new version of the Twitter Crawler task.'
