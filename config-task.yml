@@ -63,7 +63,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'CWxexVSqP9q8kmwsQbGv5N5CeYXLXk9f7Gg9FaMrJAEa'
+task_id: '4ygg5rL4T38p6y1wXi3DduiVMkZAMiJyR7YJeL3synEe'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'This version updates the bounty amount per round. Update Spheron bucket name.'
+migrationDescription: 'This version updates the bounty amount per round.'
