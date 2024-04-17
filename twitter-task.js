@@ -224,7 +224,7 @@ const getJSONFromCID = async (
   retryDelay = 3000,
 ) => {
   const urllist = [
-    `https://${cid}.ipfs.sphn.link/${fileName}`
+    `https://${cid}.ipfs.sphn.link/${fileName}`,
     `https://${cid}.ipfs.4everland.io/${fileName}`,
     `https://cloudflare-ipfs.com/ipfs/${cid}/${fileName}`,
     `https://${cid}.ipfs.dweb.link/${fileName}`,
