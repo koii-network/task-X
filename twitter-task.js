@@ -214,34 +214,40 @@ module.exports = TwitterTask;
  * @param {*} cid
  * @returns promise<JSON>
  */
-const sleep = ms => {
-  return new Promise(resolve => setTimeout(resolve, ms));
-};
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const getJSONFromCID = async (
   cid,
   fileName,
-  maxRetries = 3,
+  maxRetries = 4,
   retryDelay = 3000,
 ) => {
-
-  const url = `https://${cid}.ipfs.sphn.link/${fileName}`;
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await axios.get(url);
-      if (response.status === 200) {
-        return response.data;
-      } else {
-        // console.log(`Attempt loading IPFS ${attempt}: Received status ${response.status}`);
-      }
-    } catch (error) {
-      console.log(`Attempt loading IPFS ${attempt} failed: ${error.message}`);
-      if (attempt < maxRetries) {
-        // console.log(`Waiting for ${retryDelay / 1000} seconds before retrying...`);
-        await sleep(retryDelay);
-      } else {
-        return false; // Rethrow the last error
+  const urllist = [
+    `https://${cid}.ipfs.sphn.link/${fileName}`,
+    `https://${cid}.ipfs.4everland.io/${fileName}`,
+    `https://cloudflare-ipfs.com/ipfs/${cid}/${fileName}`,
+    `https://${cid}.ipfs.dweb.link/${fileName}`,
+  ];
+  console.log(urllist);
+  for (const url of urllist) {
+    console.log(`Trying URL: ${url}`);
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await axios.get(url);
+        if (response.status === 200) {
+          return response.data;
+        } else {
+          // console.log(`Attempt ${attempt} at IPFS ${url}: status ${response.status}`);
+        }
+      } catch (error) {
+        // console.log(`Attempt ${attempt} at IPFS ${url} failed: ${error.message}`);
+        if (attempt < maxRetries) {
+          await sleep(retryDelay);
+        }
       }
     }
   }
+  console.log("Attempted all IPFS sites failed");
+  return true; 
 };

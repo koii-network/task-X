@@ -21,3 +21,4 @@ dataList.json
 bodyHTML.html
 passwordHTML.html 
 usernameHTML.html
+tests/test-get-json-cid.js
