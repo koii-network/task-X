@@ -12,10 +12,10 @@ task_executable_network: 'IPFS'
 task_audit_program: 'dist/main.js'
 
 # Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
-round_time: 3000
+round_time: 4500
 
-audit_window: 1000
-submission_window: 1000
+audit_window: 1600
+submission_window: 1600
 
 # Amounts in KOII
 
@@ -60,7 +60,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'BKDtJCQHso4i5AxQMMYriB9nWg1oXg85Et8v9XSBuxrT'
+task_id: '32c9AGtKcyjEy4WDMddZUxbAw5Ph2QyYQwSwXwQ1TioH'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Release new version of the Twitter Crawler task.'
+migrationDescription: 'Release new version of the Twitter Crawler task. Stable version with improved performance and bug fixes.'
