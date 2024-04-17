@@ -248,5 +248,5 @@ const getJSONFromCID = async (
       }
     }
   }
-  return false; 
+  return true; 
 };
