@@ -238,15 +238,16 @@ const getJSONFromCID = async (
         if (response.status === 200) {
           return response.data;
         } else {
-          console.log(`Attempt ${attempt} at IPFS ${url}: status ${response.status}`);
+          // console.log(`Attempt ${attempt} at IPFS ${url}: status ${response.status}`);
         }
       } catch (error) {
-        console.log(`Attempt ${attempt} at IPFS ${url} failed: ${error.message}`);
+        // console.log(`Attempt ${attempt} at IPFS ${url} failed: ${error.message}`);
         if (attempt < maxRetries) {
           await sleep(retryDelay);
         }
       }
     }
   }
+  console.log("Attempted all IPFS sites failed");
   return true; 
 };
