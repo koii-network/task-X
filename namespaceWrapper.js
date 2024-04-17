@@ -822,40 +822,40 @@ class NamespaceWrapper {
       return 'No submisssions found in N-1 round';
     } else {
       const values = Object.values(submissions);
-      console.log('VALUES', values);
+      // console.log('VALUES', values);
       const keys = Object.keys(submissions);
-      console.log('KEYS', keys);
+      // console.log('KEYS', keys);
       let size = values.length;
-      console.log('Submissions from N-2  round: ', keys, values, size);
+      // console.log('Submissions from N-2  round: ', keys, values, size);
 
       // Check the keys i.e if the submitter shall be excluded or not
 
       const audit_record = taskAccountDataJSON.distributions_audit_record;
       console.log('AUDIT RECORD');
-      console.log('ROUND DATA', audit_record[round]);
+      // console.log('ROUND DATA', audit_record[round]);
 
       if (audit_record[round] == 'PayoutFailed') {
-        console.log(
-          'SUBMITTER LIST',
-          taskAccountDataJSON.distribution_rewards_submission[round],
-        );
+        // console.log(
+        //   'SUBMITTER LIST',
+        //   taskAccountDataJSON.distribution_rewards_submission[round],
+        // );
         const submitterList =
           taskAccountDataJSON.distribution_rewards_submission[round];
         const submitterSize = Object.keys(submitterList).length;
-        console.log('SUBMITTER SIZE', submitterSize);
+        // console.log('SUBMITTER SIZE', submitterSize);
         const submitterKeys = Object.keys(submitterList);
-        console.log('SUBMITTER KEYS', submitterKeys);
+        // console.log('SUBMITTER KEYS', submitterKeys);
 
         for (let j = 0; j < submitterSize; j++) {
           console.log('SUBMITTER KEY CANDIDATE', submitterKeys[j]);
           const id = keys.indexOf(submitterKeys[j]);
-          console.log('ID', id);
+          // console.log('ID', id);
           keys.splice(id, 1);
           values.splice(id, 1);
           size--;
         }
 
-        console.log('KEYS', keys);
+        // console.log('KEYS', keys);
       }
 
       // calculating the digest
