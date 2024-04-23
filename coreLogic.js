@@ -28,7 +28,7 @@ class CoreLogic {
     console.log('fetchSubmission called');
     try {
       const cid = await this.twitterTask.getRoundCID(roundNumber);
-      if (cid) {
+      if (cid && cid !== 'default') {
         console.log('about to make submission with CID: ', cid);
         return cid;
       } else {

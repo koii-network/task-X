@@ -13,7 +13,7 @@ const { default: axios } = require('axios');
 const { TASK_ID, SECRET_KEY, TASK_NODE_PORT } = require('./init');
 const { Connection, PublicKey, Keypair } = require('@_koi/web3.js');
 const Datastore = require('nedb-promises');
-const {createHash} = require('crypto');
+const { createHash } = require('crypto');
 
 const taskNodeAdministered = !!TASK_ID;
 const BASE_ROOT_URL = `http://localhost:${TASK_NODE_PORT}/namespace-wrapper`;
@@ -417,14 +417,6 @@ class NamespaceWrapper {
     }
   }
 
-  async nodeSelectionDistributionList() {
-    if (taskNodeAdministered) {
-      return await genericHandler('nodeSelectionDistributionList');
-    } else {
-      return this.#testingStakingSystemAccount.publicKey.toBase58();
-    }
-  }
-
   async payoutTrigger(round) {
     if (taskNodeAdministered) {
       return await genericHandler('payloadTrigger', round);
@@ -547,12 +539,6 @@ class NamespaceWrapper {
     }
   }
 
-  // Wrapper for selection of node to prepare a distribution list
-
-  async nodeSelectionDistributionList(round) {
-    return await genericHandler('nodeSelectionDistributionList', round);
-  }
-
   async getDistributionList(publicKey, round) {
     if (taskNodeAdministered) {
       const response = await genericHandler(
@@ -669,8 +655,12 @@ class NamespaceWrapper {
       taskAccountDataJSON.distribution_rewards_submission[round],
     );
     const submissions =
-      taskAccountDataJSON.distribution_rewards_submission[round];
-    if (submissions == null) {
+    taskAccountDataJSON?.distribution_rewards_submission[round];
+    if (
+      submissions == null ||
+      submissions == undefined ||
+      submissions.length == 0
+    ) {
       console.log(`No submisssions found in round ${round}`);
       return `No submisssions found in round ${round}`;
     } else {
@@ -792,8 +782,9 @@ class NamespaceWrapper {
     if (taskNodeAdministered) {
       try {
         const current_rpc = await namespaceWrapper.getRpcUrl();
-         const current_connection = new Connection(current_rpc);
-        const slotSamples = await current_connection.getRecentPerformanceSamples(60);
+        const current_connection = new Connection(current_rpc);
+        const slotSamples =
+          await current_connection.getRecentPerformanceSamples(60);
         let samplesLength = slotSamples.length;
 
         const averageSlotTime =
@@ -822,12 +813,39 @@ class NamespaceWrapper {
       console.log('No submisssions found in N-1 round');
       return 'No submisssions found in N-1 round';
     } else {
+      // getting last 3 submissions for the rounds
+      const rounds = Object.keys(taskAccountDataJSON.submissions)
+        .map(Number)
+        .sort((a, b) => b - a);
+      let keys;
+      // Find the index of the input round
+      const inputRoundIndex = rounds.indexOf(round);
+
+      // Check if the input round exists in the submissions
+      if (inputRoundIndex != -1 && rounds.length >= inputRoundIndex + 2) {
+        // Get the latest rounds (input round and two previous available rounds)
+        const latestRounds = rounds.slice(inputRoundIndex, inputRoundIndex + 3);
+
+        // Create sets of keys for each round
+        const keySets = latestRounds.map(
+          r => new Set(Object.keys(taskAccountDataJSON.submissions[r])),
+        );
+
+        // Find the keys present in all three rounds
+        keys = [...keySets[0]].filter(key =>
+          keySets.every(set => set.has(key)),
+        );
+        if (keys.length == 0) {
+          console.log('No common keys found in last 3 rounds');
+          keys = Object.keys(submissions);
+        }
+      } else {
+        keys = Object.keys(submissions);
+      }
+      console.log('KEYS', keys.length);
       const values = Object.values(submissions);
-      console.log('VALUES', values);
-      const keys = Object.keys(submissions);
-      console.log('KEYS', keys);
-      let size = values.length;
-      console.log('Submissions from N-2  round: ', keys, values, size);
+      let size = keys.length;
+      console.log('Submissions from N-2  round: ', size);
 
       // Check the keys i.e if the submitter shall be excluded or not
 
@@ -851,12 +869,14 @@ class NamespaceWrapper {
           console.log('SUBMITTER KEY CANDIDATE', submitterKeys[j]);
           const id = keys.indexOf(submitterKeys[j]);
           console.log('ID', id);
-          keys.splice(id, 1);
-          values.splice(id, 1);
-          size--;
+          if (id != -1) {
+            keys.splice(id, 1);
+            values.splice(id, 1);
+            size--;
+          }
         }
 
-        console.log('KEYS', keys);
+        console.log('KEYS FOR HASH CALC', keys.length);
       }
 
       // calculating the digest
@@ -930,7 +950,7 @@ class NamespaceWrapper {
             hashDigest,
             candidateSubmissionHash,
           );
-          console.log('CANDIDATE SCORE', candidateScore);
+          // console.log('CANDIDATE SCORE', candidateScore);
           if (candidateScore > score) {
             score = candidateScore;
             selectedNode.score = candidateScore;
@@ -944,7 +964,11 @@ class NamespaceWrapper {
     }
   }
 
-  async selectAndGenerateDistributionList(submitDistributionList, round, isPreviousRoundFailed) {
+  async selectAndGenerateDistributionList(
+    submitDistributionList,
+    round,
+    isPreviousRoundFailed,
+  ) {
     console.log('SelectAndGenerateDistributionList called');
     const selectedNode = await this.nodeSelectionDistributionList(
       round,
