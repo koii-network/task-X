@@ -33,6 +33,7 @@ class CoreLogic {
         return cid;
       } else {
         console.log('No submission call made as return cid is null');
+
       }
     } catch (error) {
       console.error('No submission call made as return cid is null', error);
@@ -304,11 +305,15 @@ class CoreLogic {
         'current slot while calling submit',
       );
       const submission = await this.fetchSubmission(roundNumber);
-      console.log('SUBMISSION', submission);
-      await namespaceWrapper.checkSubmissionAndUpdateRound(
-        submission,
-        roundNumber,
-      );
+      if (submission) {
+        console.log('SUBMISSION', submission);
+        await namespaceWrapper.checkSubmissionAndUpdateRound(
+          submission,
+          roundNumber,
+        );
+      }else {
+        console.log('no submission call made as submission is null');
+      }
       console.log('after the submission call');
     } catch (error) {
       console.log('error in submission', error);
