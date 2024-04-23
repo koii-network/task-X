@@ -172,7 +172,7 @@ class TwitterTask {
       // console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data, typeof(data), data[0]);
 
       let proofThreshold = 2; // an arbitrary number of records to check
-      if (data) {
+      if (data && data !== null && data.length > 0) {
       for (let i = 0; i < proofThreshold; i++) {
         let randomIndex = Math.floor(Math.random() * data.length);
         let item = data[randomIndex];
@@ -242,5 +242,5 @@ const getJSONFromCID = async (
     }
   }
   console.log("Attempted all IPFS sites failed");
-  return true; 
+  return null; 
 };
