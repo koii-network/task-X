@@ -29,7 +29,12 @@ class CoreLogic {
     try {
       const cid = await this.twitterTask.getRoundCID(roundNumber);
       console.log('VALUE', cid);
-      return cid;
+      if (cid && cid !== 'default') {
+        return cid;
+      } else {
+        console.log('No submission call made as return cid is null');
+      }
+
     } catch (err) {
       console.log('ERROR IN FETCHING SUBMISSION', err);
     }
