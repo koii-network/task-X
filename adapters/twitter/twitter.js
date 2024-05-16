@@ -182,7 +182,7 @@ class Twitter extends Adapter {
 
           if (!(await this.isPasswordCorrect(this.page, verifyURL))) {
             console.log(
-              'Phone number is incorrect or email verfication needed.',
+              'Phone number is incorrect or email verification needed.',
             );
             await this.page.waitForTimeout(8000);
             this.sessionValid = false;
@@ -215,7 +215,7 @@ class Twitter extends Adapter {
         await this.page.keyboard.press('Enter');
 
         if (!(await this.isPasswordCorrect(this.page, currentURL))) {
-          console.log('Password is incorrect or email verfication needed.');
+          console.log('Password is incorrect or email verification needed.');
           await this.page.waitForTimeout(5000);
           this.sessionValid = false;
           process.exit(1);
