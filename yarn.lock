@@ -22,6 +22,33 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
+"@_koii/storage-task-sdk@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@_koii/storage-task-sdk/-/storage-task-sdk-1.0.3.tgz#f9bb8bd0da5b70df805457417cb345709f832771"
+  integrity sha512-GgxzfUD/+xEozc72HwgB3hCjCiHkfhxkxd4DGghIAb7dpEY2UkpKhbxfVR9W+WXQAquD/ZnsI2x/hET7eRdSTA==
+  dependencies:
+    "@_koii/web3.js" "^0.1.11"
+
+"@_koii/web3.js@^0.1.11":
+  version "0.1.11"
+  resolved "https://registry.yarnpkg.com/@_koii/web3.js/-/web3.js-0.1.11.tgz#57c8452541eded10a9cb3ded4fc1fd7f4a989169"
+  integrity sha512-HJC5RwWJmTH0Xym9BWpRsX0pVh8GA1d/ChcV5vQWhOCBidTZRMMJ76lkUBZaNQABSElPZ1N+sJCOmB6tLBiCGg==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+    "@ethersproject/sha2" "^5.5.0"
+    "@solana/buffer-layout" "^3.0.0"
+    bn.js "^5.0.0"
+    borsh "^0.4.0"
+    bs58 "^4.0.1"
+    buffer "6.0.1"
+    cross-fetch "^3.1.4"
+    jayson "^3.4.4"
+    js-sha3 "^0.8.0"
+    rpc-websockets "^7.4.2"
+    secp256k1 "^4.0.2"
+    superstruct "^0.14.2"
+    tweetnacl "^1.0.0"
+
 "@assemblyscript/loader@^0.9.4":
   version "0.9.4"
   resolved "https://registry.yarnpkg.com/@assemblyscript/loader/-/loader-0.9.4.tgz#a483c54c1253656bb33babd464e3154a173e1577"
