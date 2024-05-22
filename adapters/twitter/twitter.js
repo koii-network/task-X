@@ -361,7 +361,7 @@ class Twitter extends Adapter {
 
         const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`);
         const cid = fileUploadResponse.cid;
-        // console.log(`CID: ${cid}`);
+        proof_cid = cid;        // console.log(`CID: ${cid}`);
         await this.proofs.create({
           id: 'proof:' + round,
           proof_round: round,
