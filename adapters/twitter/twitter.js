@@ -1,7 +1,8 @@
 // Import required modules
 const Adapter = require('../../model/adapter');
 const cheerio = require('cheerio');
-const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
+// const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
+const KoiiStorageClient = require('@_koii/storage-task-sdk');
 const axios = require('axios');
 const Data = require('../../model/data');
 const PCR = require('puppeteer-chromium-resolver');
@@ -92,7 +93,6 @@ class Twitter extends Adapter {
       );
       await this.page.setViewport({ width: 1920, height: 1080 });
       await this.twitterLogin();
-      this.w3sKey = await getAccessToken();
       return true;
     } catch (e) {
       console.log('Error negotiating session', e);
@@ -356,24 +356,13 @@ class Twitter extends Adapter {
           console.log(err);
         }
 
-        const client = await makeStorageClient(this.w3sKey);
-        let spheronData = await client.upload(`${basePath}/${path}`, {
-          protocol: ProtocolEnum.IPFS,
-          name: 'taskData',
-          onUploadInitiated: uploadId => {
-            // console.log(`Upload with id ${uploadId} started...`);
-          },
-          onChunkUploaded: (uploadedSize, totalSize) => {
-            // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
-          },
-        });
-
-        // console.log(`CID: ${cid}`);
-        proof_cid = spheronData.cid;
+        const client = new KoiiStorageClient.default();
+        const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`);
+        const cid = fileUploadResponse.cid;
         await this.proofs.create({
           id: 'proof:' + round,
           proof_round: round,
-          proof_cid: proof_cid,
+          proof_cid: cid,
         });
 
         console.log('returning proof cid for submission', proof_cid);
