@@ -623,16 +623,16 @@ class Twitter extends Adapter {
 
 module.exports = Twitter;
 
-async function makeStorageClient() {
-  try {
-    let token = await getAccessToken();
-    return new SpheronClient({
-      token: token,
-    });
-  } catch (e) {
-    console.log('Error: Missing spheron token, trying again');
-  }
-}
+// async function makeStorageClient() {
+//   try {
+//     let token = await getAccessToken();
+//     return new SpheronClient({
+//       token: token,
+//     });
+//   } catch (e) {
+//     console.log('Error: Missing spheron token, trying again');
+//   }
+// }
 
 async function storeFiles(data, token) {
   try {
