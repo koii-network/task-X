@@ -17,8 +17,8 @@
   "license": "ISC",
   "dependencies": {
     "@_koi/web3.js": "^0.0.6",
+    "@_koii/storage-task-sdk": "^1.0.3",
     "@lit-protocol/lit-node-client": "^2.2.63",
-    "@spheron/storage": "^2.0.4",
     "axios": "^1.3.6",
     "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.0.3",

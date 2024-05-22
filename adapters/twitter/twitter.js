@@ -359,10 +359,11 @@ class Twitter extends Adapter {
         const client = new KoiiStorageClient.default();
         const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`);
         const cid = fileUploadResponse.cid;
+        proof_cid = cid;
         await this.proofs.create({
           id: 'proof:' + round,
           proof_round: round,
-          proof_cid: cid,
+          proof_cid: proof_cid,
         });
 
         console.log('returning proof cid for submission', proof_cid);
@@ -648,16 +649,7 @@ async function storeFiles(data, token) {
 
     try {
       // console.log(`${basePath}/${path}`)
-      let spheronData = await client.upload(`${basePath}/${path}`, {
-        protocol: ProtocolEnum.IPFS,
-        name: 'taskData',
-        onUploadInitiated: uploadId => {
-          // console.log(`Upload with id ${uploadId} started...`);
-        },
-        onChunkUploaded: (uploadedSize, totalSize) => {
-          // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
-        },
-      });
+      let spheronData = await client.uploadFile(`${basePath}/${path}`);
       cid = spheronData.cid;
     } catch (err) {
       console.log('error uploading to IPFS, trying again', err);
@@ -668,6 +660,6 @@ async function storeFiles(data, token) {
   }
 }
 
-async function getAccessToken() {
-  return process.env.Spheron_Storage;
-}
+// async function getAccessToken() {
+//   return process.env.Spheron_Storage;
+// }
