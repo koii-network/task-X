@@ -523,7 +523,6 @@ class Twitter extends Adapter {
           }
           return false;
         });
-        console.log('items length', items.length);
         // Scrape the tweets
         const items = await this.page.evaluate(() => {
           const elements = document.querySelectorAll(
