@@ -357,11 +357,13 @@ class Twitter extends Adapter {
           console.log(err);
         }
 
-        const client = new KoiiStorageClient.default();
-
-        const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`);
+        const client = new KoiiStorageClient.default(undefined, undefined, true);
+        const userStaking = await namespaceWrapper.getSubmitterAccount();
+        console.log(`Uploading ${basePath}/${path}`);
+        const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
+        console.log(`Uploaded ${basePath}/${path}`);
         const cid = fileUploadResponse.cid;
-        proof_cid = cid;        // console.log(`CID: ${cid}`);
+        proof_cid = cid;      // console.log(`CID: ${cid}`);
         await this.proofs.create({
           id: 'proof:' + round,
           proof_round: round,
