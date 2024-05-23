@@ -33,7 +33,6 @@ class CoreLogic {
         return cid;
       } else {
         console.log('No submission call made as return cid is null');
-
       }
     } catch (error) {
       console.error('No submission call made as return cid is null', error);

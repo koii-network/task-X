@@ -1,7 +1,8 @@
 // Import required modules
 const Adapter = require('../../model/adapter');
-const cheerio = require('cheerio');
-const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
+const cheerio = require('cheerio'); 
+// const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
+const KoiiStorageClient = require('@_koii/storage-task-sdk');
 const axios = require('axios');
 const Data = require('../../model/data');
 const PCR = require('puppeteer-chromium-resolver');
@@ -92,7 +93,6 @@ class Twitter extends Adapter {
       );
       await this.page.setViewport({ width: 1920, height: 1080 });
       await this.twitterLogin();
-      this.w3sKey = await getAccessToken();
       return true;
     } catch (e) {
       console.log('Error negotiating session', e);
@@ -356,20 +356,13 @@ class Twitter extends Adapter {
           console.log(err);
         }
 
-        const client = await makeStorageClient(this.w3sKey);
-        let spheronData = await client.upload(`${basePath}/${path}`, {
-          protocol: ProtocolEnum.IPFS,
-          name: 'taskData',
-          onUploadInitiated: uploadId => {
-            // console.log(`Upload with id ${uploadId} started...`);
-          },
-          onChunkUploaded: (uploadedSize, totalSize) => {
-            // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
-          },
-        });
-
-        // console.log(`CID: ${cid}`);
-        proof_cid = spheronData.cid;
+        const client = new KoiiStorageClient.default(undefined, undefined, true);
+        const userStaking = await namespaceWrapper.getSubmitterAccount();
+        console.log(`Uploading ${basePath}/${path}`);
+        const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
+        console.log(`Uploaded ${basePath}/${path}`);
+        const cid = fileUploadResponse.cid;
+        proof_cid = cid;
         await this.proofs.create({
           id: 'proof:' + round,
           proof_round: round,
@@ -633,52 +626,43 @@ class Twitter extends Adapter {
 
 module.exports = Twitter;
 
-async function makeStorageClient() {
-  try {
-    let token = await getAccessToken();
-    return new SpheronClient({
-      token: token,
-    });
-  } catch (e) {
-    console.log('Error: Missing spheron token, trying again');
-  }
-}
+// async function makeStorageClient() {
+//   try {
+//     let token = await getAccessToken();
+//     return new SpheronClient({
+//       token: token,
+//     });
+//   } catch (e) {
+//     console.log('Error: Missing spheron token, trying again');
+//   }
+// }
 
-async function storeFiles(data, token) {
-  try {
-    let cid;
-    const client = await makeStorageClient(token);
-    let path = `data.json`;
-    let basePath = '';
-    try {
-      basePath = await namespaceWrapper.getBasePath();
-      fs.writeFileSync(`${basePath}/${path}`, JSON.stringify(data));
-    } catch (err) {
-      console.log(err);
-    }
+// async function storeFiles(data, token) {
+//   try {
+//     let cid;
+//     const client = await makeStorageClient(token);
+//     let path = `data.json`;
+//     let basePath = '';
+//     try {
+//       basePath = await namespaceWrapper.getBasePath();
+//       fs.writeFileSync(`${basePath}/${path}`, JSON.stringify(data));
+//     } catch (err) {
+//       console.log(err);
+//     }
 
-    try {
-      // console.log(`${basePath}/${path}`)
-      let spheronData = await client.upload(`${basePath}/${path}`, {
-        protocol: ProtocolEnum.IPFS,
-        name: 'taskData',
-        onUploadInitiated: uploadId => {
-          // console.log(`Upload with id ${uploadId} started...`);
-        },
-        onChunkUploaded: (uploadedSize, totalSize) => {
-          // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
-        },
-      });
-      cid = spheronData.cid;
-    } catch (err) {
-      console.log('error uploading to IPFS, trying again', err);
-    }
-    return cid;
-  } catch (e) {
-    console.log('Error storing files, missing w3s token', e);
-  }
-}
+//     try {
+//       // console.log(`${basePath}/${path}`)
+//       let spheronData = await client.uploadFile(`${basePath}/${path}`);
+//       cid = spheronData.cid;
+//     } catch (err) {
+//       console.log('error uploading to IPFS, trying again', err);
+//     }
+//     return cid;
+//   } catch (e) {
+//     console.log('Error storing files, missing w3s token', e);
+//   }
+// }
 
-async function getAccessToken() {
-  return process.env.Spheron_Storage;
-}
+// async function getAccessToken() {
+//   return process.env.Spheron_Storage;
+// }

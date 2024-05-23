@@ -1,9 +1,8 @@
 const Twitter = require('./adapters/twitter/twitter.js');
-const db = require('./helpers/db');
-const { Web3Storage } = require('web3.storage');
 const Data = require('./model/data');
 const dotenv = require('dotenv');
 const { default: axios } = require('axios');
+const KoiiStorageClient = require('@_koii/storage-task-sdk');
 const { namespaceWrapper } = require('./namespaceWrapper.js');
 dotenv.config();
 
@@ -224,12 +223,18 @@ const getJSONFromCID = async (
   retryDelay = 3000,
 ) => {
   const urllist = [
-    `https://${cid}.ipfs.sphn.link/${fileName}`,
     `https://${cid}.ipfs.4everland.io/${fileName}`,
     `https://cloudflare-ipfs.com/ipfs/${cid}/${fileName}`,
     `https://${cid}.ipfs.dweb.link/${fileName}`,
   ];
   console.log(urllist);
+  const client = new KoiiStorageClient.default(undefined, undefined, true);
+  try {
+    const data = await client.getFile(cid, fileName);
+    return data;
+  } catch (error) {
+    console.log(`Error fetching file from Koii IPFS: ${error.message}`);
+  }
   for (const url of urllist) {
     console.log(`Trying URL: ${url}`);
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
