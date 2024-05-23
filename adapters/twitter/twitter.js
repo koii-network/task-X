@@ -638,31 +638,31 @@ module.exports = Twitter;
 //   }
 // }
 
-async function storeFiles(data, token) {
-  try {
-    let cid;
-    const client = new KoiiStorageClient.default();
-    let path = `data.json`;
-    let basePath = '';
-    try {
-      basePath = await namespaceWrapper.getBasePath();
-      fs.writeFileSync(`${basePath}/${path}`, JSON.stringify(data));
-    } catch (err) {
-      console.log(err);
-    }
+// async function storeFiles(data, token) {
+//   try {
+//     let cid;
+//     const client = new KoiiStorageClient.default();
+//     let path = `data.json`;
+//     let basePath = '';
+//     try {
+//       basePath = await namespaceWrapper.getBasePath();
+//       fs.writeFileSync(`${basePath}/${path}`, JSON.stringify(data));
+//     } catch (err) {
+//       console.log(err);
+//     }
 
-    try {
-      // console.log(`${basePath}/${path}`)
-      let spheronData = await client.uploadFile(`${basePath}/${path}`);
-      cid = spheronData.cid;
-    } catch (err) {
-      console.log('error uploading to IPFS, trying again', err);
-    }
-    return cid;
-  } catch (e) {
-    console.log('Error storing files, missing w3s token', e);
-  }
-}
+//     try {
+//       // console.log(`${basePath}/${path}`)
+//       let spheronData = await client.uploadFile(`${basePath}/${path}`);
+//       cid = spheronData.cid;
+//     } catch (err) {
+//       console.log('error uploading to IPFS, trying again', err);
+//     }
+//     return cid;
+//   } catch (e) {
+//     console.log('Error storing files, missing w3s token', e);
+//   }
+// }
 
 // async function getAccessToken() {
 //   return process.env.Spheron_Storage;
