@@ -152,7 +152,7 @@ class CoreLogic {
 
       const reward = Math.floor(
         taskStakeListJSON.bounty_amount_per_round /
-          distributionCandidates.length * 2,
+          distributionCandidates.length,
       );
       // console.log('REWARD RECEIVED BY EACH NODE', reward);
       for (let i = 0; i < distributionCandidates.length; i++) {
