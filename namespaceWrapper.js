@@ -567,7 +567,7 @@ class NamespaceWrapper {
         'getTaskSubmissionInfo',
         round,
       );
-      if (taskSubmissionInfo.error) {
+      if (!taskSubmissionInfo || taskSubmissionInfo.error) {
         return null;
       }
       return taskSubmissionInfo;
@@ -678,7 +678,7 @@ class NamespaceWrapper {
         'getTaskDistributionInfo',
         round,
       );
-      if (taskDistributionInfo.error) {
+      if (!taskDistributionInfo || taskDistributionInfo.error) {
         return null;
       }
       return taskDistributionInfo;
