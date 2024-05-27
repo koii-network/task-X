@@ -341,10 +341,11 @@ class Twitter extends Adapter {
     if (this.proofs) {
       // we need to upload proofs for that round and then store the cid
       const data = await this.cids.getList({ round: round });
-      console.log(`got cids list for round ${round}`);
+      // priting how many data we got
+      console.log(`got ${data.length} data for round ${round}`);
 
       if (data && data.length === 0) {
-        console.log('No cids found for round ' + round);
+        console.log('No data found for round ' + round);
         return null;
       } else {
         let proof_cid;
@@ -369,10 +370,12 @@ class Twitter extends Adapter {
           proof_round: round,
           proof_cid: proof_cid,
         });
-
         if (cid !== 'default') {
           console.log('returning proof cid for submission', cid);
           return cid;
+        } else {
+          console.log('Error uploading proof');
+          return null;
         }
       }
     } else {
@@ -546,6 +549,7 @@ class Twitter extends Adapter {
                 // Store the item in the database
                 // const cid = await storeFiles(data, this.w3sKey);
                 // const cid = 'testcid';
+                console.log(`Storing tweets: ${data.tweets_id} in database`);
                 this.cids.create({
                   id: data.tweets_id,
                   round: round,
