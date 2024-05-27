@@ -2,7 +2,7 @@
 const Adapter = require('../../model/adapter');
 const cheerio = require('cheerio');
 // const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
-const KoiiStorageClient = require('@_koii/storage-task-sdk');
+const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
 const axios = require('axios');
 const Data = require('../../model/data');
 const PCR = require('puppeteer-chromium-resolver');
@@ -357,7 +357,7 @@ class Twitter extends Adapter {
           console.log(err);
         }
 
-        const client = new KoiiStorageClient.default(undefined, undefined, true);
+        const client = new KoiiStorageClient(undefined, undefined, true);
         const userStaking = await namespaceWrapper.getSubmitterAccount();
         console.log(`Uploading ${basePath}/${path}`);
         const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
