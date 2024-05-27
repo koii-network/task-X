@@ -2,7 +2,7 @@ const Twitter = require('./adapters/twitter/twitter.js');
 const Data = require('./model/data');
 const dotenv = require('dotenv');
 const { default: axios } = require('axios');
-const KoiiStorageClient = require('@_koii/storage-task-sdk');
+const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
 const { namespaceWrapper } = require('./namespaceWrapper.js');
 dotenv.config();
 
@@ -228,7 +228,7 @@ const getJSONFromCID = async (
     `https://${cid}.ipfs.dweb.link/${fileName}`,
   ];
   console.log(urllist);
-  const client = new KoiiStorageClient.default(undefined, undefined, true);
+  const client = new KoiiStorageClient(undefined, undefined, true);
   try {
     const data = await client.getFile(cid, fileName);
     return data;
