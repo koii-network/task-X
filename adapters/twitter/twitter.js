@@ -342,8 +342,11 @@ class Twitter extends Adapter {
       // we need to upload proofs for that round and then store the cid
       const data = await this.cids.getList({ round: round });
       // priting how many data we got
-      console.log(`got ${data.length} data for round ${round}`);
-
+      try{
+        console.log(`got ${data.length} data for round ${round}`);
+      }catch(e){
+        console.log('error getting data', e);
+      }
       if (data && data.length === 0) {
         console.log('No data found for round ' + round);
         return null;
