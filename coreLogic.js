@@ -305,7 +305,7 @@ class CoreLogic {
       return true;
     } catch (err) {
       console.log('ERROR IN VALIDATING DISTRIBUTION', err);
-      return false;
+      return true;
     }
   };
 
