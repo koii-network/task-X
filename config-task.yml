@@ -25,7 +25,7 @@ minimum_stake_amount: 1.9
 # total bounty is not accepted in case of update task
 total_bounty_amount: 100000
 
-bounty_amount_per_round: 1000
+bounty_amount_per_round: 2000
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 5
@@ -59,7 +59,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'GAp53Fr6tg7LHD9Bbvf21wLezsux5pDM2oMGdUQgj31b'
+task_id: '7Mq7QuxhEZ8TV1eXJCFDM37BtWWgc1C1ZrnJpySn3exe'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'This version updates the bounty amount per round.'
+migrationDescription: 'Remove Spheron Storage Requirement.'
