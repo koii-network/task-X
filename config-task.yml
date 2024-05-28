@@ -25,7 +25,7 @@ minimum_stake_amount: 1.9
 # total bounty is not accepted in case of update task
 total_bounty_amount: 100000
 
-bounty_amount_per_round: 1000
+bounty_amount_per_round: 2000
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 3
@@ -56,7 +56,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'AMhgzAtX2rkVdKTWdbdTkrpJtLxHhSWp2GYehPLP9kqE'
+task_id: '9JLj65gYASVQYpYkXwyuY1Ep265zp5wLSEJNRXzAwkHf'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Release new version of the Twitter Crawler task. Fix wrong submission value issue.'
+migrationDescription: 'Remove Spheron Storage Usage.'
