@@ -749,17 +749,10 @@ class NamespaceWrapper {
           //   'DISTRIBUTION SUBMISSION VALUE TO CHECK',
           //   values[i].submission_value,
           // );
-          if (selectedNode != candidatePublicKey) {
-            console.log(
-              `${candidatePublicKey} IS NOT A SELECTED NODE FOR DISTRIBUTION ROUND ${round}`
+          isValid = await validateDistribution(
+            values[i].submission_value,
+            round,
             );
-            isValid = false;
-          } else {
-            isValid = await validateDistribution(
-              values[i].submission_value,
-              round
-            );
-          }
           // console.log(`Voting ${isValid} to ${candidatePublicKey}`);
 
           if (isValid) {
