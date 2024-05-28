@@ -369,11 +369,12 @@ class CoreLogic {
    * @memberof Node
    */
 
-  async auditDistribution(roundNumber) {
+  async auditDistribution(roundNumber, isPreviousRoundFailed) {
     console.log('AUDIT DISTRIBUTION CALLED WITHIN ROUND: ', roundNumber);
     await namespaceWrapper.validateAndVoteOnDistributionList(
       this.validateDistribution,
       roundNumber,
+      isPreviousRoundFailed
     );
   }
 }
