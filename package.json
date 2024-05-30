@@ -21,6 +21,7 @@
     "@lit-protocol/lit-node-client": "^2.2.63",
     "axios": "^1.3.6",
     "cheerio": "^1.0.0-rc.12",
+    "cid": "multiformats/cid",
     "dotenv": "^16.0.3",
     "express": "^4.18.1",
     "fs": "^0.0.1-security",
