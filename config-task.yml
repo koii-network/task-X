@@ -56,7 +56,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'H8jJFHGv7vgJqxE6AMMLDUVUFG9prL3v7QvTYvvmzN6m'
+task_id: '4c4YGsU1Trc8SvWNwhrGQF1f2HJEYGWxCdsHtNbG4TTp'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Fix the issue of the task.'
+migrationDescription: 'Fix IPFS issue'
