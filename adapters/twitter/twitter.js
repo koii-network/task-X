@@ -356,23 +356,25 @@ class Twitter extends Adapter {
         } catch (err) {
           console.log(err);
         }
-
-        const client = new KoiiStorageClient(undefined, undefined, true);
-        const userStaking = await namespaceWrapper.getSubmitterAccount();
-        console.log(`Uploading ${basePath}/${path}`);
-        const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
-        console.log(`Uploaded ${basePath}/${path}`);
-        const cid = fileUploadResponse.cid;
-        proof_cid = cid;      // console.log(`CID: ${cid}`);
-        await this.proofs.create({
-          id: 'proof:' + round,
-          proof_round: round,
-          proof_cid: proof_cid,
-        });
-
-        if (cid !== 'default') {
-          console.log('returning proof cid for submission', cid);
-          return cid;
+        try{
+          const client = new KoiiStorageClient(undefined, undefined, false);
+          const userStaking = await namespaceWrapper.getSubmitterAccount();
+          console.log(`Uploading ${basePath}/${path}`);
+          const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
+          console.log(`Uploaded ${basePath}/${path}`);
+          const cid = fileUploadResponse.cid;
+          proof_cid = cid;      // console.log(`CID: ${cid}`);
+          await this.proofs.create({
+            id: 'proof:' + round,
+            proof_round: round,
+            proof_cid: proof_cid,
+          });
+          }  catch (error) {
+            if (error.message === 'Invalid Task ID') {
+                console.error('Error: Invalid Task ID');
+            } else {
+                console.error('An unexpected error occurred:', error);
+            }
         }
       }
     } else {
@@ -627,44 +629,3 @@ class Twitter extends Adapter {
 }
 
 module.exports = Twitter;
-
-// async function makeStorageClient() {
-//   try {
-//     let token = await getAccessToken();
-//     return new SpheronClient({
-//       token: token,
-//     });
-//   } catch (e) {
-//     console.log('Error: Missing spheron token, trying again');
-//   }
-// }
-
-// async function storeFiles(data, token) {
-//   try {
-//     let cid;
-//     const client = new KoiiStorageClient.default();
-//     let path = `data.json`;
-//     let basePath = '';
-//     try {
-//       basePath = await namespaceWrapper.getBasePath();
-//       fs.writeFileSync(`${basePath}/${path}`, JSON.stringify(data));
-//     } catch (err) {
-//       console.log(err);
-//     }
-
-//     try {
-//       // console.log(`${basePath}/${path}`)
-//       let spheronData = await client.uploadFile(`${basePath}/${path}`);
-//       cid = spheronData.cid;
-//     } catch (err) {
-//       console.log('error uploading to IPFS, trying again', err);
-//     }
-//     return cid;
-//   } catch (e) {
-//     console.log('Error storing files, missing w3s token', e);
-//   }
-// }
-
-// async function getAccessToken() {
-//   return process.env.Spheron_Storage;
-// }
