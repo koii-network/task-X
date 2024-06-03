@@ -239,7 +239,7 @@ const getJSONFromCID = async (
     `https://${cid}.ipfs.w3s.link/${fileName}`
   ];
   try {
-    const client = new KoiiStorageClient(undefined, undefined, true);
+    const client = new KoiiStorageClient(undefined, undefined, false);
     const blob = await client.getFile(cid, fileName);
     const text = await blob.text(); // Convert Blob to text
     const data = JSON.parse(text); // Parse text to JSON

@@ -355,8 +355,8 @@ class Twitter extends Adapter {
         } catch (err) {
           console.log(err);
         }
-
-        const client = new KoiiStorageClient(undefined, undefined, true);
+        try {
+        const client = new KoiiStorageClient(undefined, undefined, false);
         const userStaking = await namespaceWrapper.getSubmitterAccount();
         console.log(`Uploading ${basePath}/${path}`);
         const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
@@ -371,6 +371,13 @@ class Twitter extends Adapter {
 
         console.log('returning proof cid for submission', proof_cid);
         return proof_cid;
+      }catch (error) {
+        if (error.message === 'Invalid Task ID') {
+            console.error('Error: Invalid Task ID');
+        } else {
+            console.error('An unexpected error occurred:', error);
+        }
+    }
       }
     } else {
       throw new Error('No proofs database provided');
