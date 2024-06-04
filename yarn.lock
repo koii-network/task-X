@@ -22,10 +22,10 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@_koii/storage-task-sdk@1.2.3":
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/@_koii/storage-task-sdk/-/storage-task-sdk-1.2.3.tgz#70cc36b4b80e47038a8fd5c338cc27d000e3c5c5"
-  integrity sha512-YnXe6RQMLNjjo8Fc4DZkowWjSy08FI5gBQdzsA4+TsZ7pI39PfLKIPtq7xrQy2GcMtGzJmg7oGaSh3U+5EdodQ==
+"@_koii/storage-task-sdk@1.2.5":
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/@_koii/storage-task-sdk/-/storage-task-sdk-1.2.5.tgz#2f151faa1080c95734b377119fb09699fdd64b07"
+  integrity sha512-UVNkLYTELHTWgZiv6+7kroughiXFj62O1NvR+nqaGHgyQ0ZR9cnM9WSAjFiXV9gICXv019jWeoWSzUgwackHEw==
   dependencies:
     "@_koii/web3.js" "^0.1.11"
     bs58 "^5.0.0"
@@ -5827,6 +5827,11 @@ semver@^7.3.4:
   integrity sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==
   dependencies:
     lru-cache "^6.0.0"
+
+semver@^7.6.2:
+  version "7.6.2"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.6.2.tgz#1e3b34759f896e8f14d6134732ce798aeb0c6e13"
+  integrity sha512-FNAIBWCx9qcRhoHcgcJ0gvU7SN1lYU2ZXuSfl04bSC5OpvDHFyJCjdNHomPXxjQlCBU67YW64PzY7/VIEH7F2w==
 
 send@0.18.0:
   version "0.18.0"
