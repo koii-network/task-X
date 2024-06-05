@@ -159,7 +159,7 @@ class CoreLogic {
       for (let i = 0; i < distributionCandidates.length; i++) {
         distributionList[distributionCandidates[i]] = reward;
       }
-      console.log('Distribution List', distributionList);
+      // console.log('Distribution List', distributionList);
       return distributionList;
     } catch (err) {
       console.log('ERROR IN GENERATING DISTRIBUTION LIST', err);
