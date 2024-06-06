@@ -369,6 +369,9 @@ class Twitter extends Adapter {
             proof_round: round,
             proof_cid: proof_cid,
           });
+  
+          console.log('returning proof cid for submission', proof_cid);
+          return proof_cid;
           }  catch (error) {
             if (error.message === 'Invalid Task ID') {
                 console.error('Error: Invalid Task ID');
