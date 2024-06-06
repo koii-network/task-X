@@ -56,7 +56,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '77z7wPFro6wvf7eYHrQWHD6LsW71CHitkWKQekbh4bdS'
+task_id: 'EPA8nx31vMjTHwWSzJGHU6MLB9otDwEovrqz6NCQircC'
 
 # Provide the description for changes made in new version of task
 migrationDescription: 'Rewards updated to 5000 KOII per round'
