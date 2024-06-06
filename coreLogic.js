@@ -374,7 +374,7 @@ class CoreLogic {
     await namespaceWrapper.validateAndVoteOnDistributionList(
       this.validateDistribution,
       roundNumber,
-      isPreviousRoundFailed = false,
+      false,
     );
   }
 }

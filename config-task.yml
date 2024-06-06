@@ -59,7 +59,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'AxGkwUEb8mntHPrnReQBra5EPGBDtpeNLxnNKYR8vpdC'
+task_id: '8ktwZWcqByvWHppi3RUbvHpUdEoABK3eTAzyjLaibUUK'
 
 # Provide the description for changes made in new version of task
 migrationDescription: 'Updated to 5000 KOII per round.'
