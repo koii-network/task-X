@@ -1,9 +1,9 @@
 # Name and metadata of your task
 task_name: 'Archive Twitter'
 author: 'Soma'
-description: 'We invite you to volunteer your spare Twitter account to help us archive Twitter by the keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process. Rewards are calculated based on the amount of time your node remains online. The longer you stay online, the greater the reward you will receive. The base bounty per round is 1000 KOII, which will be divided among users who have made submissions in the last round.'
+description: 'We invite you to volunteer your spare Twitter account to help us archive Twitter by the keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process. Rewards are calculated based on the amount of time your node remains online. The longer you stay online, the greater the reward you will receive. The base bounty per round is 5000 KOII, which will be divided among users who have made submissions in the last round.'
 repositoryUrl: 'https://github.com/koii-network/task-X'
-imageUrl: 'https://bafybeicln33wg2veqvbticz4rz2j7k2yhbze6p5zan7dh3dn2ydnpmfbni.ipfs.sphn.link/task-archive.png'
+imageUrl: 'https://bafybeicln33wg2veqvbticz4rz2j7k2yhbze6p5zan7dh3dn2ydnpmfbni.ipfs.w3s.link/task-archive.png'
 
 # network value can be DEVELOPMENT , ARWEAVE or IPFS, Recommended IPFS when deploying to testnet as the cli automatically takes care of uploading the executable with the help of web3.js key
 task_executable_network: 'IPFS'
@@ -25,7 +25,7 @@ minimum_stake_amount: 1.9
 # total bounty is not accepted in case of update task
 total_bounty_amount: 100000
 
-bounty_amount_per_round: 1000
+bounty_amount_per_round: 5000
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 5
@@ -49,10 +49,6 @@ requirementsTags:
   - type: TASK_VARIABLE
     value: 'KEYWORD'
     description: 'Enter the keyword you want to search. For example, apple.'
-  - type: TASK_VARIABLE
-    value: "Spheron_Storage"
-    description: "Used to store the data. Spheron offers secure, decentralized data storage using blockchain technology for enhanced reliability and transparent data management. Do not have the key? Click the Get Key button to get one."
-    retrievalInfo: "https://faucet-api.koii.network/api/get-spheron-storage-key;GET;SYSTEM_WALLET_PUBLIC_KEY"
   - type: CPU
     value: '4-core'
   - type: RAM
@@ -63,7 +59,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'GAp53Fr6tg7LHD9Bbvf21wLezsux5pDM2oMGdUQgj31b'
+task_id: '8ktwZWcqByvWHppi3RUbvHpUdEoABK3eTAzyjLaibUUK'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'This version updates the bounty amount per round.'
+migrationDescription: 'Updated to 5000 KOII per round.'
