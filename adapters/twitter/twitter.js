@@ -1,7 +1,8 @@
 // Import required modules
 const Adapter = require('../../model/adapter');
-const cheerio = require('cheerio');
-const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
+const cheerio = require('cheerio'); 
+// const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
+const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
 const axios = require('axios');
 const Data = require('../../model/data');
 const PCR = require('puppeteer-chromium-resolver');
@@ -92,7 +93,6 @@ class Twitter extends Adapter {
       );
       await this.page.setViewport({ width: 1920, height: 1080 });
       await this.twitterLogin();
-      this.w3sKey = await getAccessToken();
       return true;
     } catch (e) {
       console.log('Error negotiating session', e);
@@ -182,7 +182,7 @@ class Twitter extends Adapter {
 
           if (!(await this.isPasswordCorrect(this.page, verifyURL))) {
             console.log(
-              'Phone number is incorrect or email verfication needed.',
+              'Phone number is incorrect or email verification needed.',
             );
             await this.page.waitForTimeout(8000);
             this.sessionValid = false;
@@ -215,7 +215,7 @@ class Twitter extends Adapter {
         await this.page.keyboard.press('Enter');
 
         if (!(await this.isPasswordCorrect(this.page, currentURL))) {
-          console.log('Password is incorrect or email verfication needed.');
+          console.log('Password is incorrect or email verification needed.');
           await this.page.waitForTimeout(5000);
           this.sessionValid = false;
           process.exit(1);
@@ -355,21 +355,14 @@ class Twitter extends Adapter {
         } catch (err) {
           console.log(err);
         }
-
-        const client = await makeStorageClient(this.w3sKey);
-        let spheronData = await client.upload(`${basePath}/${path}`, {
-          protocol: ProtocolEnum.IPFS,
-          name: 'taskData',
-          onUploadInitiated: uploadId => {
-            // console.log(`Upload with id ${uploadId} started...`);
-          },
-          onChunkUploaded: (uploadedSize, totalSize) => {
-            // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
-          },
-        });
-
-        // console.log(`CID: ${cid}`);
-        proof_cid = spheronData.cid;
+        try {
+        const client = new KoiiStorageClient(undefined, undefined, false);
+        const userStaking = await namespaceWrapper.getSubmitterAccount();
+        console.log(`Uploading ${basePath}/${path}`);
+        const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
+        console.log(`Uploaded ${basePath}/${path}`);
+        const cid = fileUploadResponse.cid;
+        proof_cid = cid;
         await this.proofs.create({
           id: 'proof:' + round,
           proof_round: round,
@@ -378,6 +371,13 @@ class Twitter extends Adapter {
 
         console.log('returning proof cid for submission', proof_cid);
         return proof_cid;
+      }catch (error) {
+        if (error.message === 'Invalid Task ID') {
+            console.error('Error: Invalid Task ID');
+        } else {
+            console.error('An unexpected error occurred:', error);
+        }
+    }
       }
     } else {
       throw new Error('No proofs database provided');
@@ -535,7 +535,6 @@ class Twitter extends Adapter {
           );
           return Array.from(elements).map(element => element.outerHTML);
         });
-        console.log('items length', items.length);
         for (const item of items) {
           await new Promise(resolve => setTimeout(resolve, 1000)); // Adds a 1-second delay
           try {
@@ -566,8 +565,10 @@ class Twitter extends Adapter {
         }
 
         try {
-          if (this.round !== (await namespaceWrapper.getRound())) {
-            console.log('round changed, closed old browser');
+          let dataLength = (await this.cids.getList({ round: round })).length;
+          console.log('Already scraped', dataLength, 'in round', round);
+          if (dataLength > 120) {
+            console.log('reach maixmum data per round, closed old browser');
             this.browser.close();
             break;
           }
@@ -633,52 +634,3 @@ class Twitter extends Adapter {
 
 module.exports = Twitter;
 
-async function makeStorageClient() {
-  try {
-    let token = await getAccessToken();
-    return new SpheronClient({
-      token: token,
-    });
-  } catch (e) {
-    console.log('Error: Missing spheron token, trying again');
-  }
-}
-
-async function storeFiles(data, token) {
-  try {
-    let cid;
-    const client = await makeStorageClient(token);
-    let path = `data.json`;
-    let basePath = '';
-    try {
-      basePath = await namespaceWrapper.getBasePath();
-      fs.writeFileSync(`${basePath}/${path}`, JSON.stringify(data));
-    } catch (err) {
-      console.log(err);
-    }
-
-    try {
-      // console.log(`${basePath}/${path}`)
-      let spheronData = await client.upload(`${basePath}/${path}`, {
-        protocol: ProtocolEnum.IPFS,
-        name: 'taskData',
-        onUploadInitiated: uploadId => {
-          // console.log(`Upload with id ${uploadId} started...`);
-        },
-        onChunkUploaded: (uploadedSize, totalSize) => {
-          // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
-        },
-      });
-      cid = spheronData.cid;
-    } catch (err) {
-      console.log('error uploading to IPFS, trying again', err);
-    }
-    return cid;
-  } catch (e) {
-    console.log('Error storing files, missing w3s token', e);
-  }
-}
-
-async function getAccessToken() {
-  return process.env.Spheron_Storage;
-}
