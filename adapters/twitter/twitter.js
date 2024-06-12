@@ -583,7 +583,7 @@ class Twitter extends Adapter {
         try {
           let dataLength = (await this.cids.getList({ round: round })).length;
           console.log('Already scraped', dataLength, 'in round', round);
-          if (dataLength > 120 || i < 5) {
+          if (dataLength > 120 || i > 3) {
             console.log('reach maixmum data per round, closed old browser');
             this.browser.close();
             break;
