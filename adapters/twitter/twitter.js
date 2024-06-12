@@ -527,7 +527,9 @@ class Twitter extends Adapter {
       // Wait an additional 5 seconds until fully loaded before scraping
       await this.page.waitForTimeout(5000);
 
+      let i = 0;
       while (true) {
+        i++;
         // Check if the error message is present on the page inside an article element
         const errorMessage = await this.page.evaluate(() => {
           const elements = document.querySelectorAll('div[dir="ltr"]');
@@ -549,9 +551,7 @@ class Twitter extends Adapter {
           );
           return Array.from(elements).map(element => element.outerHTML);
         });
-        let i = 0;
         for (const item of items) {
-          i++;
           await new Promise(resolve => setTimeout(resolve, 1000)); // Adds a 1-second delay
           try {
             let data = await this.parseItem(item);
@@ -582,9 +582,9 @@ class Twitter extends Adapter {
 
         try {
           let dataLength = (await this.cids.getList({ round: round })).length;
-          console.log('Already scraped', dataLength, 'in round', round);
-          if (dataLength > 120 || i > 3) {
-            console.log('reach maixmum data per round, closed old browser');
+          console.log('Already scraped', dataLength, 'and', i, 'times in round', round);
+          if (dataLength > 120 || i > 4) {
+            console.log('reach maixmum data per round. Closed old browser');
             this.browser.close();
             break;
           }
