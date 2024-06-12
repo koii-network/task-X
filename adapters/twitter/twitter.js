@@ -535,7 +535,9 @@ class Twitter extends Adapter {
           );
           return Array.from(elements).map(element => element.outerHTML);
         });
+        let i = 0;
         for (const item of items) {
+          i++;
           await new Promise(resolve => setTimeout(resolve, 1000)); // Adds a 1-second delay
           try {
             let data = await this.parseItem(item);
@@ -567,7 +569,7 @@ class Twitter extends Adapter {
         try {
           let dataLength = (await this.cids.getList({ round: round })).length;
           console.log('Already scraped', dataLength, 'in round', round);
-          if (dataLength > 120) {
+          if (dataLength > 120 || i < 5) {
             console.log('reach maixmum data per round, closed old browser');
             this.browser.close();
             break;
