@@ -1,8 +1,8 @@
 // Import required modules
 const Adapter = require('../../model/adapter');
-const cheerio = require('cheerio'); 
+const cheerio = require('cheerio');
 // const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
-const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
+const { KoiiStorageClient } = require('@_koii/storage-task-sdk');
 const axios = require('axios');
 const Data = require('../../model/data');
 const PCR = require('puppeteer-chromium-resolver');
@@ -83,7 +83,18 @@ class Twitter extends Adapter {
         // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+        args: [
+          '--aggressive-cache-discard',
+          '--disable-cache',
+          '--disable-application-cache',
+          '--disable-offline-load-stale-cache',
+          '--disable-gpu-shader-disk-cache',
+          '--media-cache-size=0',
+          '--disk-cache-size=0',
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-gpu',
+        ],
         executablePath: stats.executablePath,
       });
       console.log('Step: Open new page');
@@ -356,28 +367,31 @@ class Twitter extends Adapter {
           console.log(err);
         }
         try {
-        const client = new KoiiStorageClient(undefined, undefined, false);
-        const userStaking = await namespaceWrapper.getSubmitterAccount();
-        console.log(`Uploading ${basePath}/${path}`);
-        const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
-        console.log(`Uploaded ${basePath}/${path}`);
-        const cid = fileUploadResponse.cid;
-        proof_cid = cid;
-        await this.proofs.create({
-          id: 'proof:' + round,
-          proof_round: round,
-          proof_cid: proof_cid,
-        });
+          const client = new KoiiStorageClient(undefined, undefined, false);
+          const userStaking = await namespaceWrapper.getSubmitterAccount();
+          console.log(`Uploading ${basePath}/${path}`);
+          const fileUploadResponse = await client.uploadFile(
+            `${basePath}/${path}`,
+            userStaking,
+          );
+          console.log(`Uploaded ${basePath}/${path}`);
+          const cid = fileUploadResponse.cid;
+          proof_cid = cid;
+          await this.proofs.create({
+            id: 'proof:' + round,
+            proof_round: round,
+            proof_cid: proof_cid,
+          });
 
-        console.log('returning proof cid for submission', proof_cid);
-        return proof_cid;
-      }catch (error) {
-        if (error.message === 'Invalid Task ID') {
+          console.log('returning proof cid for submission', proof_cid);
+          return proof_cid;
+        } catch (error) {
+          if (error.message === 'Invalid Task ID') {
             console.error('Error: Invalid Task ID');
-        } else {
+          } else {
             console.error('An unexpected error occurred:', error);
+          }
         }
-    }
       }
     } else {
       throw new Error('No proofs database provided');
@@ -635,4 +649,3 @@ class Twitter extends Adapter {
 }
 
 module.exports = Twitter;
-
