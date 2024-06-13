@@ -76,7 +76,7 @@ class Twitter extends Adapter {
         console.log('Old browser closed');
       }
       const options = {};
-      const userDataDir = path.join(__dirname, 'puppeteer_cache');
+      const userDataDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive');
       const stats = await PCR(options);
       console.log(
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
@@ -93,8 +93,6 @@ class Twitter extends Adapter {
           '--disable-application-cache',
           '--disable-offline-load-stale-cache',
           '--disable-gpu-shader-disk-cache',
-          '--media-cache-size=0',
-          '--disk-cache-size=0',
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-gpu',
@@ -596,16 +594,6 @@ class Twitter extends Adapter {
           if (dataLength > 120 || i > 4) {
             console.log('reach maixmum data per round. Closed old browser');
             this.browser.close();
-            // Clean up the cache directory
-            const userDataDir = path.join(__dirname, 'puppeteer_cache');
-            // Clean up the cache directory
-            fs.rmSync(userDataDir, { recursive: true, force: true }, err => {
-              if (err) {
-                console.error('Error deleting cache directory:', err);
-              } else {
-                console.log('Cache directory deleted successfully');
-              }
-            });
             break;
           }
           // Scroll the page for next batch of elements
