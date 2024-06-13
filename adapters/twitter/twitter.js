@@ -3,11 +3,12 @@ const Adapter = require('../../model/adapter');
 const cheerio = require('cheerio');
 // const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
 const { KoiiStorageClient } = require('@_koii/storage-task-sdk');
-const axios = require('axios');
+const rimraf = require('rimraf');
 const Data = require('../../model/data');
 const PCR = require('puppeteer-chromium-resolver');
 const { namespaceWrapper } = require('../../namespaceWrapper');
 const fs = require('fs');
+const path = require('path');
 
 /**
  * Twitter
@@ -75,11 +76,14 @@ class Twitter extends Adapter {
         console.log('Old browser closed');
       }
       const options = {};
+      const userDataDir = path.join(__dirname, 'puppeteer_cache');
       const stats = await PCR(options);
       console.log(
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
       );
       this.browser = await stats.puppeteer.launch({
+        executablePath: stats.executablePath,
+        userDataDir: userDataDir,
         // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -95,7 +99,6 @@ class Twitter extends Adapter {
           '--disable-setuid-sandbox',
           '--disable-gpu',
         ],
-        executablePath: stats.executablePath,
       });
       console.log('Step: Open new page');
       this.page = await this.browser.newPage();
@@ -582,10 +585,27 @@ class Twitter extends Adapter {
 
         try {
           let dataLength = (await this.cids.getList({ round: round })).length;
-          console.log('Already scraped', dataLength, 'and', i, 'times in round', round);
+          console.log(
+            'Already scraped',
+            dataLength,
+            'and',
+            i,
+            'times in round',
+            round,
+          );
           if (dataLength > 120 || i > 4) {
             console.log('reach maixmum data per round. Closed old browser');
             this.browser.close();
+            // Clean up the cache directory
+            const userDataDir = path.join(__dirname, 'puppeteer_cache');
+            // Clean up the cache directory
+            fs.rmSync(userDataDir, { recursive: true, force: true }, err => {
+              if (err) {
+                console.error('Error deleting cache directory:', err);
+              } else {
+                console.log('Cache directory deleted successfully');
+              }
+            });
             break;
           }
           // Scroll the page for next batch of elements

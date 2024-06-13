@@ -33,6 +33,7 @@
     "puppeteer": "^19.11.0",
     "puppeteer-chromium-resolver": "^19.1.0",
     "request": "^2.88.2",
+    "rimraf": "^5.0.7",
     "selenium-webdriver": "^4.8.2",
     "semver": "^7.6.2",
     "twitter-api-v2": "^1.14.2",
