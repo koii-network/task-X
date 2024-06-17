@@ -1,7 +1,7 @@
 # Name and metadata of your task
 task_name: '#koii Twitter Archive'
 author: 'Soma'
-description: 'We invite you to volunteer your spare Twitter account to help us archive the #koii hashtag. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process. Rewards are calculated based on the amount of time your node remains online. The longer you stay online, the greater the reward you will receive. The base bounty per round is 3000 KOII, which will be divided among users who have made submissions in the last round.'
+description: "We invite you to volunteer your spare Twitter account to help us archive Twitter by the keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process. Rewards are calculated based on the amount of time your node remains online. The longer you stay online, the greater the reward you will receive. The base bounty per round is 3000 KOII, which will be divided among users who have made submissions in the last round. It's a good idea to use a secondary Twitter account for this project to maintain the smooth functioning of your main account."
 repositoryUrl: 'https://github.com/koii-network/task-X'
 imageUrl: 'https://bafybeienjq6idlhd7zwpdoqj2pdzjbomntfcg76dr5in5qeqkw2zczrrfi.ipfs.w3s.link/x-task.png'
 
@@ -23,7 +23,7 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 100
+total_bounty_amount: 3000
 
 bounty_amount_per_round: 3000
 
@@ -56,7 +56,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '5mGUE27bHYygxkosnTFxXJDUtZFp4MEfEncVK5DXv25s'
+task_id: 'Xj8aV6AEntJeEcTMhViDE8D8kx1b6FoRyeuCWw5Dipm'
 
 # Provide the description for changes made in new version of task
 migrationDescription: 'Adjust Rewards'
