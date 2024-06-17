@@ -14,8 +14,8 @@ task_audit_program: 'dist/main.js'
 # Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
 round_time: 13500
 
-audit_window: 1600
-submission_window: 1600
+audit_window: 5000
+submission_window: 5000
 
 # Amounts in KOII
 
