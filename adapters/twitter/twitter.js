@@ -80,7 +80,7 @@ class Twitter extends Adapter {
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
       );
       this.browser = await stats.puppeteer.launch({
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
@@ -180,19 +180,19 @@ class Twitter extends Adapter {
           );
           await this.page.keyboard.press('Enter');
 
-          if (!(await this.isPasswordCorrect(this.page, verifyURL))) {
-            console.log(
-              'Phone number is incorrect or email verification needed.',
-            );
-            await this.page.waitForTimeout(8000);
-            this.sessionValid = false;
-            process.exit(1);
-          } else if (await this.isEmailVerificationRequired(this.page)) {
-            console.log('Email verification required.');
-            this.sessionValid = false;
-            await this.page.waitForTimeout(1000000);
-            process.exit(1);
-          }
+          // if (!(await this.isPasswordCorrect(this.page, verifyURL))) {
+          //   console.log(
+          //     'Phone number is incorrect or email verification needed.',
+          //   );
+          //   await this.page.waitForTimeout(8000);
+          //   this.sessionValid = false;
+          //   process.exit(1);
+          // } else if (await this.isEmailVerificationRequired(this.page)) {
+          //   console.log('Email verification required.');
+          //   this.sessionValid = false;
+          //   await this.page.waitForTimeout(1000000);
+          //   process.exit(1);
+          // }
         }
 
         const currentURL = await this.page.url();
@@ -213,7 +213,7 @@ class Twitter extends Adapter {
         );
         console.log('Step: Click login button');
         await this.page.keyboard.press('Enter');
-
+        
         if (!(await this.isPasswordCorrect(this.page, currentURL))) {
           console.log('Password is incorrect or email verification needed.');
           await this.page.waitForTimeout(5000);
