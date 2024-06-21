@@ -194,20 +194,9 @@ class Twitter extends Adapter {
           );
           await this.page.keyboard.press('Enter');
 
-          if (!(await this.isPasswordCorrect(this.page, verifyURL))) {
-            console.log(
-              'Phone number is incorrect or email verification needed.',
-            );
-            await this.page.waitForTimeout(8000);
-            this.sessionValid = false;
-            process.exit(1);
-          } else if (await this.isEmailVerificationRequired(this.page)) {
-            console.log('Email verification required.');
-            this.sessionValid = false;
-            await this.page.waitForTimeout(1000000);
-            process.exit(1);
-          }
-        }
+          const result = await this.isPasswordCorrect(this.page, verifyURL)
+          //pause program for 10 seconds
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Adds a 1-second delay
 
         const currentURL = await this.page.url();
 
