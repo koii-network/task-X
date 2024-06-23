@@ -193,11 +193,11 @@ class Twitter extends Adapter {
             this.credentials.phone,
           );
           await this.page.keyboard.press('Enter');
-
+       
           const result = await this.isPasswordCorrect(this.page, verifyURL)
           //pause program for 10 seconds
           await new Promise(resolve => setTimeout(resolve, 2000)); // Adds a 1-second delay
-
+        }
         const currentURL = await this.page.url();
 
         // Select the div element by its aria-labelledby attribute
