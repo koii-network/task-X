@@ -193,10 +193,8 @@ class Twitter extends Adapter {
             this.credentials.phone,
           );
           await this.page.keyboard.press('Enter');
-       
-          const result = await this.isPasswordCorrect(this.page, verifyURL)
-          //pause program for 10 seconds
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Adds a 1-second delay
+          // add delay
+          await new Promise(resolve => setTimeout(resolve, 2000)); 
         }
         const currentURL = await this.page.url();
 
@@ -217,7 +215,7 @@ class Twitter extends Adapter {
         console.log('Step: Click login button');
         await this.page.keyboard.press('Enter');
 
-        if (!(await this.isPasswordCorrect(this.page, currentURL))) {
+        if (!(await this.checkLogin())) {
           console.log('Password is incorrect or email verification needed.');
           await this.page.waitForTimeout(5000);
           this.sessionValid = false;
@@ -261,6 +259,7 @@ class Twitter extends Adapter {
     }
   };
 
+
   tryLoginWithCookies = async () => {
     const cookies = await this.db.getCookie();
     // console.log('cookies', cookies);
@@ -295,6 +294,29 @@ class Twitter extends Adapter {
     }
   };
 
+  checkLogin = async () => {  
+
+    const newPage = await this.browser.newPage(); // Create a new page
+    await newPage.goto('https://twitter.com/home');
+    await newPage.waitForTimeout(5000);
+    // Replace the selector with a Twitter-specific element that indicates a logged-in state
+    const isLoggedIn =
+      (await newPage.url()) !==
+      'https://twitter.com/i/flow/login?redirect_after_login=%2Fhome';
+    if (isLoggedIn) {
+      console.log('Logged in using existing cookies');
+      console.log('Updating last session check');
+      this.sessionValid = true;
+    } else {
+      console.log('No valid cookies found, proceeding with manual login');
+      this.sessionValid = false;
+    }
+    await newPage.close(); // Close the new page
+    return this.sessionValid;
+
+  };
+  
+
   saveCookiesToDB = async cookies => {
     try {
       const data = await this.db.getCookie();
@@ -309,15 +331,15 @@ class Twitter extends Adapter {
     }
   };
 
-  isPasswordCorrect = async (page, currentURL) => {
-    await this.page.waitForTimeout(8000);
+  // isPasswordCorrect = async (page, currentURL) => {
+  //   await this.page.waitForTimeout(8000);
 
-    const newURL = await this.page.url();
-    if (newURL === currentURL) {
-      return false;
-    }
-    return true;
-  };
+  //   const newURL = await this.page.url();
+  //   if (newURL === currentURL) {
+  //     return false;
+  //   }
+  //   return true;
+  // };
 
   isEmailVerificationRequired = async page => {
     // Wait for some time to allow the page to load the required elements
