@@ -56,7 +56,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'Xj8aV6AEntJeEcTMhViDE8D8kx1b6FoRyeuCWw5Dipm'
+task_id: 'AdYesouS7v8QYDhrpAHrzuhqkqp7g1fVUH8pVHvdi86F'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Adjust Rewards'
+migrationDescription: 'Fixed Login Issue'
