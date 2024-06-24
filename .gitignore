@@ -23,3 +23,4 @@ passwordHTML.html
 usernameHTML.html
 tests/test-get-json-cid.js
 adapters/twitter/puppeteer_cache_koii_twitter_ck_archive
+puppeteer_cache_koii_twitter_archive

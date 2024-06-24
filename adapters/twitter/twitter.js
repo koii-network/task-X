@@ -1,13 +1,14 @@
 // Import required modules
 const Adapter = require('../../model/adapter');
-const cheerio = require('cheerio'); 
+const cheerio = require('cheerio');
 // const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
-const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
-const axios = require('axios');
+const { KoiiStorageClient } = require('@_koii/storage-task-sdk');
+const rimraf = require('rimraf');
 const Data = require('../../model/data');
 const PCR = require('puppeteer-chromium-resolver');
 const { namespaceWrapper } = require('../../namespaceWrapper');
 const fs = require('fs');
+const path = require('path');
 const { promise } = require('selenium-webdriver');
 
 /**
@@ -76,16 +77,27 @@ class Twitter extends Adapter {
         console.log('Old browser closed');
       }
       const options = {};
+      const userDataDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive');
       const stats = await PCR(options);
       console.log(
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
       );
       this.browser = await stats.puppeteer.launch({
+        executablePath: stats.executablePath,
+        userDataDir: userDataDir,
         // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
-        executablePath: stats.executablePath,
+        args: [
+          '--aggressive-cache-discard',
+          '--disable-cache',
+          '--disable-application-cache',
+          '--disable-offline-load-stale-cache',
+          '--disable-gpu-shader-disk-cache',
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-gpu',
+        ],
       });
       console.log('Step: Open new page');
       this.page = await this.browser.newPage();
@@ -346,28 +358,31 @@ class Twitter extends Adapter {
           console.log(err);
         }
         try {
-        const client = new KoiiStorageClient(undefined, undefined, false);
-        const userStaking = await namespaceWrapper.getSubmitterAccount();
-        console.log(`Uploading ${basePath}/${path}`);
-        const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
-        console.log(`Uploaded ${basePath}/${path}`);
-        const cid = fileUploadResponse.cid;
-        proof_cid = cid;
-        await this.proofs.create({
-          id: 'proof:' + round,
-          proof_round: round,
-          proof_cid: proof_cid,
-        });
+          const client = new KoiiStorageClient(undefined, undefined, false);
+          const userStaking = await namespaceWrapper.getSubmitterAccount();
+          console.log(`Uploading ${basePath}/${path}`);
+          const fileUploadResponse = await client.uploadFile(
+            `${basePath}/${path}`,
+            userStaking,
+          );
+          console.log(`Uploaded ${basePath}/${path}`);
+          const cid = fileUploadResponse.cid;
+          proof_cid = cid;
+          await this.proofs.create({
+            id: 'proof:' + round,
+            proof_round: round,
+            proof_cid: proof_cid,
+          });
 
-        console.log('returning proof cid for submission', proof_cid);
-        return proof_cid;
-      }catch (error) {
-        if (error.message === 'Invalid Task ID') {
+          console.log('returning proof cid for submission', proof_cid);
+          return proof_cid;
+        } catch (error) {
+          if (error.message === 'Invalid Task ID') {
             console.error('Error: Invalid Task ID');
-        } else {
+          } else {
             console.error('An unexpected error occurred:', error);
+          }
         }
-    }
       }
     } else {
       throw new Error('No proofs database provided');
@@ -503,7 +518,9 @@ class Twitter extends Adapter {
       // Wait an additional 5 seconds until fully loaded before scraping
       await this.page.waitForTimeout(5000);
 
+      let i = 0;
       while (true) {
+        i++;
         // Check if the error message is present on the page inside an article element
         const errorMessage = await this.page.evaluate(() => {
           const elements = document.querySelectorAll('div[dir="ltr"]');
@@ -556,9 +573,16 @@ class Twitter extends Adapter {
 
         try {
           let dataLength = (await this.cids.getList({ round: round })).length;
-          console.log('Already scraped', dataLength, 'in round', round);
-          if (dataLength > 120) {
-            console.log('reach maixmum data per round, closed old browser');
+          console.log(
+            'Already scraped',
+            dataLength,
+            'and',
+            i,
+            'times in round',
+            round,
+          );
+          if (dataLength > 120 || i > 4) {
+            console.log('reach maixmum data per round. Closed old browser');
             this.browser.close();
             break;
           }
@@ -623,4 +647,3 @@ class Twitter extends Adapter {
 }
 
 module.exports = Twitter;
-
