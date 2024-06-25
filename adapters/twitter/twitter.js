@@ -196,7 +196,7 @@ class Twitter extends Adapter {
             console.log(
               'Phone number is incorrect or email verification needed.',
             );
-            await this.page.waitForTimeout(8000);
+            await this.page.waitForTimeout(await this.randomDelay(8000));
             this.sessionValid = false;
             process.exit(1);
           } else if (await this.isEmailVerificationRequired(this.page)) {
@@ -553,7 +553,7 @@ class Twitter extends Adapter {
       // Wait an additional 5 seconds until fully loaded before scraping
       await this.page.waitForTimeout(await this.randomDelay(5000));
 
-      let i = 0;let i = 0;
+      let i = 0;
       while (true) {
         i++;
         // Check if the error message is present on the page inside an article element
