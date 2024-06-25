@@ -47,7 +47,7 @@ let searchTerm = "#koii";
 let query = {
     limit: 100, // total number of records to return
     searchTerm: searchTerm, // the keyword to look for
-    query: `https://twitter.com/search?q=${ searchTerm }&src=typed_query`, // the query string (including said keyword)
+    query: `https://x.com/search?q=${ searchTerm }&src=typed_query`, // the query string (including said keyword)
     depth: 3, // the depth of recursive layers to follow 
     recursive: true, // descend recursively?
     updateRound: () => {} // a function that returns the current round
