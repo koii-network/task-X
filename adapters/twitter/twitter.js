@@ -140,8 +140,8 @@ class Twitter extends Adapter {
       try {
         console.log(currentAttempt, this.maxRetry);
         console.log('Step: Go to login page');
-        await this.page.goto('https://twitter.com/i/flow/login', {
-          timeout: 60000,
+        await this.page.goto('https://x.com/i/flow/login', {
+          timeout: await this.randomDelay(60000),
           waitUntil: 'networkidle0',
         });
         let basePath = '';
@@ -157,7 +157,7 @@ class Twitter extends Adapter {
         fs.writeFileSync(`${basePath}/bodyHTML.html`, bodyHTML);
 
         await this.page.waitForSelector('input', {
-          timeout: 60000,
+          timeout: await this.randomDelay(60000),
         });
 
         // Select the div element by its aria-labelledby attribute
@@ -167,7 +167,7 @@ class Twitter extends Adapter {
         fs.writeFileSync(`${basePath}/usernameHTML.html`, usernameHTML);
 
         await this.page.waitForSelector('input[name="text"]', {
-          timeout: 60000,
+          timeout: await this.randomDelay(60000),
         });
 
         console.log('Step: Fill in username');
@@ -175,10 +175,10 @@ class Twitter extends Adapter {
 
         await this.page.type('input[name="text"]', this.credentials.username);
         await this.page.keyboard.press('Enter');
-
+        await new Promise(resolve => setTimeout(resolve, 10000));
         const twitter_verify = await this.page
           .waitForSelector('input[data-testid="ocfEnterTextTextInput"]', {
-            timeout: 5000,
+            timeout: await this.randomDelay(5000),
             visible: true,
           })
           .then(() => true)
@@ -193,22 +193,22 @@ class Twitter extends Adapter {
             this.credentials.phone,
           );
           await this.page.keyboard.press('Enter');
-
-          if (!(await this.isPasswordCorrect(this.page, verifyURL))) {
+          if (!(await this.checkLogin())) {
             console.log(
               'Phone number is incorrect or email verification needed.',
             );
-            await this.page.waitForTimeout(8000);
+            await this.page.waitForTimeout(await this.randomDelay(8000));
             this.sessionValid = false;
             process.exit(1);
           } else if (await this.isEmailVerificationRequired(this.page)) {
             console.log('Email verification required.');
             this.sessionValid = false;
-            await this.page.waitForTimeout(1000000);
+            await this.page.waitForTimeout(await this.randomDelay(1000000));
             process.exit(1);
           }
+          // add delay
+          await new Promise(resolve => setTimeout(resolve, 3000)); 
         }
-
         const currentURL = await this.page.url();
 
         // Select the div element by its aria-labelledby attribute
@@ -228,20 +228,20 @@ class Twitter extends Adapter {
         console.log('Step: Click login button');
         await this.page.keyboard.press('Enter');
 
-        if (!(await this.isPasswordCorrect(this.page, currentURL))) {
+        if (!(await this.checkLogin())) {
           console.log('Password is incorrect or email verification needed.');
-          await this.page.waitForTimeout(5000);
+          await this.page.waitForTimeout(await this.randomDelay(5000));
           this.sessionValid = false;
           process.exit(1);
         } else if (await this.isEmailVerificationRequired(this.page)) {
           console.log('Email verification required.');
           this.sessionValid = false;
-          await this.page.waitForTimeout(10000);
+          await this.page.waitForTimeout(await this.randomDelay(10000));
           process.exit(1);
         } else {
           console.log('Password is correct.');
           this.page.waitForNavigation({ waitUntil: 'load' });
-          await this.page.waitForTimeout(10000);
+          await this.page.waitForTimeout(await this.randomDelay(10000));
 
           this.sessionValid = true;
           this.lastSessionCheck = Date.now();
@@ -272,21 +272,22 @@ class Twitter extends Adapter {
     }
   };
 
+
   tryLoginWithCookies = async () => {
     const cookies = await this.db.getCookie();
     // console.log('cookies', cookies);
     if (cookies !== null) {
       await this.page.setCookie(...cookies);
 
-      await this.page.goto('https://twitter.com/home');
+      await this.page.goto('https://x.com/home');
 
-      await this.page.waitForTimeout(5000);
+      await this.page.waitForTimeout(await this.randomDelay(5000));
 
       // Replace the selector with a Twitter-specific element that indicates a logged-in state
       // This is just an example; you'll need to determine the correct selector for your case
       const isLoggedIn =
         (await this.page.url()) !==
-        'https://twitter.com/i/flow/login?redirect_after_login=%2Fhome';
+        'https://x.com/i/flow/login?redirect_after_login=%2Fhome';
 
       if (isLoggedIn) {
         console.log('Logged in using existing cookies');
@@ -306,6 +307,37 @@ class Twitter extends Adapter {
     }
   };
 
+  
+  randomDelay = async (delayTime) => {
+    const delay = Math.floor(Math.random() * (delayTime - 2000 + 1)) + (delayTime - 2000);
+    // console.log('Delaying for', delay, 'ms');
+    return delay;
+  }
+
+
+  checkLogin = async () => {  
+
+    const newPage = await this.browser.newPage(); // Create a new page
+    await newPage.goto('https://x.com/home');
+    await newPage.waitForTimeout(await this.randomDelay(5000));
+    // Replace the selector with a Twitter-specific element that indicates a logged-in state
+    const isLoggedIn =
+      (await newPage.url()) !==
+      'https://x.com/i/flow/login?redirect_after_login=%2Fhome';
+    if (isLoggedIn) {
+      console.log('Logged in using existing cookies');
+      console.log('Updating last session check');
+      this.sessionValid = true;
+    } else {
+      console.log('No valid cookies found, proceeding with manual login');
+      this.sessionValid = false;
+    }
+    await newPage.close(); // Close the new page
+    return this.sessionValid;
+
+  };
+  
+
   saveCookiesToDB = async cookies => {
     try {
       const data = await this.db.getCookie();
@@ -320,19 +352,9 @@ class Twitter extends Adapter {
     }
   };
 
-  isPasswordCorrect = async (page, currentURL) => {
-    await this.page.waitForTimeout(8000);
-
-    const newURL = await this.page.url();
-    if (newURL === currentURL) {
-      return false;
-    }
-    return true;
-  };
-
   isEmailVerificationRequired = async page => {
     // Wait for some time to allow the page to load the required elements
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(await this.randomDelay(5000));
 
     // Check if the specific text is present on the page
     const textContent = await this.page.evaluate(
@@ -445,6 +467,7 @@ class Twitter extends Adapter {
           fullURL &&
           !fullURL.includes('/search?q=') &&
           !fullURL.includes('twitter.com') &&
+          !fullURL.includes('x.com') &&
           !fullURL.includes('/hashtag/')
         ) {
           outer_media_urls.push(fullURL);
@@ -520,12 +543,12 @@ class Twitter extends Adapter {
     try {
       console.log('fetching list for ', url);
       // Go to the hashtag page
-      await this.page.waitForTimeout(5000);
+      await this.page.waitForTimeout(await this.randomDelay(5000));
       await this.page.setViewport({ width: 1024, height: 4000 });
       await this.page.goto(url);
 
       // Wait an additional 5 seconds until fully loaded before scraping
-      await this.page.waitForTimeout(5000);
+      await this.page.waitForTimeout(await this.randomDelay(5000));
       let i = 0;
       while (true) {
         i++;
@@ -542,7 +565,7 @@ class Twitter extends Adapter {
           }
           return false;
         });
-        // Scrape the tweets
+        // Archive the tweets
         const items = await this.page.evaluate(() => {
           const elements = document.querySelectorAll(
             'article[aria-labelledby]',
@@ -582,7 +605,7 @@ class Twitter extends Adapter {
         try {
           let dataLength = (await this.cids.getList({ round: round })).length;
           console.log(
-            'Already scraped',
+            'Already Archived',
             dataLength,
             'and',
             i,
@@ -598,7 +621,7 @@ class Twitter extends Adapter {
           await this.scrollPage(this.page);
 
           // Optional: wait for a moment to allow new elements to load
-          await this.page.waitForTimeout(5000);
+          await this.page.waitForTimeout(await this.randomDelay(5000));
 
           // Refetch the elements after scrolling
           await this.page.evaluate(() => {
@@ -625,7 +648,7 @@ class Twitter extends Adapter {
     await page.evaluate(() => {
       window.scrollBy(0, window.innerHeight);
     });
-    await page.waitForTimeout(5000); // Adjust the timeout as necessary
+    await page.waitForTimeout(await this.randomDelay(5000)); // Adjust the timeout as necessary
   };
 
   /**

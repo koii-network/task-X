@@ -10,7 +10,7 @@
     "webpack": "webpack",
     "webpack:prod": "webpack --mode production",
     "webpack:deploy": "yarn webpack:prod && yarn deploy",
-    "deploy": "create-task-cli",
+    "deploy": "yarn install && yarn webpack && npx @_koii/create-task-cli@latest",
     "whammy": "yarn webpack:deploy"
   },
   "author": "",

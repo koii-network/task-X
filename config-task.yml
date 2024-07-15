@@ -59,7 +59,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'HgFMR6GLPmHE4m4t8DRueqJzDcLdMFxGcanR1VTkHkAA'
+task_id: '4c6WGtcPmKjuZDxUaR6oSsbJQv8iFbwchXL8rZmggK4o'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Updated to 3000 KOII per round. Fix the puppeteer cache issue.'
+migrationDescription: 'Fix the puppeteer login issue.'
