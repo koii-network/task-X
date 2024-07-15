@@ -181,7 +181,7 @@ class TwitterTask {
    */
   async validate(proofCid) {
     // in order to validate, we need to take the proofCid
-    // and go get the results from web3.storage
+    // and go get the results from IPFS
     try {
       let data = await getJSONFromCID(proofCid, 'dataList.json'); // check this
       // console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data, typeof(data), data[0]);
