@@ -27,7 +27,7 @@ const run = async () => {
     let query = {
         limit: 100,
         searchTerm: searchTerm,
-        query: `https://twitter.com/search?q=${searchTerm}&src=typed_query`,
+        query: `https://x.com/search?q=${searchTerm}&src=typed_query`,
         depth: 3,
         updateRound: function(){
             console.log('updateRoundCalled')
@@ -36,7 +36,7 @@ const run = async () => {
         round: 1
       }
     
-    let item = "https://twitter.com/minmax_ai/status/1656324271428468737"
+    let item = "https://x.com/minmax_ai/status/1656324271428468737"
 
     // call adapter.parseItem(item)
     let parsedItem = await adapter.parseItem(item, query);

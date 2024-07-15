@@ -22,3 +22,6 @@ bodyHTML.html
 passwordHTML.html 
 usernameHTML.html
 tests/test-get-json-cid.js
+puppeteer_cache_koii_twitter_archive
+adapters/twitter/puppeteer_cache_koii_twitter_ck_archive
+adapters/twitter/puppeteer_cache_koii_twitter_archive

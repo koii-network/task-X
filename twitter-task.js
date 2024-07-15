@@ -130,7 +130,7 @@ class TwitterTask {
     let query = {
       limit: 100, // unused
       searchTerm: this.searchTerm,
-      query: `https://twitter.com/search?q=${this.searchTerm}&src=typed_query&f=live`,
+      query: `https://x.com/search?q=${this.searchTerm}&src=typed_query&f=live`,
       depth: 3,
       round: this.round,
       recursive: true,
