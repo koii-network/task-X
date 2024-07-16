@@ -170,7 +170,7 @@ class TwitterTask {
    * @returns
    */
   async getJSONofCID(cid) {
-    return await getJSONFromCID(cid, 'data.json');
+    return await getJSONFromCID(cid, 'dataList.json');
   }
 
   /**
