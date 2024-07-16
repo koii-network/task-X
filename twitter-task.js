@@ -197,8 +197,9 @@ class TwitterTask {
         // i.e.
         // console.log('item was', item);
         if (item.id) {
-          console.log('ipfs check passed');
-          return true;
+          const result = await twitterInstance.verify(item.data.tweets_id, item.data);
+          console.log('result from verify', result);
+          return result;
         } else {
           console.log('invalid item id', item.id);
           return true;
