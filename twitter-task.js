@@ -235,28 +235,24 @@ const getJSONFromCID = async (
     console.log(`Invalid CID: ${cid}`);
     return null;
   }
-  const urllist = [
-    `https://${cid}.ipfs.w3s.link/${fileName}`
-  ];
-  try {
-    const client = KoiiStorageClient.getInstance({debug: true});
-    const blob = await client.getFile(cid, fileName);
-    const text = await blob.text(); // Convert Blob to text
-    const data = JSON.parse(text); // Parse text to JSON
-    return data;
-  }  catch (error) {
-    console.log(`Error fetching file from Koii IPFS: ${error.message}`);
-  }
-  for (const url of urllist) {
-    console.log(`Trying URL: ${url}`);
+
+  const client = KoiiStorageClient.getInstance({debug: true});
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const response = await axios.get(url);
-      if (response.status === 200) {
-        return response.data;
-      }
+      const blob = await client.getFile(cid, fileName);
+      const text = await blob.text(); // Convert Blob to text
+      const data = JSON.parse(text); // Parse text to JSON
+      return data;
     } catch (error) {
+      console.log(`Attempt ${attempt}: Error fetching file from Koii IPFS: ${error.message}`);
+      if (attempt === retries) {
+        throw new Error(`Failed to fetch file after ${retries} attempts`);
+      }
+      // Optionally, you can add a delay between retries
+      await new Promise(resolve => setTimeout(resolve, 3000)); // 3-second delay
     }
   }
-  console.log("Attempted all IPFS sites failed");
+
   return null; 
 };
