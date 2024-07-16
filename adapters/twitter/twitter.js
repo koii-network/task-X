@@ -650,7 +650,7 @@ class Twitter extends Adapter {
   };
 
   /**
-   * compareList 
+   * retrieveItem derived from fetchList 
    * @param {*} url 
    * @param {*} item 
    * @returns 
@@ -694,16 +694,19 @@ class Twitter extends Adapter {
         });
         // Reason why many tweets: The given link might contain a main tweet and its comments, and the input task id might be one of the comments task id
         for (const item of items) {
-          console.log('------------');
-          console.log(item);
           await new Promise(resolve => setTimeout(resolve, 1000)); // Adds a 1-second delay
           try {
             let data = await this.parseItem(item);
-            if (data.tweets_id==tweetid) {
+            console.log(data);
+            console.log(data.tweets_id);
+            console.log(tweetid);
+            if (data.tweets_id == tweetid) {
               return data;
+            }else{
+              console.log("tweets id diff, continue");
             }
-            
           } catch (e) {
+            console.log(e);
             console.log(
               'Filtering advertisement tweets; continuing to the next item.',
             );
@@ -716,7 +719,7 @@ class Twitter extends Adapter {
       return;
     }
   };
-  verify = async (tweetid, item) => {
+  verify = async (tweetid, inputitem) => {
     try {
       const url = `https://twitter.com/any/status/${tweetid}`;
       await this.page.goto(url);
@@ -732,11 +735,24 @@ class Twitter extends Adapter {
       if (confirmed_no_tweet) {
         return false; // Return false if error detail is found
       }
-   
-      const result = await this.retrieveItem(url);
-      console.log(result);
-      return result; // Return the result if no error detail is found
-  
+      const result = await this.retrieveItem(tweetid);
+      if (result){
+        if (result.tweets_content !== inputitem.tweets_content) {
+          console.log("content not match", result.tweets_content, inputitem.tweets_content);
+          return false;
+        }
+        if (result.time_post !== inputitem.time_post) {
+          console.log("time post not match", result.time_post, inputitem.time_post);
+          return false;
+        }
+        if (result.time_read - inputitem.time_read > 3600000 * 3) {
+          console.log("time read not match", result.time_read, inputitem.time_read);
+          return false;
+        }
+        return true;
+      }
+      return result; 
+      
     } catch (e) {
       console.log('Error fetching single item', e);
       return false; // Return false in case of an exception
