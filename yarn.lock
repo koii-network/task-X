@@ -22,10 +22,10 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@_koii/storage-task-sdk@1.2.3":
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/@_koii/storage-task-sdk/-/storage-task-sdk-1.2.3.tgz#70cc36b4b80e47038a8fd5c338cc27d000e3c5c5"
-  integrity sha512-YnXe6RQMLNjjo8Fc4DZkowWjSy08FI5gBQdzsA4+TsZ7pI39PfLKIPtq7xrQy2GcMtGzJmg7oGaSh3U+5EdodQ==
+"@_koii/storage-task-sdk@1.2.7":
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/@_koii/storage-task-sdk/-/storage-task-sdk-1.2.7.tgz#813192259578c3c153db08d1c4eb0ff8f1bf32bd"
+  integrity sha512-qgCQzdrWtXrbcdZglpi3Ou5fGMd473bSWk9FZjGW4e5YE1jA6gummrzJl6dDZae3rkMeDzoh2wCo2vaPLe30sg==
   dependencies:
     "@_koii/web3.js" "^0.1.11"
     bs58 "^5.0.0"
