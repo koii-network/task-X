@@ -84,7 +84,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
@@ -577,6 +577,7 @@ class Twitter extends Adapter {
           );
           return Array.from(elements).map(element => element.outerHTML);
         });
+        console.log(items.length);
         for (const item of items) {
           await new Promise(resolve => setTimeout(resolve, 1000)); // Adds a 1-second delay
           try {
@@ -648,6 +649,101 @@ class Twitter extends Adapter {
     }
   };
 
+  /**
+   * compareList 
+   * @param {*} url 
+   * @param {*} item 
+   * @returns 
+   */
+  retrieveItem = async (tweetid) => {
+    try {
+      const url = `https://twitter.com/any/status/${tweetid}`;
+      console.log('fetching list for ', url);
+      // Go to the hashtag page
+      await this.page.waitForTimeout(await this.randomDelay(5000));
+      await this.page.setViewport({ width: 1024, height: 4000 });
+      await this.page.goto(url);
+
+      // Wait an additional 5 seconds until fully loaded before scraping
+      await this.page.waitForTimeout(await this.randomDelay(5000));
+
+      let i = 0;
+      while (true) {
+        i++;
+        // Check if the error message is present on the page inside an article element
+        const errorMessage = await this.page.evaluate(() => {
+          const elements = document.querySelectorAll('div[dir="ltr"]');
+          for (let element of elements) {
+           
+            if (
+              element.textContent === 'Something went wrong. Try reloading.'
+            ) {
+              return true;
+            }
+          }
+          return false;
+        });
+
+        // Archive the tweets
+        const items = await this.page.evaluate(() => {
+          
+          const elements = document.querySelectorAll(
+            'article[aria-labelledby]',
+          );
+          return Array.from(elements).map(element => element.outerHTML);
+        });
+        // Reason why many tweets: The given link might contain a main tweet and its comments, and the input task id might be one of the comments task id
+        for (const item of items) {
+          console.log('------------');
+          console.log(item);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Adds a 1-second delay
+          try {
+            let data = await this.parseItem(item);
+            if (data.tweets_id==tweetid) {
+              return data;
+            }
+            
+          } catch (e) {
+            console.log(
+              'Filtering advertisement tweets; continuing to the next item.',
+            );
+          }
+        }
+        return null;
+      }
+    } catch (e) {
+      console.log('Last round fetching list stop');
+      return;
+    }
+  };
+  verify = async (tweetid) => {
+    try {
+      const url = `https://twitter.com/any/status/${tweetid}`;
+      await this.page.goto(url);
+      await this.page.waitForTimeout(await this.randomDelay(5000));
+      let confirmed_no_tweet = false;
+      const item = await this.page.evaluate(() => {
+        if (document.querySelector('[data-testid="error-detail"]')) {
+          console.log('Error detail found');
+          confirmed_no_tweet = true;
+        }
+      });
+  
+      if (confirmed_no_tweet) {
+        return false; // Return false if error detail is found
+      }
+   
+      const result = await this.retrieveItem(url);
+      console.log(result);
+      return result; // Return the result if no error detail is found
+  
+    } catch (e) {
+      console.log('Error fetching single item', e);
+      return false; // Return false in case of an exception
+    }
+  };
+  
+  
   scrollPage = async page => {
     await page.evaluate(() => {
       window.scrollBy(0, window.innerHeight);
