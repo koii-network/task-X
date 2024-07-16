@@ -131,6 +131,7 @@ class TwitterTask {
       limit: 100, // unused
       searchTerm: this.searchTerm,
       query: `https://x.com/search?q=${this.searchTerm}&src=typed_query&f=live`,
+      // https://x.com/any/status/<tweets_id>
       depth: 3,
       round: this.round,
       recursive: true,
