@@ -716,7 +716,7 @@ class Twitter extends Adapter {
       return;
     }
   };
-  verify = async (tweetid) => {
+  verify = async (tweetid, item) => {
     try {
       const url = `https://twitter.com/any/status/${tweetid}`;
       await this.page.goto(url);
