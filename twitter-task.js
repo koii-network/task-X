@@ -6,7 +6,7 @@ const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
 const { namespaceWrapper } = require('./namespaceWrapper.js');
 const { CID } = require('multiformats/cid');
 
-function isValidCID(cid) {
+async function isValidCID(cid) {
   try {
     CID.parse(cid);
     return true;
@@ -197,7 +197,16 @@ class TwitterTask {
         // i.e.
         // console.log('item was', item);
         if (item.id) {
-          const result = await twitterInstance.verify(item.data.tweets_id, item.data);
+          // let credentials = {
+          //   username: "Hermanyiqunliang@gmail.com",
+          //   password: "",
+          //   phone: "4373407739",
+          // };
+          // if (!this.adapter){
+          //   this.adapter = new Twitter(credentials, this.db, 3);
+          // }
+          
+          const result = await this.adapter.verify(item.data.tweets_id, item.data);
           console.log('result from verify', result);
           return result;
         } else {
@@ -231,14 +240,15 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const getJSONFromCID = async (
   cid,
   fileName,
+  retries = 3
 ) => {
-  const validateCID = isValidCID(cid)
+  const validateCID = await isValidCID(cid)
   if (!validateCID) {
     console.log(`Invalid CID: ${cid}`);
     return null;
   }
 
-  const client = KoiiStorageClient.getInstance({debug: true});
+  const client = new KoiiStorageClient(undefined, undefined, false);
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
