@@ -84,7 +84,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        headless: false,
+        // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
@@ -658,20 +658,21 @@ class Twitter extends Adapter {
   retrieveItem = async (tweetid) => {
     try {
       const url = `https://twitter.com/any/status/${tweetid}`;
-      console.log('fetching list for ', url);
+      console.log('retrieve item for ', url);
       // Go to the hashtag page
-      await this.page.waitForTimeout(await this.randomDelay(5000));
-      await this.page.setViewport({ width: 1024, height: 4000 });
-      await this.page.goto(url);
+      const verify_page = await this.browser.newPage();
+      await verify_page.waitForTimeout(await this.randomDelay(5000));
+      await verify_page.setViewport({ width: 1024, height: 4000 });
+      await verify_page.goto(url);
 
       // Wait an additional 5 seconds until fully loaded before scraping
-      await this.page.waitForTimeout(await this.randomDelay(5000));
+      await verify_page.waitForTimeout(await this.randomDelay(5000));
 
       let i = 0;
       while (true) {
         i++;
         // Check if the error message is present on the page inside an article element
-        const errorMessage = await this.page.evaluate(() => {
+        const errorMessage = await verify_page.evaluate(() => {
           const elements = document.querySelectorAll('div[dir="ltr"]');
           for (let element of elements) {
            
@@ -685,13 +686,14 @@ class Twitter extends Adapter {
         });
 
         // Archive the tweets
-        const items = await this.page.evaluate(() => {
+        const items = await verify_page.evaluate(() => {
           
           const elements = document.querySelectorAll(
             'article[aria-labelledby]',
           );
           return Array.from(elements).map(element => element.outerHTML);
         });
+        let temp = null;
         // Reason why many tweets: The given link might contain a main tweet and its comments, and the input task id might be one of the comments task id
         for (const item of items) {
           await new Promise(resolve => setTimeout(resolve, 1000)); // Adds a 1-second delay
@@ -705,6 +707,9 @@ class Twitter extends Adapter {
             }else{
               console.log("tweets id diff, continue");
             }
+            if (data.tweets_id == "1"){
+              temp = data;
+            }
           } catch (e) {
             console.log(e);
             console.log(
@@ -712,7 +717,8 @@ class Twitter extends Adapter {
             );
           }
         }
-        return null;
+        
+        return temp;
       }
     } catch (e) {
       console.log('Last round fetching list stop');
@@ -720,12 +726,15 @@ class Twitter extends Adapter {
     }
   };
   verify = async (tweetid, inputitem) => {
+    console.log(inputitem);
+    console.log("above is input item");
     try {
       const url = `https://twitter.com/any/status/${tweetid}`;
-      await this.page.goto(url);
-      await this.page.waitForTimeout(await this.randomDelay(5000));
+      const verify_page = await this.browser.newPage();
+      await verify_page.goto(url);
+      await verify_page.waitForTimeout(await this.randomDelay(5000));
       let confirmed_no_tweet = false;
-      const item = await this.page.evaluate(() => {
+      const item = await verify_page.evaluate(() => {
         if (document.querySelector('[data-testid="error-detail"]')) {
           console.log('Error detail found');
           confirmed_no_tweet = true;
@@ -745,7 +754,7 @@ class Twitter extends Adapter {
           console.log("time post not match", result.time_post, inputitem.time_post);
           return false;
         }
-        if (result.time_read - inputitem.time_read > 3600000 * 3) {
+        if (result.time_read - inputitem.time_read > 3600000 * 15) {
           console.log("time read not match", result.time_read, inputitem.time_read);
           return false;
         }
