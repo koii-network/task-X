@@ -776,7 +776,7 @@ class Twitter extends Adapter {
           console.log("time post not match", result.time_post, inputitem.time_post);
           return false;
         }
-        if (result.time_read - inputitem.time_read > 3600000 * 1500) {
+        if (result.time_read - inputitem.time_read > 3600000 * 15) {
           console.log("time read not match", result.time_read, inputitem.time_read);
           return false;
         }
