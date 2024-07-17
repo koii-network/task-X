@@ -9,6 +9,7 @@ const PCR = require('puppeteer-chromium-resolver');
 const { namespaceWrapper } = require('../../namespaceWrapper');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcrypt');
 
 /**
  * Twitter
@@ -487,6 +488,10 @@ class Twitter extends Adapter {
       const likeCount = tweet_record.eq(1).text();
       const shareCount = tweet_record.eq(2).text();
       const viewCount = tweet_record.eq(3).text();
+      const tweets_content = tweet_text.replace(/\n/g, '<br>');
+      const originData = tweets_content + time;
+      const salt = bcrypt.genSaltSync(saltRounds);
+      const hash = bcrypt.hashSync(data, salt);
       if (screen_name && tweet_text) {
         data = {
           user_name: user_name,
@@ -494,7 +499,7 @@ class Twitter extends Adapter {
           user_url: user_url,
           user_img: user_img,
           tweets_id: tweetId,
-          tweets_content: tweet_text.replace(/\n/g, '<br>'),
+          tweets_content: tweets_content,
           time_post: time,
           time_read: Date.now(),
           comment: commentCount,
@@ -504,6 +509,7 @@ class Twitter extends Adapter {
           outer_media_url: outer_media_urls,
           outer_media_short_url: outer_media_short_urls,
           keyword: this.searchTerm,
+          hash: hash,
         };
       }
       return data;
@@ -649,7 +655,22 @@ class Twitter extends Adapter {
     }
   };
 
-  /**
+
+  
+  compareHash = async (data, saltRounds) => {
+      const dataToCompare =
+        data.data.tweets_content + data.data.time_post; // + data.data.tweets_id;
+      console.log(dataToCompare);
+      const salt = bcrypt.genSaltSync(saltRounds);
+      const hash = bcrypt.hashSync(dataToCompare, salt);
+      console.log(hash);
+      const hashCompare = bcrypt.compareSync(dataToCompare, hash);
+      console.log(hashCompare);
+      const hashCompareWrong = bcrypt.compareSync(data.data.tweets_id, hash);
+      console.log(hashCompareWrong);
+  };
+  
+ /**
    * retrieveItem derived from fetchList 
    * @param {*} url 
    * @param {*} item 
