@@ -761,7 +761,7 @@ class Twitter extends Adapter {
           confirmed_no_tweet = true;
         }
       });
-      const inputitemHash = inputitem.hash;
+
       if (confirmed_no_tweet) {
         return false; // Return false if error detail is found
       }
@@ -779,8 +779,11 @@ class Twitter extends Adapter {
           console.log("time read not match", result.time_read, inputitem.time_read);
           return false;
         }
-        const resultHash = 
-        if()
+        const dataToCompare = result.tweets_content + result.time_post;
+        const hashCompare = bcrypt.compareSync(dataToCompare, hash);
+        if(hashCompare==false){
+          return false;
+        }
         return true;
       }
       return result; 
