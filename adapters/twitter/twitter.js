@@ -490,6 +490,7 @@ class Twitter extends Adapter {
       const viewCount = tweet_record.eq(3).text();
       const tweets_content = tweet_text.replace(/\n/g, '<br>');
       const originData = tweets_content + time;
+      const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(originData, salt);
       if (screen_name && tweet_text) {
@@ -775,13 +776,14 @@ class Twitter extends Adapter {
           console.log("time post not match", result.time_post, inputitem.time_post);
           return false;
         }
-        if (result.time_read - inputitem.time_read > 3600000 * 15) {
+        if (result.time_read - inputitem.time_read > 3600000 * 1500) {
           console.log("time read not match", result.time_read, inputitem.time_read);
           return false;
         }
         const dataToCompare = result.tweets_content + result.time_post;
-        const hashCompare = bcrypt.compareSync(dataToCompare, hash);
+        const hashCompare = bcrypt.compareSync(dataToCompare, inputitem.hash);
         if(hashCompare==false){
+          console.log("hash not match", dataToCompare, inputitem.hash);
           return false;
         }
         return true;

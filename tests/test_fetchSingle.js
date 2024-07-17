@@ -1,5 +1,5 @@
 const Twitter = require('../adapters/twitter/twitter.js'); 
-
+const bcrypt = require('bcryptjs');
 
 const credentials = { username: process.env.TWITTER_USERNAME, password: process.env.TWITTER_PASSWORD, phone: 'your-phone-number' };
 const db = {}; // Replace with your actual database instance or mock
@@ -34,7 +34,11 @@ const twitterInstance = new Twitter(credentials, db, maxRetry);
         },
         "_id": "0e2leB4TSrw4tYPK"
       };
-      
+      const originData = webresult.data.tweets_content+webresult.data.time_post;
+      const saltRounds = 10;
+      const salt = bcrypt.genSaltSync(saltRounds);
+      const hash = bcrypt.hashSync(originData, salt);
+      webresult.data.hash = hash;
       const retrievedJSON = JSON.stringify(webresult);
       const parsedData = JSON.parse(retrievedJSON);
       const datajson = parsedData.data;
