@@ -205,7 +205,7 @@ class TwitterTask {
           // if (!this.adapter){
           //   this.adapter = new Twitter(credentials, this.db, 3);
           // }
-          
+          await new Promise(resolve => setTimeout(resolve, 30000)); 
           const result = await this.adapter.verify(item.data.tweets_id, item.data);
           console.log('result from verify', result);
           return result;
