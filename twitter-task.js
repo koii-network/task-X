@@ -211,7 +211,7 @@ class TwitterTask {
           return result;
         } else {
           console.log('invalid item id', item.id);
-          return true;
+          return false;
         }
       }
     } else {
