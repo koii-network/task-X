@@ -228,7 +228,7 @@ class Twitter extends Adapter {
         );
         console.log('Step: Click login button');
         await this.page.keyboard.press('Enter');
-
+        await this.page.waitForTimeout(await this.randomDelay(3000));
         if (!(await this.checkLogin())) {
           console.log('Password is incorrect or email verification needed.');
           await this.page.waitForTimeout(await this.randomDelay(5000));
@@ -753,7 +753,7 @@ class Twitter extends Adapter {
     try {
       const url = `https://twitter.com/any/status/${tweetid}`;
       const verify_page = await this.browser.newPage();
-      await verify_page.goto(url);
+      await verify_page.goto(url, { timeout: 60000 });
       await verify_page.waitForTimeout(await this.randomDelay(5000));
       let confirmed_no_tweet = false;
       const item = await verify_page.evaluate(() => {
