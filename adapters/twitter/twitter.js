@@ -817,7 +817,7 @@ class Twitter extends Adapter {
         return true;
       }
       auditBrowser.close();
-      return result; 
+      return false; 
       
     } catch (e) {
       console.log('Error fetching single item', e);
