@@ -501,7 +501,7 @@ class Twitter extends Adapter {
       const shareCount = tweet_record.eq(2).text();
       const viewCount = tweet_record.eq(3).text();
       const tweets_content = tweet_text.replace(/\n/g, '<br>');
-      const originData = tweets_content + time;
+      const originData = tweets_content;
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(originData, salt);
