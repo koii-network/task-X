@@ -802,7 +802,7 @@ class Twitter extends Adapter {
           return false;
         }
         if (result.time_read - inputitem.time_read > 3600000 * 15) {
-          console.log("time read not match", result.time_read, inputitem.time_read);
+          console.log("time read difference too big", result.time_read, inputitem.time_read);
           auditBrowser.close();
           return false;
         }
