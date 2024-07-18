@@ -306,7 +306,20 @@ class Twitter extends Adapter {
       return false;
     }
   };
-
+  createNewPage = async () => {
+    //attemp 3 times to create new page
+    let currentAttempt = 0;
+    while (currentAttempt < 3) {
+      try {
+        const newPage = await this.browser.newPage();
+        return newPage;
+      } catch (e) {
+        console.log('Error creating new page', e);
+        currentAttempt++;
+      }
+    }
+    return null;
+  };
   checkLogin = async () => {  
 
     const newPage = await this.browser.newPage(); // Create a new page
@@ -324,7 +337,6 @@ class Twitter extends Adapter {
       console.log('No valid cookies found, proceeding with manual login');
       this.sessionValid = false;
     }
-    await newPage.close(); // Close the new page
     return this.sessionValid;
 
   };
@@ -779,12 +791,12 @@ class Twitter extends Adapter {
       console.log('retrieve item for ', url);
       const result = await this.retrieveItem(verify_page, tweetid);
       if (result){
-        if (result.tweets_content !== inputitem.tweets_content) {
+        if (result.tweets_content != inputitem.tweets_content) {
           console.log("content not match", result.tweets_content, inputitem.tweets_content);
           auditBrowser.close();
           return false;
         }
-        if (result.time_post !== inputitem.time_post) {
+        if (result.time_post != inputitem.time_post) {
           console.log("time post not match", result.time_post, inputitem.time_post);
           auditBrowser.close();
           return false;
