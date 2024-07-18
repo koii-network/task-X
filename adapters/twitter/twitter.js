@@ -265,7 +265,6 @@ verify = async (tweetid, inputitem) => {
     
   } catch (e) {
     console.log('Error fetching single item', e);
-    auditBrowser.close();
     return false; // Return false in case of an exception
   }
 };
