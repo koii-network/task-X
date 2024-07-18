@@ -86,7 +86,6 @@ class Twitter extends Adapter {
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
         // headless: false,
-        protocolTimeout: 20000,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
@@ -338,7 +337,6 @@ class Twitter extends Adapter {
       console.log('No valid cookies found, proceeding with manual login');
       this.sessionValid = false;
     }
-    await newPage.close(); // Close the new page
     return this.sessionValid;
 
   };
