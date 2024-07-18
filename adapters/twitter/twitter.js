@@ -86,6 +86,7 @@ class Twitter extends Adapter {
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
         // headless: false,
+        protocolTimeout: 20000,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
@@ -306,7 +307,20 @@ class Twitter extends Adapter {
       return false;
     }
   };
-
+  createNewPage = async () => {
+    //attemp 3 times to create new page
+    let currentAttempt = 0;
+    while (currentAttempt < 3) {
+      try {
+        const newPage = await this.browser.newPage();
+        return newPage;
+      } catch (e) {
+        console.log('Error creating new page', e);
+        currentAttempt++;
+      }
+    }
+    return null;
+  };
   checkLogin = async () => {  
 
     const newPage = await this.browser.newPage(); // Create a new page
@@ -682,7 +696,7 @@ class Twitter extends Adapter {
       const url = `https://twitter.com/any/status/${tweetid}`;
       console.log('retrieve item for ', url);
       // Go to the hashtag page
-      const verify_page = await this.browser.newPage();
+      const verify_page = await this.createNewPage();
       await verify_page.waitForTimeout(await this.randomDelay(5000));
       await verify_page.setViewport({ width: 1024, height: 4000 });
       await verify_page.goto(url);
@@ -752,7 +766,7 @@ class Twitter extends Adapter {
     console.log("above is input item");
     try {
       const url = `https://twitter.com/any/status/${tweetid}`;
-      const verify_page = await this.browser.newPage();
+      const verify_page = await this.createNewPage();
       await verify_page.goto(url, { timeout: 60000 });
       await verify_page.waitForTimeout(await this.randomDelay(5000));
       let confirmed_no_tweet = false;
@@ -768,11 +782,11 @@ class Twitter extends Adapter {
       }
       const result = await this.retrieveItem(tweetid);
       if (result){
-        if (result.tweets_content !== inputitem.tweets_content) {
+        if (result.tweets_content != inputitem.tweets_content) {
           console.log("content not match", result.tweets_content, inputitem.tweets_content);
           return false;
         }
-        if (result.time_post !== inputitem.time_post) {
+        if (result.time_post != inputitem.time_post) {
           console.log("time post not match", result.time_post, inputitem.time_post);
           return false;
         }
