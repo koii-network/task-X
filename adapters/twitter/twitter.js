@@ -672,7 +672,7 @@ class Twitter extends Adapter {
   
   compareHash = async (data, saltRounds) => {
       const dataToCompare =
-        data.data.tweets_content + data.data.time_post; // + data.data.tweets_id;
+        data.data.tweets_content; // + data.data.tweets_id;
       console.log(dataToCompare);
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(dataToCompare, salt);
@@ -796,17 +796,17 @@ class Twitter extends Adapter {
           auditBrowser.close();
           return false;
         }
-        if (result.time_post != inputitem.time_post) {
-          console.log("time post not match", result.time_post, inputitem.time_post);
-          auditBrowser.close();
-          return false;
-        }
+        // if (result.time_post != inputitem.time_post) {
+        //   console.log("time post not match", result.time_post, inputitem.time_post);
+        //   auditBrowser.close();
+        //   return false;
+        // }
         if (result.time_read - inputitem.time_read > 3600000 * 15) {
           console.log("time read difference too big", result.time_read, inputitem.time_read);
           auditBrowser.close();
           return false;
         }
-        const dataToCompare = result.tweets_content + result.time_post;
+        const dataToCompare = result.tweets_content;
         const hashCompare = bcrypt.compareSync(dataToCompare, inputitem.hash);
         if(hashCompare==false){
           console.log("hash not match", dataToCompare, inputitem.hash);
