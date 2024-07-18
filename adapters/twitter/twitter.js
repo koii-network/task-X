@@ -85,7 +85,8 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        // headless: false,
+        headless: false,
+        protocolTimeout: 240000,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
@@ -678,11 +679,25 @@ class Twitter extends Adapter {
    * @returns 
    */
   retrieveItem = async (tweetid) => {
+    const options = {};
+    const userDataDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive');
+    const stats = await PCR(options);
+    console.log(
+      '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
+    );
     try {
       const url = `https://twitter.com/any/status/${tweetid}`;
       console.log('retrieve item for ', url);
       // Go to the hashtag page
-      const verify_page = await this.browser.newPage();
+      const browser = await stats.puppeteer.launch({
+        executablePath: stats.executablePath,
+        userDataDir: userDataDir,
+        headless: false,
+        protocolTimeout: 240000,
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      });
+      const verify_page = await browser.newPage();
       await verify_page.waitForTimeout(await this.randomDelay(5000));
       await verify_page.setViewport({ width: 1024, height: 4000 });
       await verify_page.goto(url);
@@ -748,11 +763,36 @@ class Twitter extends Adapter {
     }
   };
   verify = async (tweetid, inputitem) => {
+    this.browser.close();
+    const options = {};
+    const userDataDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive');
+    const stats = await PCR(options);
+    console.log(
+      '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
+    );
     console.log(inputitem);
     console.log("above is input item");
     try {
+      const browser = await stats.puppenewteer.launch({
+        executablePath: stats.executablePath,
+        userDataDir: userDataDir,
+        headless: false,
+        protocolTimeout: 240000,
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        args: [
+          '--aggressive-cache-discard',
+          '--disable-cache',
+          '--disable-application-cache',
+          '--disable-offline-load-stale-cache',
+          '--disable-gpu-shader-disk-cache',
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-gpu',
+        ],
+      });
       const url = `https://twitter.com/any/status/${tweetid}`;
-      const verify_page = await this.browser.newPage();
+      const verify_page = await browser.newPage();
       await verify_page.goto(url, { timeout: 60000 });
       await verify_page.waitForTimeout(await this.randomDelay(5000));
       let confirmed_no_tweet = false;
@@ -791,6 +831,7 @@ class Twitter extends Adapter {
       return result; 
       
     } catch (e) {
+      console.log(e);
       console.log('Error fetching single item', e);
       return false; // Return false in case of an exception
     }
