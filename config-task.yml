@@ -59,7 +59,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '4c6WGtcPmKjuZDxUaR6oSsbJQv8iFbwchXL8rZmggK4o'
+task_id: '7dh8uesdssE8tPZAuaWiqEp5SVBWiUXDrRmbkZh4uxUF'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Fix the puppeteer login issue.'
+migrationDescription: 'Updated Audit Function'
