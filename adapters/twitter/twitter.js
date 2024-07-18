@@ -116,7 +116,7 @@ class Twitter extends Adapter {
   };
   compareHash = async (data, saltRounds) => {
     const dataToCompare =
-      data.data.tweets_content + data.data.time_post; // + data.data.tweets_id;
+      data.data.tweets_content ; // + data.data.tweets_id;
     console.log(dataToCompare);
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(dataToCompare, salt);
@@ -240,17 +240,17 @@ verify = async (tweetid, inputitem) => {
         auditBrowser.close();
         return false;
       }
-      if (result.time_post != inputitem.time_post) {
-        console.log("time post not match", result.time_post, inputitem.time_post);
-        auditBrowser.close();
-        return false;
-      }
+      // if (result.time_post != inputitem.time_post) {
+      //   console.log("time post not match", result.time_post, inputitem.time_post);
+      //   auditBrowser.close();
+      //   return false;
+      // }
       if (result.time_read - inputitem.time_read > 3600000 * 15) {
         console.log("time read difference too big", result.time_read, inputitem.time_read);
         auditBrowser.close();
         return false;
       }
-      const dataToCompare = result.tweets_content + result.time_post;
+      const dataToCompare = result.tweets_content;
       const hashCompare = bcrypt.compareSync(dataToCompare, inputitem.hash);
       if(hashCompare==false){
         console.log("hash not match", dataToCompare, inputitem.hash);
@@ -655,7 +655,7 @@ verify = async (tweetid, inputitem) => {
       const shareCount = tweet_record.eq(2).text();
       const viewCount = tweet_record.eq(3).text();
       const tweets_content = tweet_text.replace(/\n/g, '<br>');
-      const originData = tweets_content + time;
+      const originData = tweets_content;
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(originData, salt);
