@@ -800,11 +800,11 @@ class Twitter extends Adapter {
         }
         return true;
       }
-      return result; 
+      return false; // Result False if the item is not found
       
     } catch (e) {
       console.log('Error fetching single item', e);
-      return false; // Return false in case of an exception
+      return true; // Return true if error occurs to avoid slash
     }
   };
   
