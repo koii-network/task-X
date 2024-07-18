@@ -85,7 +85,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
@@ -689,18 +689,8 @@ class Twitter extends Adapter {
    * @param {*} item 
    * @returns 
    */
-  retrieveItem = async (tweetid) => {
+  retrieveItem = async (verify_page, tweetid) => {
     try {
-      const url = `https://twitter.com/any/status/${tweetid}`;
-      console.log('retrieve item for ', url);
-      // Go to the hashtag page
-      const verify_page = await this.createNewPage();
-      await verify_page.waitForTimeout(await this.randomDelay(5000));
-      await verify_page.setViewport({ width: 1024, height: 4000 });
-      await verify_page.goto(url);
-
-      // Wait an additional 5 seconds until fully loaded before scraping
-      await verify_page.waitForTimeout(await this.randomDelay(5000));
 
       let i = 0;
       while (true) {
@@ -755,7 +745,7 @@ class Twitter extends Adapter {
         return temp;
       }
     } catch (e) {
-      console.log('Last round fetching list stop');
+      console.log('Last round fetching list stop', e);
       return;
     }
   };
@@ -763,12 +753,32 @@ class Twitter extends Adapter {
     console.log(inputitem);
     console.log("above is input item");
     try {
+      const options = {};
+      const userAuditDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive_audit');
+      const stats = await PCR(options);
+      let auditBrowser = await stats.puppeteer.launch({
+        executablePath: stats.executablePath,
+        userDataDir: userAuditDir,
+        headless: false,
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        args: [
+          '--aggressive-cache-discard',
+          '--disable-cache',
+          '--disable-application-cache',
+          '--disable-offline-load-stale-cache',
+          '--disable-gpu-shader-disk-cache',
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-gpu',
+        ],
+      });
       const url = `https://twitter.com/any/status/${tweetid}`;
-      const verify_page = await this.createNewPage();
+      const verify_page = await auditBrowser.newPage();
       await verify_page.goto(url, { timeout: 60000 });
       await verify_page.waitForTimeout(await this.randomDelay(5000));
       let confirmed_no_tweet = false;
-      const item = await verify_page.evaluate(() => {
+      await verify_page.evaluate(() => {
         if (document.querySelector('[data-testid="error-detail"]')) {
           console.log('Error detail found');
           confirmed_no_tweet = true;
@@ -778,33 +788,41 @@ class Twitter extends Adapter {
       if (confirmed_no_tweet) {
         return false; // Return false if error detail is found
       }
-      const result = await this.retrieveItem(tweetid);
+      console.log('retrieve item for ', url);
+      const result = await this.retrieveItem(verify_page, tweetid);
       if (result){
         if (result.tweets_content != inputitem.tweets_content) {
           console.log("content not match", result.tweets_content, inputitem.tweets_content);
+          auditBrowser.close();
           return false;
         }
         if (result.time_post != inputitem.time_post) {
           console.log("time post not match", result.time_post, inputitem.time_post);
+          auditBrowser.close();
           return false;
         }
         if (result.time_read - inputitem.time_read > 3600000 * 15) {
           console.log("time read difference too big", result.time_read, inputitem.time_read);
+          auditBrowser.close();
           return false;
         }
         const dataToCompare = result.tweets_content + result.time_post;
         const hashCompare = bcrypt.compareSync(dataToCompare, inputitem.hash);
         if(hashCompare==false){
           console.log("hash not match", dataToCompare, inputitem.hash);
+          auditBrowser.close();
           return false;
         }
+        auditBrowser.close();
         return true;
       }
-      return false; // Result False if the item is not found
+      auditBrowser.close();
+      return false; 
       
     } catch (e) {
       console.log('Error fetching single item', e);
-      return true; // Return true if error occurs to avoid slash
+      auditBrowser.close();
+      return false; // Return false in case of an exception
     }
   };
   
