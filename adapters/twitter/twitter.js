@@ -9,6 +9,7 @@ const PCR = require('puppeteer-chromium-resolver');
 const { namespaceWrapper } = require('../../namespaceWrapper');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 /**
  * Twitter
@@ -227,7 +228,7 @@ class Twitter extends Adapter {
         );
         console.log('Step: Click login button');
         await this.page.keyboard.press('Enter');
-
+        await this.page.waitForTimeout(await this.randomDelay(3000));
         if (!(await this.checkLogin())) {
           console.log('Password is incorrect or email verification needed.');
           await this.page.waitForTimeout(await this.randomDelay(5000));
@@ -305,7 +306,20 @@ class Twitter extends Adapter {
       return false;
     }
   };
-
+  createNewPage = async () => {
+    //attemp 3 times to create new page
+    let currentAttempt = 0;
+    while (currentAttempt < 3) {
+      try {
+        const newPage = await this.browser.newPage();
+        return newPage;
+      } catch (e) {
+        console.log('Error creating new page', e);
+        currentAttempt++;
+      }
+    }
+    return null;
+  };
   checkLogin = async () => {  
 
     const newPage = await this.browser.newPage(); // Create a new page
@@ -323,7 +337,6 @@ class Twitter extends Adapter {
       console.log('No valid cookies found, proceeding with manual login');
       this.sessionValid = false;
     }
-    await newPage.close(); // Close the new page
     return this.sessionValid;
 
   };
@@ -487,6 +500,11 @@ class Twitter extends Adapter {
       const likeCount = tweet_record.eq(1).text();
       const shareCount = tweet_record.eq(2).text();
       const viewCount = tweet_record.eq(3).text();
+      const tweets_content = tweet_text.replace(/\n/g, '<br>');
+      const originData = tweets_content;
+      const saltRounds = 10;
+      const salt = bcrypt.genSaltSync(saltRounds);
+      const hash = bcrypt.hashSync(originData, salt);
       if (screen_name && tweet_text) {
         data = {
           user_name: user_name,
@@ -494,7 +512,7 @@ class Twitter extends Adapter {
           user_url: user_url,
           user_img: user_img,
           tweets_id: tweetId,
-          tweets_content: tweet_text.replace(/\n/g, '<br>'),
+          tweets_content: tweets_content,
           time_post: time,
           time_read: Date.now(),
           comment: commentCount,
@@ -504,6 +522,7 @@ class Twitter extends Adapter {
           outer_media_url: outer_media_urls,
           outer_media_short_url: outer_media_short_urls,
           keyword: this.searchTerm,
+          hash: hash,
         };
       }
       return data;
@@ -577,6 +596,7 @@ class Twitter extends Adapter {
           );
           return Array.from(elements).map(element => element.outerHTML);
         });
+        console.log(items.length);
         for (const item of items) {
           await new Promise(resolve => setTimeout(resolve, 1000)); // Adds a 1-second delay
           try {
@@ -648,6 +668,164 @@ class Twitter extends Adapter {
     }
   };
 
+
+  
+  compareHash = async (data, saltRounds) => {
+      const dataToCompare =
+        data.data.tweets_content; // + data.data.tweets_id;
+      console.log(dataToCompare);
+      const salt = bcrypt.genSaltSync(saltRounds);
+      const hash = bcrypt.hashSync(dataToCompare, salt);
+      console.log(hash);
+      const hashCompare = bcrypt.compareSync(dataToCompare, hash);
+      console.log(hashCompare);
+      const hashCompareWrong = bcrypt.compareSync(data.data.tweets_id, hash);
+      console.log(hashCompareWrong);
+  };
+  
+ /**
+   * retrieveItem derived from fetchList 
+   * @param {*} url 
+   * @param {*} item 
+   * @returns 
+   */
+  retrieveItem = async (verify_page, tweetid) => {
+    try {
+
+      let i = 0;
+      while (true) {
+        i++;
+        // Check if the error message is present on the page inside an article element
+        const errorMessage = await verify_page.evaluate(() => {
+          const elements = document.querySelectorAll('div[dir="ltr"]');
+          for (let element of elements) {
+           
+            if (
+              element.textContent === 'Something went wrong. Try reloading.'
+            ) {
+              return true;
+            }
+          }
+          return false;
+        });
+
+        // Archive the tweets
+        const items = await verify_page.evaluate(() => {
+          
+          const elements = document.querySelectorAll(
+            'article[aria-labelledby]',
+          );
+          return Array.from(elements).map(element => element.outerHTML);
+        });
+        let temp = null;
+        // Reason why many tweets: The given link might contain a main tweet and its comments, and the input task id might be one of the comments task id
+        for (const item of items) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Adds a 1-second delay
+          try {
+            let data = await this.parseItem(item);
+            console.log(data);
+            console.log(data.tweets_id);
+            console.log(tweetid);
+            if (data.tweets_id == tweetid) {
+              return data;
+            }else{
+              console.log("tweets id diff, continue");
+            }
+            if (data.tweets_id == "1"){
+              temp = data;
+            }
+          } catch (e) {
+            console.log(e);
+            console.log(
+              'Filtering advertisement tweets; continuing to the next item.',
+            );
+          }
+        }
+        
+        return temp;
+      }
+    } catch (e) {
+      console.log('Last round fetching list stop', e);
+      return;
+    }
+  };
+  verify = async (tweetid, inputitem) => {
+    console.log(inputitem);
+    console.log("above is input item");
+    try {
+      const options = {};
+      const userAuditDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive_audit');
+      const stats = await PCR(options);
+      let auditBrowser = await stats.puppeteer.launch({
+        executablePath: stats.executablePath,
+        userDataDir: userAuditDir,
+        // headless: false,
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        args: [
+          '--aggressive-cache-discard',
+          '--disable-cache',
+          '--disable-application-cache',
+          '--disable-offline-load-stale-cache',
+          '--disable-gpu-shader-disk-cache',
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-gpu',
+        ],
+      });
+      const url = `https://twitter.com/any/status/${tweetid}`;
+      const verify_page = await auditBrowser.newPage();
+      await verify_page.goto(url, { timeout: 60000 });
+      await verify_page.waitForTimeout(await this.randomDelay(5000));
+      let confirmed_no_tweet = false;
+      await verify_page.evaluate(() => {
+        if (document.querySelector('[data-testid="error-detail"]')) {
+          console.log('Error detail found');
+          confirmed_no_tweet = true;
+        }
+      });
+
+      if (confirmed_no_tweet) {
+        return false; // Return false if error detail is found
+      }
+      console.log('retrieve item for ', url);
+      const result = await this.retrieveItem(verify_page, tweetid);
+      if (result){
+        if (result.tweets_content != inputitem.tweets_content) {
+          console.log("content not match", result.tweets_content, inputitem.tweets_content);
+          auditBrowser.close();
+          return false;
+        }
+        // if (result.time_post != inputitem.time_post) {
+        //   console.log("time post not match", result.time_post, inputitem.time_post);
+        //   auditBrowser.close();
+        //   return false;
+        // }
+        if (result.time_read - inputitem.time_read > 3600000 * 15) {
+          console.log("time read difference too big", result.time_read, inputitem.time_read);
+          auditBrowser.close();
+          return false;
+        }
+        const dataToCompare = result.tweets_content;
+        const hashCompare = bcrypt.compareSync(dataToCompare, inputitem.hash);
+        if(hashCompare==false){
+          console.log("hash not match", dataToCompare, inputitem.hash);
+          auditBrowser.close();
+          return false;
+        }
+        auditBrowser.close();
+        return true;
+      }
+      auditBrowser.close();
+      return false; 
+      
+    } catch (e) {
+      console.log('Error fetching single item', e);
+      return false; // Return false in case of an exception
+    }
+  };
+  
+  
   scrollPage = async page => {
     await page.evaluate(() => {
       window.scrollBy(0, window.innerHeight);

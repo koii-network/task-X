@@ -23,7 +23,7 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 3000
+total_bounty_amount: 100000
 
 bounty_amount_per_round: 3000
 
@@ -56,7 +56,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'AdYesouS7v8QYDhrpAHrzuhqkqp7g1fVUH8pVHvdi86F'
+task_id: 'HRdRBAwzLJoW9DeCmKgsfrt5SAn2XoRNtDqrKckTwZDc'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Fixed Login Issue'
+migrationDescription: 'Updated audit function. '

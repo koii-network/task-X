@@ -508,7 +508,20 @@ class NamespaceWrapper {
       this.#testingTaskState = {
         task_name: 'DummyTestState',
         task_description: 'Dummy Task state for testing flow',
-        submissions: {},
+        submissions: {
+          2: {
+            '12NCN3sS1LP8C53rSzqvt7CvqMZ7H2Da42NxuDU19J2B':{
+              submission_value:"bafybeidkjkkj63urwofbb3wveila5ffirwfpszvh6sx5p7h2jv5f2wepba",
+              slot:27056008
+            }
+          },
+          3: {
+            '12NCN3sS1LP8C53rSzqvt7CvqMZ7H2Da42NxuDU19J2B':{
+              submission_value:"bafybeidkjkkj63urwofbb3wveila5ffirwfpszvh6sx5p7h2jv5f2wepba",
+              slot:27056008
+            }
+          }
+        },
         submissions_audit_trigger: {},
         total_bounty_amount: 10000000000,
         bounty_amount_per_round: 1000000000,
@@ -572,7 +585,7 @@ class NamespaceWrapper {
       }
       return taskSubmissionInfo;
     } else {
-      return this.#testingTaskState.submissions[round];
+      return this.#testingTaskState;
     }
   }
 
