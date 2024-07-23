@@ -22,10 +22,10 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@_koii/storage-task-sdk@1.2.5":
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/@_koii/storage-task-sdk/-/storage-task-sdk-1.2.5.tgz#2f151faa1080c95734b377119fb09699fdd64b07"
-  integrity sha512-UVNkLYTELHTWgZiv6+7kroughiXFj62O1NvR+nqaGHgyQ0ZR9cnM9WSAjFiXV9gICXv019jWeoWSzUgwackHEw==
+"@_koii/storage-task-sdk@^1.2.7":
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/@_koii/storage-task-sdk/-/storage-task-sdk-1.2.7.tgz#813192259578c3c153db08d1c4eb0ff8f1bf32bd"
+  integrity sha512-qgCQzdrWtXrbcdZglpi3Ou5fGMd473bSWk9FZjGW4e5YE1jA6gummrzJl6dDZae3rkMeDzoh2wCo2vaPLe30sg==
   dependencies:
     "@_koii/web3.js" "^0.1.11"
     bs58 "^5.0.0"
@@ -2194,6 +2194,11 @@ bcrypt-pbkdf@^1.0.0:
   integrity sha512-qeFIXtP4MSoi6NLqO12WfqARWWuCKi2Rn/9hJLEmtB5yTNr9DqFWkJRCf2qShWzPeAMRnOgCrq0sg/KLv5ES9w==
   dependencies:
     tweetnacl "^0.14.3"
+
+bcryptjs@^2.4.3:
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/bcryptjs/-/bcryptjs-2.4.3.tgz#9ab5627b93e60621ff7cdac5da9733027df1d0cb"
+  integrity sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ==
 
 bech32@1.1.4, bech32@^1.1.4:
   version "1.1.4"

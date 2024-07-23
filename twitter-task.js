@@ -6,7 +6,7 @@ const { default: axios } = require('axios');
 const { namespaceWrapper } = require('./namespaceWrapper.js');
 const { CID } = require('multiformats/cid');
 
-function isValidCID(cid) {
+async function isValidCID(cid) {
   try {
     CID.parse(cid);
     return true;
@@ -164,7 +164,7 @@ class TwitterTask {
    * @returns
    */
   async getJSONofCID(cid) {
-    return await getJSONFromCID(cid, 'data.json');
+    return await getJSONFromCID(cid, 'dataList.json');
   }
 
   /**
@@ -190,11 +190,13 @@ class TwitterTask {
         // i.e.
         // console.log('item was', item);
         if (item.id) {
-          console.log('ipfs check passed');
-          return true;
+          await new Promise(resolve => setTimeout(resolve, 30000)); 
+          const result = await this.adapter.verify(item.data.tweets_id, item.data);
+          console.log('result from verify', result);
+          return result;
         } else {
           console.log('invalid item id', item.id);
-          return true;
+          return false;
         }
       }
     } else {
@@ -222,34 +224,31 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const getJSONFromCID = async (
   cid,
   fileName,
+  retries = 3
 ) => {
-  const validateCID = isValidCID(cid)
+  const validateCID = await isValidCID(cid)
   if (!validateCID) {
     console.log(`Invalid CID: ${cid}`);
     return null;
   }
-  const urllist = [
-    `https://${cid}.ipfs.w3s.link/${fileName}`
-  ];
-  try {
-    const client = new KoiiStorageClient(undefined, undefined, false);
-    const blob = await client.getFile(cid, fileName);
-    const text = await blob.text(); // Convert Blob to text
-    const data = JSON.parse(text); // Parse text to JSON
-    return data;
-  }  catch (error) {
-    console.log(`Error fetching file from Koii IPFS: ${error.message}`);
-  }
-  for (const url of urllist) {
-    console.log(`Trying URL: ${url}`);
+
+  const client = new KoiiStorageClient(undefined, undefined, false);
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const response = await axios.get(url);
-      if (response.status === 200) {
-        return response.data;
-      }
+      const blob = await client.getFile(cid, fileName);
+      const text = await blob.text(); // Convert Blob to text
+      const data = JSON.parse(text); // Parse text to JSON
+      return data;
     } catch (error) {
+      console.log(`Attempt ${attempt}: Error fetching file from Koii IPFS: ${error.message}`);
+      if (attempt === retries) {
+        throw new Error(`Failed to fetch file after ${retries} attempts`);
+      }
+      // Optionally, you can add a delay between retries
+      await new Promise(resolve => setTimeout(resolve, 3000)); // 3-second delay
     }
   }
-  console.log("Attempted all IPFS sites failed");
+
   return null; 
 };
