@@ -8,11 +8,11 @@ function sleep(ms) {
 }
 
 async function executeTasks() {
-    for (let i = 3; i < 10; i++) {
-        let delay = 1200000;
+    for (let i = 9; i < 15; i++) {
+        let delay = 600000;
         let round = i;
-        coreLogic.task(round);
-        coreLogic.auditTask(round - 1)
+        await coreLogic.task(round);
+
         await sleep(delay);
 
         console.log('stopping searcher at round', round);
@@ -20,3 +20,4 @@ async function executeTasks() {
 }
 
 executeTasks();
+
