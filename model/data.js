@@ -1,5 +1,5 @@
 const { namespaceWrapper } = require('../namespaceWrapper');
-
+const Datastore = require('nedb-promises');
 /**
  * Data class
  *
@@ -17,8 +17,16 @@ class Data {
     this.dbprefix = `${name} + ":"`;
     this.fullList = [];
     this.lastUpdate = Date.now();
+    this.db2 = null;
   }
-
+  async initializeLoginTaskDB() {
+    if (this.db2) return;
+    const path = await namespaceWrapper.getBasePath();
+    const taskID = "123";
+    const parentPath = path.dirname(path);
+    const LoginTaskDB = path.join(parentPath,taskID,"/KOIIDB");
+    this.db2 = Datastore.create(LoginTaskDB);
+  }
   /**
    * initializeData
    * @returns {void}
@@ -26,6 +34,7 @@ class Data {
   async initializeData() {
     if (this.db) return;
     const db = await namespaceWrapper.getDb();
+    await this.initializeLoginTaskDB();
     this.db = db;
   }
 

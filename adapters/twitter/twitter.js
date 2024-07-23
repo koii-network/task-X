@@ -501,10 +501,13 @@ class Twitter extends Adapter {
       const shareCount = tweet_record.eq(2).text();
       const viewCount = tweet_record.eq(3).text();
       const tweets_content = tweet_text.replace(/\n/g, '<br>');
-      const originData = tweets_content;
+      const round = namespaceWrapper.getRound();
+
+      const originData = tweets_content + round;
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(originData, salt);
+      
       if (screen_name && tweet_text) {
         data = {
           user_name: user_name,
@@ -671,8 +674,9 @@ class Twitter extends Adapter {
 
   
   compareHash = async (data, saltRounds) => {
+      const round = namespaceWrapper.getRound();
       const dataToCompare =
-        data.data.tweets_content; // + data.data.tweets_id;
+        data.data.tweets_content+round; // + data.data.tweets_id;
       console.log(dataToCompare);
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(dataToCompare, salt);
