@@ -90,10 +90,6 @@ class Twitter extends Adapter {
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
           '--aggressive-cache-discard',
-          '--disable-cache',
-          '--disable-application-cache',
-          '--disable-offline-load-stale-cache',
-          '--disable-gpu-shader-disk-cache',
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-gpu',
@@ -208,10 +204,6 @@ verify = async (tweetid, inputitem) => {
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       args: [
         '--aggressive-cache-discard',
-        '--disable-cache',
-        '--disable-application-cache',
-        '--disable-offline-load-stale-cache',
-        '--disable-gpu-shader-disk-cache',
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-gpu',
@@ -339,32 +331,7 @@ verify = async (tweetid, inputitem) => {
           .then(() => true)
           .catch(() => false);
 
-        if (twitter_verify) {
-          const verifyURL = await this.page.url();
-          console.log('Twitter verify needed, trying phone number');
-          console.log('Step: Fill in phone number');
-          await this.page.type(
-            'input[data-testid="ocfEnterTextTextInput"]',
-            this.credentials.phone,
-          );
-          await this.page.keyboard.press('Enter');
-          await this.page.waitForTimeout(await this.randomDelay(3000));
-          if (!(await this.checkLogin())) {
-            console.log(
-              'Phone number is incorrect or email verification needed.',
-            );
-            await this.page.waitForTimeout(await this.randomDelay(8000));
-            this.sessionValid = false;
-            process.exit(1);
-          } else if (await this.isEmailVerificationRequired(this.page)) {
-            console.log('Email verification required.');
-            this.sessionValid = false;
-            await this.page.waitForTimeout(await this.randomDelay(1000000));
-            process.exit(1);
-          }
-          // add delay
-          await new Promise(resolve => setTimeout(resolve, 3000)); 
-        }
+
         const currentURL = await this.page.url();
 
         // Select the div element by its aria-labelledby attribute
@@ -383,7 +350,7 @@ verify = async (tweetid, inputitem) => {
         );
         console.log('Step: Click login button');
         await this.page.keyboard.press('Enter');
-
+        await this.page.waitForTimeout(await this.randomDelay(5000));
         if (!(await this.checkLogin())) {
           console.log('Password is incorrect or email verification needed.');
           await this.page.waitForTimeout(await this.randomDelay(5000));
