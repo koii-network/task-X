@@ -85,15 +85,12 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
           '--aggressive-cache-discard',
-          '--disable-cache',
-          '--disable-application-cache',
-          '--disable-offline-load-stale-cache',
-          '--disable-gpu-shader-disk-cache',
+ 
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-gpu',
@@ -193,19 +190,6 @@ class Twitter extends Adapter {
           );
           await this.page.keyboard.press('Enter');
 
-          if (!(await this.checkLogin())) {
-            console.log(
-              'Phone number is incorrect or email verification needed.',
-            );
-            await this.page.waitForTimeout(await this.randomDelay(8000));
-            this.sessionValid = false;
-            process.exit(1);
-          } else if (await this.isEmailVerificationRequired(this.page)) {
-            console.log('Email verification required.');
-            this.sessionValid = false;
-            await this.page.waitForTimeout(await this.randomDelay(1000000));
-            process.exit(1);
-          }
            // add delay
            await new Promise(resolve => setTimeout(resolve, 3000));
         }
@@ -759,15 +743,12 @@ class Twitter extends Adapter {
       let auditBrowser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userAuditDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
           '--aggressive-cache-discard',
-          '--disable-cache',
-          '--disable-application-cache',
-          '--disable-offline-load-stale-cache',
-          '--disable-gpu-shader-disk-cache',
+  
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-gpu',
