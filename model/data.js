@@ -1,5 +1,6 @@
 const { namespaceWrapper } = require('../namespaceWrapper');
 const Datastore = require('nedb-promises');
+const path = require('path');
 /**
  * Data class
  *
@@ -21,9 +22,9 @@ class Data {
   }
   async initializeLoginTaskDB() {
     if (this.db2) return;
-    const path = await namespaceWrapper.getBasePath();
-    const taskID = "123";
-    const parentPath = path.dirname(path);
+    const currpath = await namespaceWrapper.getBasePath();
+    const taskID = "TestingPath";
+    const parentPath = path.dirname(currpath);
     const LoginTaskDB = path.join(parentPath,taskID,"/KOIIDB");
     this.db2 = Datastore.create(LoginTaskDB);
   }
