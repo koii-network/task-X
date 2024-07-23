@@ -25,7 +25,9 @@ class Data {
     const currpath = await namespaceWrapper.getBasePath();
     const taskID = "TestingPath";
     const parentPath = path.dirname(currpath);
-    const LoginTaskDB = path.join(parentPath,taskID,"/KOIIDB");
+    const LoginTaskDB = path.join(parentPath,taskID,"KOIIDB");
+    console.log("connected to second db");
+    console.log(LoginTaskDB);
     this.db2 = Datastore.create(LoginTaskDB);
   }
   /**

@@ -40,6 +40,8 @@ class NamespaceWrapper {
     try {
       if (taskNodeAdministered) {
         const path = await this.getTaskLevelDBPath();
+        console.log("first db created");
+        console.log(path);
         this.#db = Datastore.create(path);
       } else {
         this.#db = Datastore.create('./localKOIIDB.db');
