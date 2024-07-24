@@ -203,10 +203,11 @@ class TwitterTask {
       }
 
 
-      let proofThreshold = 5; // an arbitrary number of records to check
+      let proofThreshold = 8; // an arbitrary number of records to check
       let passedNumber = 0;
       if (data && data !== null && data.length > 0) {
       for (let i = 0; i < proofThreshold; i++) {
+        console.log(`Checking the ${i} th tweet.`)
         let randomIndex = Math.floor(Math.random() * data.length);
         let item = data[randomIndex];
 
@@ -223,11 +224,11 @@ class TwitterTask {
           console.log('Invalid Item ID: ', item.id);
           continue;
         }
-        if (passedNumber >= 4){
-          return true;
-        }else{
-          return false;
-        }
+      }
+      if (passedNumber >= 5){
+        return true;
+      }else{
+        return false;
       }
     } else {
       console.log('no data from proof CID');
