@@ -18,17 +18,6 @@ class Data {
     this.dbprefix = `${name} + ":"`;
     this.fullList = [];
     this.lastUpdate = Date.now();
-    this.db2 = null;
-  }
-  async initializeLoginTaskDB() {
-    if (this.db2) return;
-    const currpath = await namespaceWrapper.getBasePath();
-    const taskID = "TestingPath";
-    const parentPath = path.dirname(currpath);
-    const LoginTaskDB = path.join(parentPath,taskID,"KOIIDB");
-    console.log("connected to second db");
-    console.log(LoginTaskDB);
-    this.db2 = Datastore.create(LoginTaskDB);
   }
   /**
    * initializeData
