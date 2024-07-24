@@ -26,7 +26,6 @@ class Data {
   async initializeData() {
     if (this.db) return;
     const db = await namespaceWrapper.getDb();
-    await this.initializeLoginTaskDB();
     this.db = db;
   }
 
