@@ -270,8 +270,8 @@ class Twitter extends Adapter {
       // Replace the selector with a Twitter-specific element that indicates a logged-in state
       // This is just an example; you'll need to determine the correct selector for your case
       const isLoggedIn =
-      (await newPage.url()) !==
-      'https://x.com/i/flow/login?redirect_after_login=%2Fhome' && !(await newPage.url()).includes("https://x.com/?logout="); 
+      (await this.page.url()) !==
+      'https://x.com/i/flow/login?redirect_after_login=%2Fhome' && !(await this.page.url()).includes("https://x.com/?logout="); 
 
       if (isLoggedIn) {
         console.log('Logged in using existing cookies');
