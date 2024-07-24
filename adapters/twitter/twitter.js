@@ -90,7 +90,10 @@ class Twitter extends Adapter {
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
           '--aggressive-cache-discard',
- 
+          '--disable-cache',
+          '--disable-application-cache',
+          '--disable-offline-load-stale-cache',
+          '--disable-gpu-shader-disk-cache',
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-gpu',
@@ -752,7 +755,10 @@ class Twitter extends Adapter {
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
           '--aggressive-cache-discard',
-  
+          '--disable-cache',
+          '--disable-application-cache',
+          '--disable-offline-load-stale-cache',
+          '--disable-gpu-shader-disk-cache',
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-gpu',
