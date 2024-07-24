@@ -4,10 +4,10 @@ dotenv.config();
 
 (async () => {
     try {
-        const getRound = () => 1;
+        const getRound = () => 0;
         const round = getRound();
         const twitterTask = new TwitterTask(getRound, round);
-        const proofCid = "bafybeigybbtvrt2zdrkjumaiehwai3mj5rzvl7mmub3rmoilyddhmspcsm";
+        const proofCid = "bafybeih6lezod6fnfyvvxfoai552gof3y4t3upgejxclrww5ot2vbzbm24";
         const isValid = await twitterTask.validate(proofCid);
         console.log("Validation result:", isValid);
     } catch (error) {

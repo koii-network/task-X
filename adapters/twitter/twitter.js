@@ -193,19 +193,6 @@ class Twitter extends Adapter {
           );
           await this.page.keyboard.press('Enter');
 
-          if (!(await this.checkLogin())) {
-            console.log(
-              'Phone number is incorrect or email verification needed.',
-            );
-            await this.page.waitForTimeout(await this.randomDelay(8000));
-            this.sessionValid = false;
-            process.exit(1);
-          } else if (await this.isEmailVerificationRequired(this.page)) {
-            console.log('Email verification required.');
-            this.sessionValid = false;
-            await this.page.waitForTimeout(await this.randomDelay(1000000));
-            process.exit(1);
-          }
            // add delay
            await new Promise(resolve => setTimeout(resolve, 3000));
         }
@@ -286,8 +273,8 @@ class Twitter extends Adapter {
       // Replace the selector with a Twitter-specific element that indicates a logged-in state
       // This is just an example; you'll need to determine the correct selector for your case
       const isLoggedIn =
-        (await this.page.url()) !==
-        'https://x.com/i/flow/login?redirect_after_login=%2Fhome';
+      (await this.page.url()) !==
+      'https://x.com/i/flow/login?redirect_after_login=%2Fhome' && !(await this.page.url()).includes("https://x.com/?logout="); 
 
       if (isLoggedIn) {
         console.log('Logged in using existing cookies');
@@ -327,8 +314,8 @@ class Twitter extends Adapter {
     await newPage.waitForTimeout(await this.randomDelay(5000));
     // Replace the selector with a Twitter-specific element that indicates a logged-in state
     const isLoggedIn =
-      (await newPage.url()) !==
-      'https://x.com/i/flow/login?redirect_after_login=%2Fhome';
+    (await newPage.url()) !==
+    'https://x.com/i/flow/login?redirect_after_login=%2Fhome' && !(await newPage.url()).includes("https://x.com/?logout="); 
     if (isLoggedIn) {
       console.log('Logged in using existing cookies');
       console.log('Updating last session check');
@@ -501,10 +488,13 @@ class Twitter extends Adapter {
       const shareCount = tweet_record.eq(2).text();
       const viewCount = tweet_record.eq(3).text();
       const tweets_content = tweet_text.replace(/\n/g, '<br>');
-      const originData = tweets_content;
+      const round = namespaceWrapper.getRound();
+
+      const originData = tweets_content + round;
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(originData, salt);
+      
       if (screen_name && tweet_text) {
         data = {
           user_name: user_name,
@@ -671,8 +661,9 @@ class Twitter extends Adapter {
 
   
   compareHash = async (data, saltRounds) => {
+      const round = namespaceWrapper.getRound();
       const dataToCompare =
-        data.data.tweets_content; // + data.data.tweets_id;
+        data.data.tweets_content+round; // + data.data.tweets_id;
       console.log(dataToCompare);
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(dataToCompare, salt);

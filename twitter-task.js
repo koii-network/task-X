@@ -186,10 +186,28 @@ class TwitterTask {
     try {
       let data = await getJSONFromCID(proofCid, 'dataList.json'); // check this
       // console.log(`validate got results for CID: ${ proofCid } for round ${ roundID }`, data, typeof(data), data[0]);
+      // Check for duplicate item IDs
+      let idSet = new Set();
+      let duplicatedIDNumber = 0;
+      for (let item of data) {
+        if (idSet.has(item.id)) {
+          console.log('Duplicate Item ID found: ', item.id);
+          duplicatedIDNumber += 1;
+        }
+        idSet.add(item.id);
+      }
+      if (duplicatedIDNumber > 10){
+        console.log(`Detected Potential Risk ; Duplicated ID is ${duplicatedIDNumber}`);
+      }else{
+        console.log(`Duplicated ID Check Passed ; Duplicated ID numebr is ${duplicatedIDNumber}`);
+      }
 
-      let proofThreshold = 2; // an arbitrary number of records to check
+
+      let proofThreshold = 8; // an arbitrary number of records to check
+      let passedNumber = 0;
       if (data && data !== null && data.length > 0) {
       for (let i = 0; i < proofThreshold; i++) {
+        console.log(`Checking the ${i} th tweet.`)
         let randomIndex = Math.floor(Math.random() * data.length);
         let item = data[randomIndex];
 
@@ -197,22 +215,20 @@ class TwitterTask {
         // i.e.
         // console.log('item was', item);
         if (item.id) {
-          // let credentials = {
-          //   username: "Hermanyiqunliang@gmail.com",
-          //   password: "",
-          //   phone: "4373407739",
-          // };
-          // if (!this.adapter){
-          //   this.adapter = new Twitter(credentials, this.db, 3);
           // }
           await new Promise(resolve => setTimeout(resolve, 30000)); 
           const result = await this.adapter.verify(item.data.tweets_id, item.data);
-          console.log('result from verify', result);
-          return result;
+          console.log('Result from verify', result);
+          if(result){passedNumber += 1;}
         } else {
-          console.log('invalid item id', item.id);
-          return false;
+          console.log('Invalid Item ID: ', item.id);
+          continue;
         }
+      }
+      if (passedNumber >= 5){
+        return true;
+      }else{
+        return false;
       }
     } else {
       console.log('no data from proof CID');

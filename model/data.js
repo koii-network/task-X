@@ -1,5 +1,6 @@
 const { namespaceWrapper } = require('../namespaceWrapper');
-
+const Datastore = require('nedb-promises');
+const path = require('path');
 /**
  * Data class
  *
@@ -18,7 +19,6 @@ class Data {
     this.fullList = [];
     this.lastUpdate = Date.now();
   }
-
   /**
    * initializeData
    * @returns {void}
