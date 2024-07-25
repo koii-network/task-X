@@ -85,7 +85,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
@@ -740,7 +740,7 @@ class Twitter extends Adapter {
       return;
     }
   };
-  verify = async (tweetid, inputitem) => {
+  verify = async (tweetid, inputitem, round) => {
     console.log(inputitem);
     console.log("above is input item");
     try {
@@ -750,7 +750,7 @@ class Twitter extends Adapter {
       let auditBrowser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userAuditDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
@@ -767,7 +767,7 @@ class Twitter extends Adapter {
       const url = `https://twitter.com/any/status/${tweetid}`;
       const verify_page = await auditBrowser.newPage();
       await verify_page.goto(url, { timeout: 60000 });
-      await verify_page.waitForTimeout(await this.randomDelay(5000));
+      await new Promise(resolve => setTimeout(resolve, 5000));
       let confirmed_no_tweet = false;
       await verify_page.evaluate(() => {
         if (document.querySelector('[data-testid="error-detail"]')) {
@@ -777,36 +777,33 @@ class Twitter extends Adapter {
       });
 
       if (confirmed_no_tweet) {
-        return false; // Return false if error detail is found
+        return false; // Return false if error-detail is found
       }
-      console.log('retrieve item for ', url);
+      console.log('Retrieve item for', url);
       const result = await this.retrieveItem(verify_page, tweetid);
       if (result){
         if (result.tweets_content != inputitem.tweets_content) {
-          console.log("content not match", result.tweets_content, inputitem.tweets_content);
+          console.log("Content not match", result.tweets_content, inputitem.tweets_content);
           auditBrowser.close();
           return false;
         }
-        // if (result.time_post != inputitem.time_post) {
-        //   console.log("time post not match", result.time_post, inputitem.time_post);
-        //   auditBrowser.close();
-        //   return false;
-        // }
         if (result.time_read - inputitem.time_read > 3600000 * 15) {
-          console.log("time read difference too big", result.time_read, inputitem.time_read);
+          console.log("Time read difference too big", result.time_read, inputitem.time_read);
           auditBrowser.close();
           return false;
         }
-        const dataToCompare = result.tweets_content;
+        const dataToCompare = result.tweets_content + round;
+    
         const hashCompare = bcrypt.compareSync(dataToCompare, inputitem.hash);
         if(hashCompare==false){
-          console.log("hash not match", dataToCompare, inputitem.hash);
+          console.log("Hash not match", dataToCompare, inputitem.hash);
           auditBrowser.close();
-          return false;
         }
         auditBrowser.close();
         return true;
       }
+      // Result does not exist
+      console.log("Result does not exist. ");
       auditBrowser.close();
       return false; 
       
