@@ -489,12 +489,12 @@ class Twitter extends Adapter {
       const viewCount = tweet_record.eq(3).text();
       const tweets_content = tweet_text.replace(/\n/g, '<br>');
       const round = namespaceWrapper.getRound();
-
+      // const tweets_content_no_special_char = 
       const originData = tweets_content + round;
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(originData, salt);
-      
+
       if (screen_name && tweet_text) {
         data = {
           user_name: user_name,
@@ -741,8 +741,9 @@ class Twitter extends Adapter {
     }
   };
   verify = async (tweetid, inputitem, round) => {
+    console.log("----Input Item Below -----");
     console.log(inputitem);
-    console.log("above is input item");
+    console.log("----Input Item Above -----");
     try {
       const options = {};
       const userAuditDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive_audit');

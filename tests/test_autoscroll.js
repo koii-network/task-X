@@ -13,11 +13,9 @@ const autoScroll = require('./autoscroll.js');
     // Set the viewport height to simulate a specific screen size
     await page.setViewport({ width: 1280, height: 800 });
   
-    // Scroll every second by 100 pixels
     //await scrollIndefinitely(page, 1);
     await autoScroll(page);
   
-    // Perform any other tasks or take a screenshot after waiting for some time
     // For example, waiting for 10 seconds before taking a screenshot
     await page.waitForTimeout(10 * 1000);
   

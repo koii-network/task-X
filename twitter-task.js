@@ -226,8 +226,10 @@ class TwitterTask {
         }
       }
       if (passedNumber >= 5){
+        console.log(passedNumber,"is passedNumber")
         return true;
       }else{
+        console.log(passedNumber,"is passedNumber")
         return false;
       }
     } else {
