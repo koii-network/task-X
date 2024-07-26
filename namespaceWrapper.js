@@ -629,6 +629,12 @@ class NamespaceWrapper {
       let isValid;
       const submitterAccountKeyPair = await this.getSubmitterAccount();
       const submitterPubkey = submitterAccountKeyPair.publicKey.toBase58();
+
+      if (!keys.includes(submitterPubkey)) {
+        console.log(`Node do not have submissions in last round ${round}`);
+        return `Node do not have submissions in last round ${round}`;
+      }
+
       for (let index of uniqueIndices) {
 
         let candidatePublicKey = keys[index];
