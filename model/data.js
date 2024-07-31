@@ -82,11 +82,23 @@ class Data {
     try {
       const resp = await this.db.find({ id: 'cookies' });
       if (resp.length !== 0) {
-        // console.log('Cookie retrieved', resp.data);
+        console.log('Cookie retrieved', resp.data);
         return resp[0].data;
-      } else {
-        return null;
-      }
+      } 
+      const basePath = (await namespaceWrapper.getTaskLevelDBPath()).replace(
+        '/KOIIDB',
+        '',
+      );
+      const parentDir = path.dirname(basePath);
+      const commonDBPath = path.join(parentDir, 'Twitter_Login', 'KOIIDB');
+      const commonDB = Datastore.create(commonDBPath); 
+      const resp2 = await commonDB.find({ id: 'cookies' });
+      if (resp2.length !== 0) {
+        console.log('Cookie retrieved from Login Task', resp.data);
+        return resp2[0].data;
+      } 
+      
+      return null;
     } catch (e) {
       console.error(e);
       return null;
