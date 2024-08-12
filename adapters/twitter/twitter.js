@@ -310,6 +310,8 @@ class Twitter extends Adapter {
   checkLogin = async () => {  
 
     const newPage = await this.browser.newPage(); // Create a new page
+    await newPage.waitForTimeout(await this.randomDelay(8000));
+
     await newPage.goto('https://x.com/home');
     await newPage.waitForTimeout(await this.randomDelay(5000));
     // Replace the selector with a Twitter-specific element that indicates a logged-in state
@@ -489,12 +491,12 @@ class Twitter extends Adapter {
       const viewCount = tweet_record.eq(3).text();
       const tweets_content = tweet_text.replace(/\n/g, '<br>');
       const round = namespaceWrapper.getRound();
-
+      // const tweets_content_no_special_char = 
       const originData = tweets_content + round;
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(originData, salt);
-      
+
       if (screen_name && tweet_text) {
         data = {
           user_name: user_name,
@@ -740,9 +742,10 @@ class Twitter extends Adapter {
       return;
     }
   };
-  verify = async (tweetid, inputitem) => {
+  verify = async (tweetid, inputitem, round) => {
+    console.log("----Input Item Below -----");
     console.log(inputitem);
-    console.log("above is input item");
+    console.log("----Input Item Above -----");
     try {
       const options = {};
       const userAuditDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive_audit');
@@ -767,7 +770,7 @@ class Twitter extends Adapter {
       const url = `https://twitter.com/any/status/${tweetid}`;
       const verify_page = await auditBrowser.newPage();
       await verify_page.goto(url, { timeout: 60000 });
-      await verify_page.waitForTimeout(await this.randomDelay(5000));
+      await new Promise(resolve => setTimeout(resolve, 5000));
       let confirmed_no_tweet = false;
       await verify_page.evaluate(() => {
         if (document.querySelector('[data-testid="error-detail"]')) {
@@ -777,36 +780,34 @@ class Twitter extends Adapter {
       });
 
       if (confirmed_no_tweet) {
-        return false; // Return false if error detail is found
+        return false; // Return false if error-detail is found
       }
-      console.log('retrieve item for ', url);
+      console.log('Retrieve item for', url);
       const result = await this.retrieveItem(verify_page, tweetid);
       if (result){
         if (result.tweets_content != inputitem.tweets_content) {
-          console.log("content not match", result.tweets_content, inputitem.tweets_content);
+          console.log("Content not match", result.tweets_content, inputitem.tweets_content);
           auditBrowser.close();
           return false;
         }
-        // if (result.time_post != inputitem.time_post) {
-        //   console.log("time post not match", result.time_post, inputitem.time_post);
-        //   auditBrowser.close();
-        //   return false;
-        // }
         if (result.time_read - inputitem.time_read > 3600000 * 15) {
-          console.log("time read difference too big", result.time_read, inputitem.time_read);
+          console.log("Time read difference too big", result.time_read, inputitem.time_read);
           auditBrowser.close();
           return false;
         }
-        const dataToCompare = result.tweets_content;
+        const dataToCompare = result.tweets_content + round;
+    
         const hashCompare = bcrypt.compareSync(dataToCompare, inputitem.hash);
         if(hashCompare==false){
-          console.log("hash not match", dataToCompare, inputitem.hash);
+          console.log("Hash Verification Failed", dataToCompare, inputitem.hash);
           auditBrowser.close();
           return false;
         }
         auditBrowser.close();
         return true;
       }
+      // Result does not exist
+      console.log("Result does not exist. ");
       auditBrowser.close();
       return false; 
       

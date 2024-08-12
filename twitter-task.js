@@ -180,7 +180,7 @@ class TwitterTask {
    * @param {*} proofCid
    * @returns
    */
-  async validate(proofCid) {
+  async validate(proofCid, round) {
     // in order to validate, we need to take the proofCid
     // and go get the results from IPFS
     try {
@@ -217,7 +217,7 @@ class TwitterTask {
         if (item.id) {
           // }
           await new Promise(resolve => setTimeout(resolve, 30000)); 
-          const result = await this.adapter.verify(item.data.tweets_id, item.data);
+          const result = await this.adapter.verify(item.data.tweets_id, item.data, round);
           console.log('Result from verify', result);
           if(result){passedNumber += 1;}
         } else {
@@ -226,8 +226,10 @@ class TwitterTask {
         }
       }
       if (passedNumber >= 5){
+        console.log(passedNumber,"is passedNumber")
         return true;
       }else{
+        console.log(passedNumber,"is passedNumber")
         return false;
       }
     } else {
