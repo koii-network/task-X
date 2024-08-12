@@ -455,6 +455,7 @@ verify = async (tweetid, inputitem) => {
   checkLogin = async () => {  
 
     const newPage = await this.browser.newPage(); // Create a new page
+    await newPage.waitForTimeout(await this.randomDelay(8000));
     await newPage.goto('https://x.com/home');
     await newPage.waitForTimeout(await this.randomDelay(5000));
     // Replace the selector with a Twitter-specific element that indicates a logged-in state
