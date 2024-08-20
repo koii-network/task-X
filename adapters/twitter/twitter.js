@@ -189,7 +189,7 @@ verify = async (tweetid, inputitem) => {
   console.log("above is input item");
   try {
     const options = {};
-    const userDataDir = path.join(__dirname, 'puppeteer_cache');
+    const userAuditDir = path.join(__dirname, 'puppeteer_cache');
     const stats = await PCR(options);
     let auditBrowser = await stats.puppeteer.launch({
       executablePath: stats.executablePath,
