@@ -52,20 +52,20 @@ class TwitterTask {
     this.initialize();
 
     this.setAdapter = async () => {
-      const username = process.env.TWITTER_USERNAME;
-      const password = process.env.TWITTER_PASSWORD;
-      const phone = process.env.TWITTER_PHONE;
+      // const username = process.env.TWITTER_USERNAME;
+      // const password = process.env.TWITTER_PASSWORD;
+      // const phone = process.env.TWITTER_PHONE;
 
-      if (!username || !password) {
-        throw new Error(
-          'Environment variables TWITTER_USERNAME and/or TWITTER_PASSWORD are not set',
-        );
-      }
+      // if (!username || !password) {
+      //   throw new Error(
+      //     'Environment variables TWITTER_USERNAME and/or TWITTER_PASSWORD are not set',
+      //   );
+      // }
 
       let credentials = {
-        username: username,
-        password: password,
-        phone: phone,
+        // username: username,
+        // password: password,
+        // phone: phone,
       };
       this.adapter = new Twitter(credentials, this.db, 3);
       await this.adapter.negotiateSession();

@@ -77,7 +77,7 @@ class Twitter extends Adapter {
         console.log('Old browser closed');
       }
       const options = {};
-      const userDataDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_ck_archive');
+      const userDataDir = path.join(__dirname, 'puppeteer_cache');
       const stats = await PCR(options);
       console.log(
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
@@ -88,12 +88,7 @@ class Twitter extends Adapter {
         userDataDir: userDataDir,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        args: [
-          '--aggressive-cache-discard',
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-gpu',
-        ],
+          args: ['--no-sandbox'],
         executablePath: stats.executablePath,
       });
       console.log('Step: Open new page');
@@ -194,7 +189,7 @@ verify = async (tweetid, inputitem) => {
   console.log("above is input item");
   try {
     const options = {};
-    const userAuditDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive_audit');
+    const userDataDir = path.join(__dirname, 'puppeteer_cache');
     const stats = await PCR(options);
     let auditBrowser = await stats.puppeteer.launch({
       executablePath: stats.executablePath,
@@ -202,12 +197,7 @@ verify = async (tweetid, inputitem) => {
       // headless: false,
       userAgent:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      args: [
-        '--aggressive-cache-discard',
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-gpu',
-      ],
+        args: ['--no-sandbox'],
     });
     const url = `https://twitter.com/any/status/${tweetid}`;
     const verify_page = await auditBrowser.newPage();
@@ -411,20 +401,13 @@ verify = async (tweetid, inputitem) => {
   };
 
   tryLoginWithCookies = async () => {
-    const cookies = await this.db.getCookie();
-    // console.log('cookies', cookies);
-    if (cookies !== null) {
-      await this.page.setCookie(...cookies);
-
+    try {
       await this.page.goto('https://x.com/home');
-
       await this.page.waitForTimeout(await this.randomDelay(5000));
-
-      // Replace the selector with a Twitter-specific element that indicates a logged-in state
-      // This is just an example; you'll need to determine the correct selector for your case
       const isLoggedIn =
         (await this.page.url()) !==
-        'https://x.com/i/flow/login?redirect_after_login=%2Fhome';
+          'https://x.com/i/flow/login?redirect_after_login=%2Fhome' &&
+        !(await this.page.url()).includes('https://x.com/?logout=');
 
       if (isLoggedIn) {
         console.log('Logged in using existing cookies');
@@ -432,15 +415,42 @@ verify = async (tweetid, inputitem) => {
         const cookies = await this.page.cookies();
         this.saveCookiesToDB(cookies);
         this.sessionValid = true;
-        // Optionally, refresh or validate cookies here
-      } else {
-        console.log('No valid cookies found, proceeding with manual login');
-        this.sessionValid = false;
       }
       return this.sessionValid;
-    } else {
-      console.log('No cookies found');
-      return false;
+    } catch (e) {
+      console.log('Error logging in with cache, trying cookies');
+      const cookies = await this.db.getCookie();
+      // console.log('cookies', cookies);
+      if (cookies !== null) {
+        await this.page.setCookie(...cookies);
+
+        await this.page.goto('https://x.com/home');
+
+        await this.page.waitForTimeout(await this.randomDelay(5000));
+
+        // Replace the selector with a Twitter-specific element that indicates a logged-in state
+        // This is just an example; you'll need to determine the correct selector for your case
+        const isLoggedIn =
+          (await this.page.url()) !==
+            'https://x.com/i/flow/login?redirect_after_login=%2Fhome' &&
+          !(await this.page.url()).includes('https://x.com/?logout=');
+
+        if (isLoggedIn) {
+          console.log('Logged in using existing cookies');
+          console.log('Updating last session check');
+          const cookies = await this.page.cookies();
+          this.saveCookiesToDB(cookies);
+          this.sessionValid = true;
+          // Optionally, refresh or validate cookies here
+        } else {
+          console.log('No valid cookies found, proceeding with manual login');
+          this.sessionValid = false;
+        }
+        return this.sessionValid;
+      } else {
+        console.log('No cookies found');
+        return false;
+      }
     }
   };
 
