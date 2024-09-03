@@ -12,10 +12,10 @@ task_executable_network: 'IPFS'
 task_audit_program: 'dist/main.js'
 
 # Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
-round_time: 13500
+round_time: 3000
 
-audit_window: 5000
-submission_window: 5000
+audit_window: 1200
+submission_window: 1200
 
 # Amounts in KOII
 
@@ -23,29 +23,20 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 100000
+total_bounty_amount: 10
 
-bounty_amount_per_round: 3000
+bounty_amount_per_round: 1
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 3
 
 #Space in MBs for the account size, that holds the task data
-space: 5
+space: 1
 
 # Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
 # To add more global variables and task variables, please refer the type,value,description format shown below
 
 requirementsTags:
-  - type: TASK_VARIABLE
-    value: 'TWITTER_USERNAME'
-    description: 'The username of your volunteer Twitter account. Please ensure your volunteer Twitter account has passed the Twitter verification process.'
-  - type: TASK_VARIABLE
-    value: 'TWITTER_PASSWORD'
-    description: 'The password of your volunteer Twitter account.'
-  - type: TASK_VARIABLE
-    value: 'TWITTER_PHONE'
-    description: 'If verification is required, will use your phone number to login.'
   - type: CPU
     value: '4-core'
   - type: RAM

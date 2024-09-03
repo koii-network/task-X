@@ -77,7 +77,7 @@ class Twitter extends Adapter {
         console.log('Old browser closed');
       }
       const options = {};
-      const userDataDir = path.join(__dirname, 'puppeteer_cache');
+      const userDataDir = path.join('koii/puppeteer_cache');
       const stats = await PCR(options);
       console.log(
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
@@ -752,7 +752,7 @@ class Twitter extends Adapter {
     console.log('----Input Item Above -----');
     try {
       const options = {};
-      const userAuditDir = path.join(__dirname, 'puppeteer_cache');
+      const userAuditDir = path.join('koii/puppeteer_cache');
       const stats = await PCR(options);
       let auditBrowser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
@@ -761,14 +761,7 @@ class Twitter extends Adapter {
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
-          '--aggressive-cache-discard',
-          '--disable-cache',
-          '--disable-application-cache',
-          '--disable-offline-load-stale-cache',
-          '--disable-gpu-shader-disk-cache',
           '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-gpu',
         ],
       });
       const url = `https://twitter.com/any/status/${tweetid}`;

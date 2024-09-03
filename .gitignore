@@ -23,5 +23,5 @@ passwordHTML.html
 usernameHTML.html
 tests/test-get-json-cid.js
 puppeteer_cache_koii_twitter_archive
-adapters/twitter/puppeteer_cache*/
+**/puppeteer_cache/
 Twitter_Login/
