@@ -10,6 +10,7 @@ const { namespaceWrapper } = require('../../namespaceWrapper');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const os = require('os');
 
 /**
  * Twitter
@@ -76,8 +77,31 @@ class Twitter extends Adapter {
         await this.browser.close();
         console.log('Old browser closed');
       }
-      const options = {};
-      const userDataDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive');
+      const platform = os.platform();
+      let revision;
+
+      if (platform === 'linux') {
+        revision = '1347928'; // Linux revision
+      } else if (platform === 'darwin') {
+        revision = '1347941'; // MacOS revision
+      } else if (platform === 'win32') {
+        // Determine if the Windows platform is 32-bit or 64-bit
+        const is64Bit = os.arch() === 'x64';
+        if (is64Bit) {
+          revision = '1347979'; // Windows 64-bit revision
+        } else {
+          revision = '1347966'; // Windows 32-bit revision
+        }
+      } else {
+        throw new Error('Unsupported platform: ' + platform);
+      }
+      const options = {
+        revision: revision, // Always use the latest revision of puppeteer-chromium-resolver
+      };
+      const userDataDir = path.join(
+        __dirname,
+        'puppeteer_cache_koii_twitter_archive',
+      );
       const stats = await PCR(options);
       console.log(
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
@@ -88,16 +112,7 @@ class Twitter extends Adapter {
         // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        args: [
-          '--aggressive-cache-discard',
-          '--disable-cache',
-          '--disable-application-cache',
-          '--disable-offline-load-stale-cache',
-          '--disable-gpu-shader-disk-cache',
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-gpu',
-        ],
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
       });
       console.log('Step: Open new page');
       this.page = await this.browser.newPage();
@@ -193,8 +208,8 @@ class Twitter extends Adapter {
           );
           await this.page.keyboard.press('Enter');
 
-           // add delay
-           await new Promise(resolve => setTimeout(resolve, 3000));
+          // add delay
+          await new Promise(resolve => setTimeout(resolve, 3000));
         }
 
         const currentURL = await this.page.url();
@@ -273,8 +288,9 @@ class Twitter extends Adapter {
       // Replace the selector with a Twitter-specific element that indicates a logged-in state
       // This is just an example; you'll need to determine the correct selector for your case
       const isLoggedIn =
-      (await this.page.url()) !==
-      'https://x.com/i/flow/login?redirect_after_login=%2Fhome' && !(await this.page.url()).includes("https://x.com/?logout="); 
+        (await this.page.url()) !==
+          'https://x.com/i/flow/login?redirect_after_login=%2Fhome' &&
+        !(await this.page.url()).includes('https://x.com/?logout=');
 
       if (isLoggedIn) {
         console.log('Logged in using existing cookies');
@@ -289,8 +305,28 @@ class Twitter extends Adapter {
       }
       return this.sessionValid;
     } else {
-      console.log('No cookies found');
-      return false;
+      console.log('No cookies found, trying cached cookies');
+      this.sessionValid = false;
+
+      await this.page.goto('https://x.com/home');
+
+      await this.page.waitForTimeout(await this.randomDelay(5000));
+
+      // Replace the selector with a Twitter-specific element that indicates a logged-in state
+      // This is just an example; you'll need to determine the correct selector for your case
+      const isLoggedIn =
+        (await this.page.url()) !==
+          'https://x.com/i/flow/login?redirect_after_login=%2Fhome' &&
+        !(await this.page.url()).includes('https://x.com/?logout=');
+
+      if (isLoggedIn) {
+        console.log('Logged in using existing cookies');
+        console.log('Updating last session check');
+        const cookies = await this.page.cookies();
+        this.saveCookiesToDB(cookies);
+        this.sessionValid = true;
+      }
+      return this.sessionValid;
     }
   };
   createNewPage = async () => {
@@ -307,8 +343,7 @@ class Twitter extends Adapter {
     }
     return null;
   };
-  checkLogin = async () => {  
-
+  checkLogin = async () => {
     const newPage = await this.browser.newPage(); // Create a new page
     await newPage.waitForTimeout(await this.randomDelay(8000));
 
@@ -316,8 +351,9 @@ class Twitter extends Adapter {
     await newPage.waitForTimeout(await this.randomDelay(5000));
     // Replace the selector with a Twitter-specific element that indicates a logged-in state
     const isLoggedIn =
-    (await newPage.url()) !==
-    'https://x.com/i/flow/login?redirect_after_login=%2Fhome' && !(await newPage.url()).includes("https://x.com/?logout="); 
+      (await newPage.url()) !==
+        'https://x.com/i/flow/login?redirect_after_login=%2Fhome' &&
+      !(await newPage.url()).includes('https://x.com/?logout=');
     if (isLoggedIn) {
       console.log('Logged in using existing cookies');
       console.log('Updating last session check');
@@ -327,9 +363,8 @@ class Twitter extends Adapter {
       this.sessionValid = false;
     }
     return this.sessionValid;
-
   };
-  
+
   saveCookiesToDB = async cookies => {
     try {
       const data = await this.db.getCookie();
@@ -491,7 +526,7 @@ class Twitter extends Adapter {
       const viewCount = tweet_record.eq(3).text();
       const tweets_content = tweet_text.replace(/\n/g, '<br>');
       const round = namespaceWrapper.getRound();
-      // const tweets_content_no_special_char = 
+      // const tweets_content_no_special_char =
       const originData = tweets_content + round;
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
@@ -660,31 +695,27 @@ class Twitter extends Adapter {
     }
   };
 
-
-  
   compareHash = async (data, saltRounds) => {
-      const round = namespaceWrapper.getRound();
-      const dataToCompare =
-        data.data.tweets_content+round; // + data.data.tweets_id;
-      console.log(dataToCompare);
-      const salt = bcrypt.genSaltSync(saltRounds);
-      const hash = bcrypt.hashSync(dataToCompare, salt);
-      console.log(hash);
-      const hashCompare = bcrypt.compareSync(dataToCompare, hash);
-      console.log(hashCompare);
-      const hashCompareWrong = bcrypt.compareSync(data.data.tweets_id, hash);
-      console.log(hashCompareWrong);
+    const round = namespaceWrapper.getRound();
+    const dataToCompare = data.data.tweets_content + round; // + data.data.tweets_id;
+    console.log(dataToCompare);
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hash = bcrypt.hashSync(dataToCompare, salt);
+    console.log(hash);
+    const hashCompare = bcrypt.compareSync(dataToCompare, hash);
+    console.log(hashCompare);
+    const hashCompareWrong = bcrypt.compareSync(data.data.tweets_id, hash);
+    console.log(hashCompareWrong);
   };
-  
- /**
-   * retrieveItem derived from fetchList 
-   * @param {*} url 
-   * @param {*} item 
-   * @returns 
+
+  /**
+   * retrieveItem derived from fetchList
+   * @param {*} url
+   * @param {*} item
+   * @returns
    */
   retrieveItem = async (verify_page, tweetid) => {
     try {
-
       let i = 0;
       while (true) {
         i++;
@@ -692,7 +723,6 @@ class Twitter extends Adapter {
         const errorMessage = await verify_page.evaluate(() => {
           const elements = document.querySelectorAll('div[dir="ltr"]');
           for (let element of elements) {
-           
             if (
               element.textContent === 'Something went wrong. Try reloading.'
             ) {
@@ -704,7 +734,6 @@ class Twitter extends Adapter {
 
         // Archive the tweets
         const items = await verify_page.evaluate(() => {
-          
           const elements = document.querySelectorAll(
             'article[aria-labelledby]',
           );
@@ -721,10 +750,10 @@ class Twitter extends Adapter {
             console.log(tweetid);
             if (data.tweets_id == tweetid) {
               return data;
-            }else{
-              console.log("tweets id diff, continue");
+            } else {
+              console.log('tweets id diff, continue');
             }
-            if (data.tweets_id == "1"){
+            if (data.tweets_id == '1') {
               temp = data;
             }
           } catch (e) {
@@ -734,7 +763,7 @@ class Twitter extends Adapter {
             );
           }
         }
-        
+
         return temp;
       }
     } catch (e) {
@@ -743,12 +772,35 @@ class Twitter extends Adapter {
     }
   };
   verify = async (tweetid, inputitem, round) => {
-    console.log("----Input Item Below -----");
+    console.log('----Input Item Below -----');
     console.log(inputitem);
-    console.log("----Input Item Above -----");
+    console.log('----Input Item Above -----');
     try {
-      const options = {};
-      const userAuditDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive_audit');
+      const platform = os.platform();
+      let revision;
+
+      if (platform === 'linux') {
+        revision = '1347928'; // Linux revision
+      } else if (platform === 'darwin') {
+        revision = '1347941'; // MacOS revision
+      } else if (platform === 'win32') {
+        // Determine if the Windows platform is 32-bit or 64-bit
+        const is64Bit = os.arch() === 'x64';
+        if (is64Bit) {
+          revision = '1347979'; // Windows 64-bit revision
+        } else {
+          revision = '1347966'; // Windows 32-bit revision
+        }
+      } else {
+        throw new Error('Unsupported platform: ' + platform);
+      }
+      const options = {
+        revision: revision, // Always use the latest revision of puppeteer-chromium-resolver
+      };
+      const userAuditDir = path.join(
+        __dirname,
+        'puppeteer_cache_koii_twitter_archive',
+      );
       const stats = await PCR(options);
       let auditBrowser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
@@ -756,16 +808,7 @@ class Twitter extends Adapter {
         // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        args: [
-          '--aggressive-cache-discard',
-          '--disable-cache',
-          '--disable-application-cache',
-          '--disable-offline-load-stale-cache',
-          '--disable-gpu-shader-disk-cache',
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-gpu',
-        ],
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
       });
       const url = `https://twitter.com/any/status/${tweetid}`;
       const verify_page = await auditBrowser.newPage();
@@ -784,22 +827,34 @@ class Twitter extends Adapter {
       }
       console.log('Retrieve item for', url);
       const result = await this.retrieveItem(verify_page, tweetid);
-      if (result){
+      if (result) {
         if (result.tweets_content != inputitem.tweets_content) {
-          console.log("Content not match", result.tweets_content, inputitem.tweets_content);
+          console.log(
+            'Content not match',
+            result.tweets_content,
+            inputitem.tweets_content,
+          );
           auditBrowser.close();
           return false;
         }
         if (result.time_read - inputitem.time_read > 3600000 * 15) {
-          console.log("Time read difference too big", result.time_read, inputitem.time_read);
+          console.log(
+            'Time read difference too big',
+            result.time_read,
+            inputitem.time_read,
+          );
           auditBrowser.close();
           return false;
         }
         const dataToCompare = result.tweets_content + round;
-    
+
         const hashCompare = bcrypt.compareSync(dataToCompare, inputitem.hash);
-        if(hashCompare==false){
-          console.log("Hash Verification Failed", dataToCompare, inputitem.hash);
+        if (hashCompare == false) {
+          console.log(
+            'Hash Verification Failed',
+            dataToCompare,
+            inputitem.hash,
+          );
           auditBrowser.close();
           return false;
         }
@@ -807,17 +862,15 @@ class Twitter extends Adapter {
         return true;
       }
       // Result does not exist
-      console.log("Result does not exist. ");
+      console.log('Result does not exist. ');
       auditBrowser.close();
-      return false; 
-      
+      return false;
     } catch (e) {
       console.log('Error fetching single item', e);
       return false; // Return false in case of an exception
     }
   };
-  
-  
+
   scrollPage = async page => {
     await page.evaluate(() => {
       window.scrollBy(0, window.innerHeight);
@@ -837,16 +890,13 @@ class Twitter extends Adapter {
     links.forEach(link => {});
   };
 
-
-
-  randomDelay = async (delayTime) => {
-    const delay = Math.floor(Math.random() * (delayTime - 2000 + 1)) + (delayTime - 2000);
+  randomDelay = async delayTime => {
+    const delay =
+      Math.floor(Math.random() * (delayTime - 2000 + 1)) + (delayTime - 2000);
     // console.log('Delaying for', delay, 'ms');
     return delay;
-  }
+  };
 
-
-  
   /**
    * stop
    * @returns {Promise<boolean>}
