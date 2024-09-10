@@ -11,6 +11,8 @@ const fs = require('fs');
 const path = require('path');
 const rimraf = require('rimraf');
 const bcrypt = require('bcryptjs');
+const os = require('os');
+
 /**
  * Twitter
  * @class
@@ -76,8 +78,31 @@ class Twitter extends Adapter {
         await this.browser.close();
         console.log('Old browser closed');
       }
-      const options = {};
-      const userDataDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_ck_archive');
+      const platform = os.platform();
+      let revision;
+
+      if (platform === 'linux') {
+        revision = '1347928'; // Linux revision
+      } else if (platform === 'darwin') {
+        revision = '1347941'; // MacOS revision
+      } else if (platform === 'win32') {
+        // Determine if the Windows platform is 32-bit or 64-bit
+        const is64Bit = os.arch() === 'x64';
+        if (is64Bit) {
+          revision = '1347979'; // Windows 64-bit revision
+        } else {
+          revision = '1347966'; // Windows 32-bit revision
+        }
+      } else {
+        throw new Error('Unsupported platform: ' + platform);
+      }
+      const options = {
+        revision: revision, // Always use the latest revision of puppeteer-chromium-resolver
+      };
+      const userDataDir = path.join(
+        __dirname,
+        'puppeteer_cache_koii_twitter_archive',
+      );
       const stats = await PCR(options);
       console.log(
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
@@ -89,7 +114,6 @@ class Twitter extends Adapter {
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
-          '--aggressive-cache-discard',
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-gpu',
@@ -193,8 +217,31 @@ verify = async (tweetid, inputitem) => {
   console.log(inputitem);
   console.log("above is input item");
   try {
-    const options = {};
-    const userAuditDir = path.join(__dirname, 'puppeteer_cache_koii_twitter_archive_audit');
+    const platform = os.platform();
+    let revision;
+
+    if (platform === 'linux') {
+      revision = '1347928'; // Linux revision
+    } else if (platform === 'darwin') {
+      revision = '1347941'; // MacOS revision
+    } else if (platform === 'win32') {
+      // Determine if the Windows platform is 32-bit or 64-bit
+      const is64Bit = os.arch() === 'x64';
+      if (is64Bit) {
+        revision = '1347979'; // Windows 64-bit revision
+      } else {
+        revision = '1347966'; // Windows 32-bit revision
+      }
+    } else {
+      throw new Error('Unsupported platform: ' + platform);
+    }
+    const options = {
+      revision: revision, // Always use the latest revision of puppeteer-chromium-resolver
+    };
+    const userDataDir = path.join(
+      __dirname,
+      'puppeteer_cache_koii_twitter_archive',
+    );
     const stats = await PCR(options);
     let auditBrowser = await stats.puppeteer.launch({
       executablePath: stats.executablePath,
@@ -203,7 +250,6 @@ verify = async (tweetid, inputitem) => {
       userAgent:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       args: [
-        '--aggressive-cache-discard',
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-gpu',
@@ -439,8 +485,28 @@ verify = async (tweetid, inputitem) => {
       }
       return this.sessionValid;
     } else {
-      console.log('No cookies found');
-      return false;
+      console.log('No cookies found, trying cached cookies');
+      this.sessionValid = false;
+
+      await this.page.goto('https://x.com/home');
+
+      await this.page.waitForTimeout(await this.randomDelay(5000));
+
+      // Replace the selector with a Twitter-specific element that indicates a logged-in state
+      // This is just an example; you'll need to determine the correct selector for your case
+      const isLoggedIn =
+        (await this.page.url()) !==
+          'https://x.com/i/flow/login?redirect_after_login=%2Fhome' &&
+        !(await this.page.url()).includes('https://x.com/?logout=');
+
+      if (isLoggedIn) {
+        console.log('Logged in using existing cookies');
+        console.log('Updating last session check');
+        const cookies = await this.page.cookies();
+        this.saveCookiesToDB(cookies);
+        this.sessionValid = true;
+      }
+      return this.sessionValid;
     }
   };
 
