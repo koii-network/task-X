@@ -18,10 +18,10 @@ audit_window: 5000
 submission_window: 5000
 
 # Task Bounty Type: KOII, KPL
-task_type: 'KOII'
+task_type: 'KPL'
 
-# OPTIONAL (ONLY IF Task Type = KPL) : Token Mint Address, Fire Token as an example here. 
-token_type: "FJG2aEPtertCXoedgteCCMmgngSZo1Zd715oNBzR7xpR"
+# OPTIONAL (ONLY IF Task Type = KPL) : Token Mint Address, BIRD Token as an example here. 
+token_type: "us8mD4jGkFWnUuAHB8V5ZcrAosEqi2h1Zcyca68QA1G"
 
 # Amounts in KOII
 
@@ -29,15 +29,15 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 10
+total_bounty_amount: 3000000
 
-bounty_amount_per_round: 1
+bounty_amount_per_round: 3000
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 5
 
 #Space in MBs for the account size, that holds the task data
-space: 0.1
+space: 3
 
 # Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
 # To add more global variables and task variables, please refer the type,value,description format shown below
