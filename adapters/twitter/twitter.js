@@ -77,27 +77,7 @@ class Twitter extends Adapter {
         await this.browser.close();
         console.log('Old browser closed');
       }
-      const platform = os.platform();
-      let revision;
-
-      if (platform === 'linux') {
-        revision = '1347928'; // Linux revision
-      } else if (platform === 'darwin') {
-        revision = '1347941'; // MacOS revision
-      } else if (platform === 'win32') {
-        // Determine if the Windows platform is 32-bit or 64-bit
-        const is64Bit = os.arch() === 'x64';
-        if (is64Bit) {
-          revision = '1347979'; // Windows 64-bit revision
-        } else {
-          revision = '1347966'; // Windows 32-bit revision
-        }
-      } else {
-        throw new Error('Unsupported platform: ' + platform);
-      }
-      const options = {
-        revision: revision, // Always use the latest revision of puppeteer-chromium-resolver
-      };
+      const options = {};
       const userDataDir = path.join(
         __dirname,
         'puppeteer_cache_koii_twitter_archive',
@@ -777,26 +757,7 @@ class Twitter extends Adapter {
     console.log('----Input Item Above -----');
     try {
       const platform = os.platform();
-      let revision;
-
-      if (platform === 'linux') {
-        revision = '1347928'; // Linux revision
-      } else if (platform === 'darwin') {
-        revision = '1347941'; // MacOS revision
-      } else if (platform === 'win32') {
-        // Determine if the Windows platform is 32-bit or 64-bit
-        const is64Bit = os.arch() === 'x64';
-        if (is64Bit) {
-          revision = '1347979'; // Windows 64-bit revision
-        } else {
-          revision = '1347966'; // Windows 32-bit revision
-        }
-      } else {
-        throw new Error('Unsupported platform: ' + platform);
-      }
-      const options = {
-        revision: revision, // Always use the latest revision of puppeteer-chromium-resolver
-      };
+      const options = {};
       const userAuditDir = path.join(
         __dirname,
         'puppeteer_cache_koii_twitter_archive_audit',
