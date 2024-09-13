@@ -238,9 +238,9 @@ verify = async (tweetid, inputitem) => {
     const options = {
       revision: revision, // Always use the latest revision of puppeteer-chromium-resolver
     };
-    const userDataDir = path.join(
+    const userAuditDir = path.join(
       __dirname,
-      'puppeteer_cache_koii_twitter_archive',
+      'puppeteer_cache_koii_twitter_archive_audit',
     );
     const stats = await PCR(options);
     let auditBrowser = await stats.puppeteer.launch({
