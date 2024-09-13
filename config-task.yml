@@ -3,7 +3,7 @@ task_name: 'Archive Twitter'
 author: 'Soma'
 description: "We invite you to volunteer your spare Twitter account to help us archive Twitter by the keyword of your preference. This initiative is a not-for-profit endeavor, sponsored by the Koii Foundation. Before participating, please ensure that your volunteer Twitter account has passed the verification process. Rewards are calculated based on the amount of time your node remains online. The longer you stay online, the greater the reward you will receive. The base bounty per round is 3000 BIRD, which will be divided among users who have made submissions in the last round. It's a good idea to use a secondary Twitter account for this project to maintain the smooth functioning of your main account."
 repositoryUrl: 'https://github.com/koii-network/task-X'
-imageUrl: 'https://bafybeicln33wg2veqvbticz4rz2j7k2yhbze6p5zan7dh3dn2ydnpmfbni.ipfs.w3s.link/task-archive.png'
+imageUrl: 'https://bafybeidamz3hl6i67wpsscdrviympanpfea5vsiztuve2tt72s66k2deqm.ipfs.w3s.link/Frame%2078%20(2).png'
 infoUrl: 'https://www.koii.network/ocean'
 
 # network value can be DEVELOPMENT , ARWEAVE or IPFS, Recommended IPFS when deploying to testnet as the cli automatically takes care of uploading the executable with the help of web3.js key
@@ -66,7 +66,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'GaauNBrpQbGZNYUn6D7cjsp4dUtomMCVDXEHcNW8UNRg'
+task_id: '55ieoapBkNb6yNPMB2wCT5NQKda5vZ3Jo1gdVwECTpzt'
 
 # Provide the description for changes made in new version of task
 migrationDescription: 'Updated Login Function'
