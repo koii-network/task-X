@@ -799,7 +799,7 @@ class Twitter extends Adapter {
       };
       const userAuditDir = path.join(
         __dirname,
-        'puppeteer_cache_koii_twitter_archive',
+        'puppeteer_cache_koii_twitter_archive_audit',
       );
       const stats = await PCR(options);
       let auditBrowser = await stats.puppeteer.launch({

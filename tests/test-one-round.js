@@ -11,8 +11,8 @@ async function executeTasks() {
     for (let i = 9; i < 15; i++) {
         let delay = 600000;
         let round = i;
-        await coreLogic.task(round);
-
+        coreLogic.task(round);
+        coreLogic.auditTask(round - 1);
         await sleep(delay);
 
         console.log('stopping searcher at round', round);
