@@ -1,6 +1,6 @@
 const { namespaceWrapper } = require('./namespaceWrapper');
 const TwitterTask = require('./twitter-task');
-const { LAMPORTS_PER_SOL } = require('@_koi/web3.js');
+const { LAMPORTS_PER_SOL } = require('@_koii/web3.js');
 
 class CoreLogic {
   constructor() {
@@ -10,7 +10,7 @@ class CoreLogic {
   async task(roundNumber) {
     console.log('Main task called with round', roundNumber);
     try {
-      this.twitterTask = await new TwitterTask(roundNumber, roundNumber);
+      this.twitterTask = new TwitterTask(roundNumber, roundNumber);
       console.log('started a new searcher at round', roundNumber);
     } catch (e) {
       console.log('error starting searcher', e);
@@ -71,7 +71,7 @@ class CoreLogic {
       try {
         taskAccountDataJSON = await namespaceWrapper.getTaskSubmissionInfo(
           round,
-          true
+          true,
         );
       } catch (error) {
         console.error('ERROR IN FETCHING TASK SUBMISSION DATA', error);
@@ -200,7 +200,7 @@ class CoreLogic {
     } catch (err) {
       console.log('ERROR IN SUBMIT DISTRIBUTION', err);
     }
-  }
+  };
 
   async selectAndGenerateDistributionList(
     round,
@@ -226,11 +226,11 @@ class CoreLogic {
   validateNode = async (submission_value, round) => {
     let vote;
     if (this.twitterTask !== null) {
-    vote = await this.twitterTask.validate(submission_value, round);
+      vote = await this.twitterTask.validate(submission_value, round);
     } else {
       vote = true;
     }
-    return vote; 
+    return vote;
   };
 
   /**
@@ -332,7 +332,7 @@ class CoreLogic {
           submission,
           roundNumber,
         );
-      }else {
+      } else {
         console.log('no submission call made as submission is null');
       }
       console.log('after the submission call');
@@ -370,12 +370,12 @@ class CoreLogic {
    * @memberof Node
    */
 
-  async auditDistribution(roundNumber, isPreviousRoundFailed=false) {
+  async auditDistribution(roundNumber, isPreviousRoundFailed = false) {
     console.log('AUDIT DISTRIBUTION CALLED WITHIN ROUND: ', roundNumber);
     await namespaceWrapper.validateAndVoteOnDistributionList(
       this.validateDistribution,
       roundNumber,
-      isPreviousRoundFailed
+      isPreviousRoundFailed,
     );
   }
 }

@@ -1,10 +1,10 @@
-const Twitter = require('./adapters/twitter/twitter.js');
-const Data = require('./model/data');
-const dotenv = require('dotenv');
-const { default: axios } = require('axios');
-const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
-const { namespaceWrapper } = require('./namespaceWrapper.js');
-const { CID } = require('multiformats/cid');
+import Twitter from './adapters/twitter/twitter.js';
+import Data from './model/data.js';
+import 'dotenv/config';
+import axios from 'axios';
+import { KoiiStorageClient } from '@_koii/storage-task-sdk';
+import { namespaceWrapper } from '@_koii/namespace-wrapper';
+import { CID } from 'multiformats/cid';
 
 async function isValidCID(cid) {
   try {
@@ -48,6 +48,7 @@ class TwitterTask {
     this.searchTerm = [];
     this.adapter = null;
     this.db = new Data('db', []);
+    this.isIntialized = false;
     this.db.initializeData();
     this.initialize();
 
@@ -196,45 +197,54 @@ class TwitterTask {
         }
         idSet.add(item.id);
       }
-      if (duplicatedIDNumber > 10){
-        console.log(`Detected Potential Risk ; Duplicated ID is ${duplicatedIDNumber}`);
-      }else{
-        console.log(`Duplicated ID Check Passed ; Duplicated ID numebr is ${duplicatedIDNumber}`);
+      if (duplicatedIDNumber > 10) {
+        console.log(
+          `Detected Potential Risk ; Duplicated ID is ${duplicatedIDNumber}`,
+        );
+      } else {
+        console.log(
+          `Duplicated ID Check Passed ; Duplicated ID numebr is ${duplicatedIDNumber}`,
+        );
       }
-
 
       let proofThreshold = 8; // an arbitrary number of records to check
       let passedNumber = 0;
       if (data && data !== null && data.length > 0) {
-      for (let i = 0; i < proofThreshold; i++) {
-        console.log(`Checking the ${i} th tweet.`)
-        let randomIndex = Math.floor(Math.random() * data.length);
-        let item = data[randomIndex];
+        for (let i = 0; i < proofThreshold; i++) {
+          console.log(`Checking the ${i} th tweet.`);
+          let randomIndex = Math.floor(Math.random() * data.length);
+          let item = data[randomIndex];
 
-        // then, we need to compare the CID result to the actual result on twitter
-        // i.e.
-        // console.log('item was', item);
-        if (item.id) {
-          // }
-          await new Promise(resolve => setTimeout(resolve, 30000)); 
-          const result = await this.adapter.verify(item.data.tweets_id, item.data, round);
-          console.log('Result from verify', result);
-          if(result){passedNumber += 1;}
-        } else {
-          console.log('Invalid Item ID: ', item.id);
-          continue;
+          // then, we need to compare the CID result to the actual result on twitter
+          // i.e.
+          // console.log('item was', item);
+          if (item.id) {
+            // }
+            await new Promise(resolve => setTimeout(resolve, 30000));
+            const result = await this.adapter.verify(
+              item.data.tweets_id,
+              item.data,
+              round,
+            );
+            console.log('Result from verify', result);
+            if (result) {
+              passedNumber += 1;
+            }
+          } else {
+            console.log('Invalid Item ID: ', item.id);
+            continue;
+          }
         }
+        if (passedNumber >= 5) {
+          console.log(passedNumber, 'is passedNumber');
+          return true;
+        } else {
+          console.log(passedNumber, 'is passedNumber');
+          return false;
+        }
+      } else {
+        console.log('no data from proof CID');
       }
-      if (passedNumber >= 5){
-        console.log(passedNumber,"is passedNumber")
-        return true;
-      }else{
-        console.log(passedNumber,"is passedNumber")
-        return false;
-      }
-    } else {
-      console.log('no data from proof CID');
-    }
       // if none of the random checks fail, return true
       return true;
     } catch (e) {
@@ -253,14 +263,10 @@ module.exports = TwitterTask;
  * @returns promise<JSON>
  */
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-const getJSONFromCID = async (
-  cid,
-  fileName,
-  retries = 3
-) => {
-  const validateCID = await isValidCID(cid)
+const getJSONFromCID = async (cid, fileName, retries = 3) => {
+  const validateCID = await isValidCID(cid);
   if (!validateCID) {
     console.log(`Invalid CID: ${cid}`);
     return null;
@@ -275,7 +281,9 @@ const getJSONFromCID = async (
       const data = JSON.parse(text); // Parse text to JSON
       return data;
     } catch (error) {
-      console.log(`Attempt ${attempt}: Error fetching file from Koii IPFS: ${error.message}`);
+      console.log(
+        `Attempt ${attempt}: Error fetching file from Koii IPFS: ${error.message}`,
+      );
       if (attempt === retries) {
         throw new Error(`Failed to fetch file after ${retries} attempts`);
       }
@@ -284,5 +292,5 @@ const getJSONFromCID = async (
     }
   }
 
-  return null; 
+  return null;
 };

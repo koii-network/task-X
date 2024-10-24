@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@_koi/web3.js@^0.0.6":
+"@_koii/web3.js@^0.0.6":
   version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@_koi/web3.js/-/web3.js-0.0.6.tgz#a1542785b9465b99cfbc971f95d8f57c8ec0222b"
+  resolved "https://registry.yarnpkg.com/@_koii/web3.js/-/web3.js-0.0.6.tgz#a1542785b9465b99cfbc971f95d8f57c8ec0222b"
   integrity sha512-91HZwO+O0wj7Gwo5QBzihYAWYb3Wi/5JzZiR6iJPtQRsUAJvtcw9de2DloevO8QTQGOI/rqj8rwyVyGSDdsEog==
   dependencies:
     "@babel/runtime" "^7.12.5"
