@@ -38,7 +38,7 @@ bounty_amount_per_round: 3000
 allowed_failed_distributions: 5
 
 #Space in MBs for the account size, that holds the task data
-space: 5
+space: 2
 
 # Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
 # To add more global variables and task variables, please refer the type,value,description format shown below
@@ -51,7 +51,7 @@ requirementsTags:
     value: 'TWITTER_PASSWORD'
     description: 'The password of your volunteer Twitter account.'
   - type: TASK_VARIABLE
-    value: 'TWITTER_PHONE'
+    value: 'TWITTER_VERIFICATION'
     description: 'If verification is required, will use your phone number to login.'
   - type: TASK_VARIABLE
     value: 'KEYWORD'
