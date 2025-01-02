@@ -84,7 +84,7 @@ class Twitter extends Adapter {
       );
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
-        userDataDir: userDataDir,
+        // userDataDir: userDataDir,
         // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -152,17 +152,12 @@ class Twitter extends Adapter {
           () => document.body.outerHTML,
         );
 
-        // Write the HTML to a file
-        fs.writeFileSync(`${basePath}/bodyHTML.html`, bodyHTML);
 
         await this.page.waitForSelector('input', {
           timeout: await this.randomDelay(60000),
         });
         // Select the div element by its aria-labelledby attribute
         const usernameHTML = await this.page.$eval('input', el => el.outerHTML);
-
-        // Use fs module to write the HTML to a file
-        fs.writeFileSync(`${basePath}/usernameHTML.html`, usernameHTML);
 
         await this.page.waitForSelector('input[name="text"]', {
           timeout: await this.randomDelay(60000),
@@ -203,9 +198,6 @@ class Twitter extends Adapter {
         const passwordHTML = await this.page.$$eval('input', elements =>
           elements.map(el => el.outerHTML).join('\n'),
         );
-
-        // Use fs module to write the HTML to a file
-        fs.writeFileSync(`${basePath}/passwordHTML.html`, passwordHTML);
 
         await this.page.waitForSelector('input[name="password"]');
         console.log('Step: Fill in password');
@@ -752,7 +744,7 @@ class Twitter extends Adapter {
       const stats = await PCR(options);
       let auditBrowser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
-        userDataDir: userAuditDir,
+        // userDataDir: userAuditDir,
         // headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
