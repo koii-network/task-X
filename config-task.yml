@@ -23,14 +23,14 @@ submission_window: 5000
 task_type: 'KPL'
 
 # OPTIONAL (ONLY IF Task Type = KPL) : Token Mint Address, BIRD
-token_type: "us8mD4jGkFWnUuAHB8V5ZcrAosEqi2h1Zcyca68QA1G"
+token_type: "Fe7878UvoGHUM7B8C95rX3MigUqtBZmtcPcX5sz3Qhxd"
 
 # Amounts in KOII
 minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 100000
+total_bounty_amount: 200000
 
 bounty_amount_per_round: 1000
 
@@ -63,7 +63,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'BiFmpvKoeLmno6qurqQ9cAHfnj2eyT6o9JQ3TqVYSVFb'
+task_id: ''
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Fixed Login Issue'
+migrationDescription: ''
