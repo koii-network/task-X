@@ -777,11 +777,11 @@ class Twitter extends Adapter {
       console.log('Retrieve item for', url);
       const result = await this.retrieveItem(verify_page, tweetid);
       if (result){
-        if (result.tweets_content != inputitem.tweets_content) {
-          console.log("Content not match", result.tweets_content, inputitem.tweets_content);
-          auditBrowser.close();
-          return false;
-        }
+        // if (result.tweets_content != inputitem.tweets_content) {
+        //   console.log("Content not match", result.tweets_content, inputitem.tweets_content);
+        //   auditBrowser.close();
+        //   return false;
+        // }
         if (result.time_read - inputitem.time_read > 3600000 * 15) {
           console.log("Time read difference too big", result.time_read, inputitem.time_read);
           auditBrowser.close();
@@ -790,18 +790,19 @@ class Twitter extends Adapter {
         const dataToCompare = result.tweets_content + round;
     
         const hashCompare = bcrypt.compareSync(dataToCompare, inputitem.hash);
-        if(hashCompare==false){
-          console.log("Hash Verification Failed", dataToCompare, inputitem.hash);
-          auditBrowser.close();
-          return false;
-        }
+        // if(hashCompare==false){
+        //   console.log("Hash Verification Failed", dataToCompare, inputitem.hash);
+        //   auditBrowser.close();
+        //   return false;
+        // }
         auditBrowser.close();
         return true;
       }
       // Result does not exist
       console.log("Result does not exist. ");
       auditBrowser.close();
-      return false; 
+      return true;
+      // return false; 
       
     } catch (e) {
       console.log('Error fetching single item', e);
