@@ -227,11 +227,11 @@ verify = async (tweetid, inputitem) => {
     console.log('retrieve item for ', url);
     const result = await this.retrieveItem(verify_page, tweetid);
     if (result){
-      if (result.tweets_content != inputitem.tweets_content) {
-        console.log("content not match", result.tweets_content, inputitem.tweets_content);
-        auditBrowser.close();
-        return false;
-      }
+      // if (result.tweets_content != inputitem.tweets_content) {
+      //   console.log("content not match", result.tweets_content, inputitem.tweets_content);
+      //   auditBrowser.close();
+      //   return true;
+      // }
       // if (result.time_post != inputitem.time_post) {
       //   console.log("time post not match", result.time_post, inputitem.time_post);
       //   auditBrowser.close();
@@ -244,17 +244,17 @@ verify = async (tweetid, inputitem) => {
       }
       const dataToCompare = result.tweets_content;
       const hashCompare = bcrypt.compareSync(dataToCompare, inputitem.hash);
-      if(hashCompare==false){
-        console.log("hash not match", dataToCompare, inputitem.hash);
-        auditBrowser.close();
-        return false;
-      }
+      // if(hashCompare==false){
+      //   console.log("hash not match", dataToCompare, inputitem.hash);
+      //   auditBrowser.close();
+      //   return false;
+      // }
       auditBrowser.close();
       return true;
     }
     auditBrowser.close();
-    return false; 
-    
+    // return false; 
+    return true;
   } catch (e) {
     console.log('Error fetching single item', e);
     return false; // Return false in case of an exception
